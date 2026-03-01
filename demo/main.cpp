@@ -1,0 +1,118 @@
+#include <chrono>
+#include <iostream>
+#include <string>
+#include <thread>
+
+#include "core/error_code.hpp"
+#include "core/process_guardian.hpp"
+#include "core/thread_pool.hpp"
+#include "ipc/posix_message_queue.hpp"
+#include "log/logger.hpp"
+
+namespace {
+
+/**
+ * @brief 子服务入口：模拟车载/机器人基础服务生命周期。
+ * @return 0 表示成功退出，非0表示异常退出。
+ */
+int ServiceEntry() {
+    using vr::core::ErrorCode;
+    using vr::ipc::PosixMessageQueue;
+    using vr::log::Logger;
+
+    Logger::Instance().SetLevel(vr::log::LogLevel::kDebug);
+    Logger::Instance().Info("Demo", "Service starting...");
+
+    vr::ipc::QueueConfig queue_config;
+    queue_config.name = "/vr_framework_demo_queue";
+    queue_config.max_messages = 10;
+    queue_config.message_size = 256;
+
+    PosixMessageQueue queue;
+    ErrorCode ec = queue.Create(queue_config);
+    if (ec != ErrorCode::kOk) {
+        Logger::Instance().Error("Demo", std::string("Queue create failed: ") + vr::core::ToString(ec));
+        return 1;
+    }
+
+    vr::core::ThreadPool pool;
+    vr::core::ThreadConfig thread_config;
+    thread_config.worker_count = 2;
+    thread_config.enable_realtime = false;
+
+    ec = pool.Start(thread_config);
+    if (ec != ErrorCode::kOk) {
+        Logger::Instance().Error("Demo", std::string("ThreadPool start failed: ") + vr::core::ToString(ec));
+        queue.Close();
+        queue.Unlink();
+        return 2;
+    }
+
+    ec = pool.Enqueue([&queue]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        const auto send_ec = queue.Send("hello_from_sender", 1U);
+        if (send_ec != ErrorCode::kOk) {
+            Logger::Instance().Error("Sender", std::string("Send failed: ") + vr::core::ToString(send_ec));
+            return;
+        }
+        Logger::Instance().Info("Sender", "Message sent to POSIX queue");
+    });
+
+    if (ec != ErrorCode::kOk) {
+        Logger::Instance().Error("Demo", std::string("Enqueue sender failed: ") + vr::core::ToString(ec));
+        pool.Stop();
+        queue.Close();
+        queue.Unlink();
+        return 3;
+    }
+
+    ec = pool.Enqueue([&queue]() {
+        std::string msg;
+        std::uint32_t prio = 0;
+        const auto recv_ec = queue.Receive(&msg, &prio);
+        if (recv_ec != ErrorCode::kOk) {
+            Logger::Instance().Error("Receiver", std::string("Receive failed: ") + vr::core::ToString(recv_ec));
+            return;
+        }
+
+        Logger::Instance().Info("Receiver", "Received message: " + msg + ", priority=" + std::to_string(prio));
+    });
+
+    if (ec != ErrorCode::kOk) {
+        Logger::Instance().Error("Demo", std::string("Enqueue receiver failed: ") + vr::core::ToString(ec));
+        pool.Stop();
+        queue.Close();
+        queue.Unlink();
+        return 4;
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    pool.Stop();
+    queue.Close();
+    queue.Unlink();
+
+    Logger::Instance().Info("Demo", "Service exit normally");
+    return 0;
+}
+
+}  // namespace
+
+/**
+ * @brief 程序主入口，调用进程守护模块执行服务。
+ * @return 0 表示演示成功。
+ */
+int main() {
+    vr::core::ProcessGuardian guardian;
+    int final_status = -1;
+
+    const vr::core::ErrorCode ec = guardian.RunWithRestart(ServiceEntry, 0, &final_status);
+    if (ec != vr::core::ErrorCode::kOk || final_status != 0) {
+        vr::log::Logger::Instance().Error("Main", "Service guardian failed");
+        return 1;
+    }
+
+    vr::log::Logger::Instance().Info("Main", "Demo finished successfully");
+    return 0;
+}
+
