@@ -39,6 +39,8 @@ int ServiceEntry() {
     vr::core::ThreadConfig thread_config;
     thread_config.worker_count = 2;
     thread_config.enable_realtime = false;
+    thread_config.queue_capacity = 1;
+    thread_config.rejection_policy = vr::core::RejectionPolicy::kCallerRuns;
 
     ec = pool.Start(thread_config);
     if (ec != ErrorCode::kOk) {
@@ -49,7 +51,7 @@ int ServiceEntry() {
     }
 
     ec = pool.Enqueue([&queue]() {
-        std::this_thread::sleep_for(std::chrono::milliseconds(200));
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
         const auto send_ec = queue.Send("hello_from_sender", 1U);
         if (send_ec != ErrorCode::kOk) {
             Logger::Instance().Error("Sender", std::string("Send failed: ") + vr::core::ToString(send_ec));
@@ -78,7 +80,7 @@ int ServiceEntry() {
         Logger::Instance().Info("Receiver", "Received message: " + msg + ", priority=" + std::to_string(prio));
     });
 
-    if (ec != ErrorCode::kOk) {
+    if (ec != ErrorCode::kOk && ec != ErrorCode::kThreadTaskRejected) {
         Logger::Instance().Error("Demo", std::string("Enqueue receiver failed: ") + vr::core::ToString(ec));
         pool.Stop();
         queue.Close();
@@ -86,7 +88,20 @@ int ServiceEntry() {
         return 4;
     }
 
+    if (ec == ErrorCode::kThreadTaskRejected) {
+        Logger::Instance().Info("Demo", "Queue full triggered rejection policy: caller runs");
+    }
+
     std::this_thread::sleep_for(std::chrono::seconds(1));
+
+    const vr::core::ThreadPoolMetrics metrics = pool.GetMetrics();
+    Logger::Instance().Info(
+        "Demo",
+        "ThreadPool metrics => queue=" + std::to_string(metrics.queue_size) + "/" +
+            std::to_string(metrics.queue_capacity) + ", submitted=" +
+            std::to_string(metrics.submitted_count) + ", executed=" +
+            std::to_string(metrics.executed_count) + ", rejected=" +
+            std::to_string(metrics.rejected_count));
 
     pool.Stop();
     queue.Close();
@@ -115,4 +130,3 @@ int main() {
     vr::log::Logger::Instance().Info("Main", "Demo finished successfully");
     return 0;
 }
-

@@ -10,7 +10,7 @@ ThreadPool::~ThreadPool() {
 }
 
 ErrorCode ThreadPool::Start(const ThreadConfig& config) {
-    if (config.worker_count == 0U) {
+    if (config.worker_count == 0U || config.queue_capacity == 0U) {
         return ErrorCode::kInvalidParam;
     }
     if (running_) {
@@ -19,7 +19,13 @@ ErrorCode ThreadPool::Start(const ThreadConfig& config) {
 
     enable_realtime_ = config.enable_realtime;
     realtime_priority_ = config.realtime_priority;
+    queue_capacity_ = config.queue_capacity;
+    rejection_policy_ = config.rejection_policy;
     running_ = true;
+
+    submitted_count_.store(0U, std::memory_order_relaxed);
+    executed_count_.store(0U, std::memory_order_relaxed);
+    rejected_count_.store(0U, std::memory_order_relaxed);
 
     workers_.reserve(config.worker_count);
     for (std::size_t i = 0; i < config.worker_count; ++i) {
@@ -63,16 +69,53 @@ void ThreadPool::Stop() noexcept {
 }
 
 ErrorCode ThreadPool::Enqueue(const std::function<void()>& task) {
+    if (!task) {
+        return ErrorCode::kInvalidParam;
+    }
+
+    bool run_in_caller = false;
     {
         std::lock_guard<std::mutex> lock(tasks_mutex_);
         if (!running_) {
             return ErrorCode::kThreadStartFailed;
         }
-        tasks_.push(task);
+
+        if (tasks_.size() >= queue_capacity_) {
+            rejected_count_.fetch_add(1U, std::memory_order_relaxed);
+            if (rejection_policy_ == RejectionPolicy::kCallerRuns) {
+                run_in_caller = true;
+            } else {
+                return ErrorCode::kThreadQueueFull;
+            }
+        } else {
+            tasks_.push(task);
+            submitted_count_.fetch_add(1U, std::memory_order_relaxed);
+        }
+    }
+
+    if (run_in_caller) {
+        ExecuteTask(task);
+        return ErrorCode::kThreadTaskRejected;
     }
 
     tasks_cv_.notify_one();
     return ErrorCode::kOk;
+}
+
+ThreadPoolMetrics ThreadPool::GetMetrics() const noexcept {
+    ThreadPoolMetrics metrics;
+    {
+        std::lock_guard<std::mutex> lock(tasks_mutex_);
+        metrics.queue_size = tasks_.size();
+        metrics.queue_capacity = queue_capacity_;
+        metrics.worker_count = workers_.size();
+        metrics.running = running_;
+    }
+
+    metrics.submitted_count = submitted_count_.load(std::memory_order_relaxed);
+    metrics.executed_count = executed_count_.load(std::memory_order_relaxed);
+    metrics.rejected_count = rejected_count_.load(std::memory_order_relaxed);
+    return metrics;
 }
 
 void ThreadPool::WorkerLoop(const std::size_t /*index*/) {
@@ -91,7 +134,7 @@ void ThreadPool::WorkerLoop(const std::size_t /*index*/) {
             tasks_.pop();
         }
 
-        task();
+        ExecuteTask(task);
     }
 }
 
@@ -107,6 +150,10 @@ ErrorCode ThreadPool::ConfigureRealtimePriority(std::thread& worker) noexcept {
     return ErrorCode::kOk;
 }
 
+void ThreadPool::ExecuteTask(const std::function<void()>& task) noexcept {
+    task();
+    executed_count_.fetch_add(1U, std::memory_order_relaxed);
+}
+
 }  // namespace core
 }  // namespace vr
-

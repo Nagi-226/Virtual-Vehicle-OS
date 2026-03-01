@@ -16,6 +16,8 @@ enum class ErrorCode : std::int32_t {
     kQueueReceiveFailed = 2002,
     kThreadStartFailed = 3000,
     kThreadPrioritySetFailed = 3001,
+    kThreadQueueFull = 3002,
+    kThreadTaskRejected = 3003,
     kProcessForkFailed = 4000,
     kProcessWaitFailed = 4001,
     kUnknown = 9000
@@ -27,4 +29,3 @@ const char* ToString(ErrorCode code) noexcept;
 }  // namespace vr
 
 #endif  // VR_CORE_ERROR_CODE_HPP
-

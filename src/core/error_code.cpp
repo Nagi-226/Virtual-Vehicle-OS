@@ -21,6 +21,10 @@ const char* ToString(const ErrorCode code) noexcept {
             return "THREAD_START_FAILED";
         case ErrorCode::kThreadPrioritySetFailed:
             return "THREAD_PRIORITY_SET_FAILED";
+        case ErrorCode::kThreadQueueFull:
+            return "THREAD_QUEUE_FULL";
+        case ErrorCode::kThreadTaskRejected:
+            return "THREAD_TASK_REJECTED";
         case ErrorCode::kProcessForkFailed:
             return "PROCESS_FORK_FAILED";
         case ErrorCode::kProcessWaitFailed:
@@ -32,4 +36,3 @@ const char* ToString(const ErrorCode code) noexcept {
 
 }  // namespace core
 }  // namespace vr
-
