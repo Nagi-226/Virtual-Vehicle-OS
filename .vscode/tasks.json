@@ -1,0 +1,59 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "WSL Configure (Debug)",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "cd /mnt/e/Virtual-Vehicle-OS && cmake -S . -B build-linux -DCMAKE_BUILD_TYPE=Debug"
+      ],
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": "build"
+    },
+    {
+      "label": "WSL Build (Debug)",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "cd /mnt/e/Virtual-Vehicle-OS && cmake --build build-linux -j"
+      ],
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "dependsOn": "WSL Configure (Debug)"
+    },
+    {
+      "label": "WSL Run Demo",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "cd /mnt/e/Virtual-Vehicle-OS/build-linux && ./demo_service"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "WSL Install Build Tools",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "sudo apt update && sudo apt install -y cmake g++ gdb make"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

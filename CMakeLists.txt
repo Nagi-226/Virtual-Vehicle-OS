@@ -5,13 +5,11 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_compile_options(
-    -Wall
-    -Wextra
-    -Wpedantic
-    -Werror
-    -pthread
-)
+if(MSVC)
+    add_compile_options(/W4 /WX)
+else()
+    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
@@ -23,15 +21,11 @@ add_library(vr_base_framework
     src/log/logger.cpp
 )
 
-target_link_libraries(vr_base_framework
-    rt
-    pthread
-)
+if(UNIX AND NOT APPLE)
+    target_link_libraries(vr_base_framework rt pthread)
+elseif(UNIX)
+    target_link_libraries(vr_base_framework pthread)
+endif()
 
-add_executable(demo_service
-    demo/main.cpp
-)
-
-target_link_libraries(demo_service
-    vr_base_framework
-)
+add_executable(demo_service demo/main.cpp)
+target_link_libraries(demo_service vr_base_framework)

@@ -1,0 +1,4 @@
+/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/vr_base_framework.dir
+/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/demo_service.dir
+/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/edit_cache.dir
+/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/rebuild_cache.dir
