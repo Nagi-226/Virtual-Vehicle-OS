@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o -o logger_format_test  libvr_base_framework.a -lrt -lpthread 

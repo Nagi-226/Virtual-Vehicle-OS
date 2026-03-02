@@ -157,20 +157,4 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: \
  /usr/include/c++/13/bits/stl_queue.h /usr/include/c++/13/thread \
  /usr/include/c++/13/bits/std_thread.h \
  /usr/include/c++/13/bits/this_thread_sleep.h \
- /mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp \
- /usr/include/c++/13/string /usr/include/c++/13/bits/char_traits.h \
- /usr/include/c++/13/bits/localefwd.h \
- /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
- /usr/include/c++/13/clocale /usr/include/locale.h \
- /usr/include/x86_64-linux-gnu/bits/locale.h /usr/include/c++/13/cctype \
- /usr/include/ctype.h /usr/include/c++/13/bits/ostream_insert.h \
- /usr/include/c++/13/bits/basic_string.h /usr/include/c++/13/string_view \
- /usr/include/c++/13/bits/string_view.tcc \
- /usr/include/c++/13/ext/string_conversions.h /usr/include/c++/13/cstdio \
- /usr/include/stdio.h /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
- /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
- /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
- /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
- /usr/include/c++/13/bits/charconv.h \
- /usr/include/c++/13/bits/basic_string.tcc
+ /mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp

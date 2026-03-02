@@ -1,5 +1,4 @@
 #include <chrono>
-#include <iostream>
 #include <string>
 #include <thread>
 
@@ -18,10 +17,12 @@ namespace {
 int ServiceEntry() {
     using vr::core::ErrorCode;
     using vr::ipc::PosixMessageQueue;
-    using vr::log::Logger;
 
-    Logger::Instance().SetLevel(vr::log::LogLevel::kDebug);
-    Logger::Instance().Info("Demo", "Service starting...");
+    commonsvc::Logger::Instance().SetMinLevel(commonsvc::LogLevel::kDebug);
+    commonsvc::Logger::Instance().EnableConsole(true);
+    commonsvc::Logger::Instance().SetDefaultContext("demo", "service_entry");
+
+    LOG_INFO("Service starting...");
 
     vr::ipc::QueueConfig queue_config;
     queue_config.name = "/vr_framework_demo_queue";
@@ -31,7 +32,7 @@ int ServiceEntry() {
     PosixMessageQueue queue;
     ErrorCode ec = queue.Create(queue_config);
     if (ec != ErrorCode::kOk) {
-        Logger::Instance().Error("Demo", std::string("Queue create failed: ") + vr::core::ToString(ec));
+        LOG_ERROR_CODE(ec, std::string("Queue create failed: ") + vr::core::ToString(ec));
         return 1;
     }
 
@@ -44,7 +45,7 @@ int ServiceEntry() {
 
     ec = pool.Start(thread_config);
     if (ec != ErrorCode::kOk) {
-        Logger::Instance().Error("Demo", std::string("ThreadPool start failed: ") + vr::core::ToString(ec));
+        LOG_ERROR_CODE(ec, std::string("ThreadPool start failed: ") + vr::core::ToString(ec));
         queue.Close();
         queue.Unlink();
         return 2;
@@ -54,14 +55,14 @@ int ServiceEntry() {
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         const auto send_ec = queue.Send("hello_from_sender", 1U);
         if (send_ec != ErrorCode::kOk) {
-            Logger::Instance().Error("Sender", std::string("Send failed: ") + vr::core::ToString(send_ec));
+            LOG_ERROR_CODE(send_ec, std::string("Send failed: ") + vr::core::ToString(send_ec));
             return;
         }
-        Logger::Instance().Info("Sender", "Message sent to POSIX queue");
+        LOG_INFO("Message sent to POSIX queue");
     });
 
     if (ec != ErrorCode::kOk) {
-        Logger::Instance().Error("Demo", std::string("Enqueue sender failed: ") + vr::core::ToString(ec));
+        LOG_ERROR_CODE(ec, std::string("Enqueue sender failed: ") + vr::core::ToString(ec));
         pool.Stop();
         queue.Close();
         queue.Unlink();
@@ -73,15 +74,15 @@ int ServiceEntry() {
         std::uint32_t prio = 0;
         const auto recv_ec = queue.Receive(&msg, &prio);
         if (recv_ec != ErrorCode::kOk) {
-            Logger::Instance().Error("Receiver", std::string("Receive failed: ") + vr::core::ToString(recv_ec));
+            LOG_ERROR_CODE(recv_ec, std::string("Receive failed: ") + vr::core::ToString(recv_ec));
             return;
         }
 
-        Logger::Instance().Info("Receiver", "Received message: " + msg + ", priority=" + std::to_string(prio));
+        LOG_INFO("Received message: " + msg + ", priority=" + std::to_string(prio));
     });
 
     if (ec != ErrorCode::kOk && ec != ErrorCode::kThreadTaskRejected) {
-        Logger::Instance().Error("Demo", std::string("Enqueue receiver failed: ") + vr::core::ToString(ec));
+        LOG_ERROR_CODE(ec, std::string("Enqueue receiver failed: ") + vr::core::ToString(ec));
         pool.Stop();
         queue.Close();
         queue.Unlink();
@@ -89,25 +90,23 @@ int ServiceEntry() {
     }
 
     if (ec == ErrorCode::kThreadTaskRejected) {
-        Logger::Instance().Info("Demo", "Queue full triggered rejection policy: caller runs");
+        LOG_WARN("Queue full triggered rejection policy: caller runs");
     }
 
     std::this_thread::sleep_for(std::chrono::seconds(1));
 
     const vr::core::ThreadPoolMetrics metrics = pool.GetMetrics();
-    Logger::Instance().Info(
-        "Demo",
-        "ThreadPool metrics => queue=" + std::to_string(metrics.queue_size) + "/" +
-            std::to_string(metrics.queue_capacity) + ", submitted=" +
-            std::to_string(metrics.submitted_count) + ", executed=" +
-            std::to_string(metrics.executed_count) + ", rejected=" +
-            std::to_string(metrics.rejected_count));
+    LOG_INFO("ThreadPool metrics => queue=" + std::to_string(metrics.queue_size) + "/" +
+             std::to_string(metrics.queue_capacity) + ", submitted=" +
+             std::to_string(metrics.submitted_count) + ", executed=" +
+             std::to_string(metrics.executed_count) + ", rejected=" +
+             std::to_string(metrics.rejected_count));
 
     pool.Stop();
     queue.Close();
     queue.Unlink();
 
-    Logger::Instance().Info("Demo", "Service exit normally");
+    LOG_INFO("Service exit normally");
     return 0;
 }
 
@@ -118,15 +117,17 @@ int ServiceEntry() {
  * @return 0 表示演示成功。
  */
 int main() {
+    commonsvc::Logger::Instance().SetDefaultContext("demo", "main");
+
     vr::core::ProcessGuardian guardian;
     int final_status = -1;
 
     const vr::core::ErrorCode ec = guardian.RunWithRestart(ServiceEntry, 0, &final_status);
     if (ec != vr::core::ErrorCode::kOk || final_status != 0) {
-        vr::log::Logger::Instance().Error("Main", "Service guardian failed");
+        LOG_ERROR_CODE(ec, "Service guardian failed");
         return 1;
     }
 
-    vr::log::Logger::Instance().Info("Main", "Demo finished successfully");
+    LOG_INFO("Demo finished successfully");
     return 0;
 }

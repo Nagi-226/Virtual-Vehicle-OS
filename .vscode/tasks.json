@@ -10,9 +10,7 @@
         "-lc",
         "cd /mnt/e/Virtual-Vehicle-OS && cmake -S . -B build-linux -DCMAKE_BUILD_TYPE=Debug"
       ],
-      "problemMatcher": [
-        "$gcc"
-      ],
+      "problemMatcher": ["$gcc"],
       "group": "build"
     },
     {
@@ -24,14 +22,89 @@
         "-lc",
         "cd /mnt/e/Virtual-Vehicle-OS && cmake --build build-linux -j"
       ],
-      "problemMatcher": [
-        "$gcc"
-      ],
+      "problemMatcher": ["$gcc"],
       "group": {
         "kind": "build",
         "isDefault": true
       },
       "dependsOn": "WSL Configure (Debug)"
+    },
+    {
+      "label": "WSL Configure (Debug + Tests)",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "cd /mnt/e/Virtual-Vehicle-OS && cmake -S . -B build-linux -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS=ON"
+      ],
+      "problemMatcher": ["$gcc"],
+      "group": "test"
+    },
+    {
+      "label": "WSL Build Tests (Debug)",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "cd /mnt/e/Virtual-Vehicle-OS && cmake --build build-linux -j"
+      ],
+      "problemMatcher": ["$gcc"],
+      "dependsOn": "WSL Configure (Debug + Tests)"
+    },
+    {
+      "label": "WSL Test",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "cd /mnt/e/Virtual-Vehicle-OS/build-linux && ctest --output-on-failure --repeat until-pass:2"
+      ],
+      "problemMatcher": [],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "dependsOn": "WSL Build Tests (Debug)"
+    },
+    {
+      "label": "WSL Configure (Debug + Tests + Sanitizer)",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "cd /mnt/e/Virtual-Vehicle-OS && cmake -S . -B build-linux-asan -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS=ON -DENABLE_SANITIZER=ON"
+      ],
+      "problemMatcher": ["$gcc"],
+      "group": "test"
+    },
+    {
+      "label": "WSL Build Tests (Sanitizer)",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "cd /mnt/e/Virtual-Vehicle-OS && cmake --build build-linux-asan -j"
+      ],
+      "problemMatcher": ["$gcc"],
+      "dependsOn": "WSL Configure (Debug + Tests + Sanitizer)"
+    },
+    {
+      "label": "WSL Test (Sanitizer)",
+      "type": "process",
+      "command": "wsl",
+      "args": [
+        "bash",
+        "-lc",
+        "cd /mnt/e/Virtual-Vehicle-OS/build-linux-asan && ctest --output-on-failure --repeat until-pass:2"
+      ],
+      "problemMatcher": [],
+      "group": "test",
+      "dependsOn": "WSL Build Tests (Sanitizer)"
     },
     {
       "label": "WSL Run Demo",

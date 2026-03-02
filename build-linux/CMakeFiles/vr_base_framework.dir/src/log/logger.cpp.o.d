@@ -147,6 +147,7 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: \
  /usr/include/c++/13/bits/basic_string.tcc \
  /usr/include/c++/13/bits/memory_resource.h /usr/include/c++/13/cstddef \
  /usr/include/c++/13/bits/uses_allocator_args.h \
+ /mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp \
  /usr/include/c++/13/chrono /usr/include/c++/13/iomanip \
  /usr/include/c++/13/bits/ios_base.h \
  /usr/include/c++/13/bits/locale_classes.h \

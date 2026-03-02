@@ -65,6 +65,16 @@ CMAKE_BINARY_DIR = /mnt/e/Virtual-Vehicle-OS/build-linux
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target test
+test:
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running tests..."
+	/usr/bin/ctest --force-new-ctest-process $(ARGS)
+.PHONY : test
+
+# Special rule for the target test
+test/fast: test
+.PHONY : test/fast
+
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "No interactive CMake dialog available..."
@@ -141,6 +151,45 @@ demo_service: cmake_check_build_system
 demo_service/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo_service.dir/build.make CMakeFiles/demo_service.dir/build
 .PHONY : demo_service/fast
+
+#=============================================================================
+# Target rules for targets named thread_pool_test
+
+# Build rule for target.
+thread_pool_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 thread_pool_test
+.PHONY : thread_pool_test
+
+# fast build rule for target.
+thread_pool_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/thread_pool_test.dir/build.make CMakeFiles/thread_pool_test.dir/build
+.PHONY : thread_pool_test/fast
+
+#=============================================================================
+# Target rules for targets named posix_message_queue_test
+
+# Build rule for target.
+posix_message_queue_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 posix_message_queue_test
+.PHONY : posix_message_queue_test
+
+# fast build rule for target.
+posix_message_queue_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/posix_message_queue_test.dir/build.make CMakeFiles/posix_message_queue_test.dir/build
+.PHONY : posix_message_queue_test/fast
+
+#=============================================================================
+# Target rules for targets named logger_format_test
+
+# Build rule for target.
+logger_format_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 logger_format_test
+.PHONY : logger_format_test
+
+# fast build rule for target.
+logger_format_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/logger_format_test.dir/build.make CMakeFiles/logger_format_test.dir/build
+.PHONY : logger_format_test/fast
 
 demo/main.o: demo/main.cpp.o
 .PHONY : demo/main.o
@@ -286,6 +335,78 @@ src/log/logger.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.s
 .PHONY : src/log/logger.cpp.s
 
+tests/ipc/posix_message_queue_test.o: tests/ipc/posix_message_queue_test.cpp.o
+.PHONY : tests/ipc/posix_message_queue_test.o
+
+# target to build an object file
+tests/ipc/posix_message_queue_test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/posix_message_queue_test.dir/build.make CMakeFiles/posix_message_queue_test.dir/tests/ipc/posix_message_queue_test.cpp.o
+.PHONY : tests/ipc/posix_message_queue_test.cpp.o
+
+tests/ipc/posix_message_queue_test.i: tests/ipc/posix_message_queue_test.cpp.i
+.PHONY : tests/ipc/posix_message_queue_test.i
+
+# target to preprocess a source file
+tests/ipc/posix_message_queue_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/posix_message_queue_test.dir/build.make CMakeFiles/posix_message_queue_test.dir/tests/ipc/posix_message_queue_test.cpp.i
+.PHONY : tests/ipc/posix_message_queue_test.cpp.i
+
+tests/ipc/posix_message_queue_test.s: tests/ipc/posix_message_queue_test.cpp.s
+.PHONY : tests/ipc/posix_message_queue_test.s
+
+# target to generate assembly for a file
+tests/ipc/posix_message_queue_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/posix_message_queue_test.dir/build.make CMakeFiles/posix_message_queue_test.dir/tests/ipc/posix_message_queue_test.cpp.s
+.PHONY : tests/ipc/posix_message_queue_test.cpp.s
+
+tests/log/logger_format_test.o: tests/log/logger_format_test.cpp.o
+.PHONY : tests/log/logger_format_test.o
+
+# target to build an object file
+tests/log/logger_format_test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/logger_format_test.dir/build.make CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o
+.PHONY : tests/log/logger_format_test.cpp.o
+
+tests/log/logger_format_test.i: tests/log/logger_format_test.cpp.i
+.PHONY : tests/log/logger_format_test.i
+
+# target to preprocess a source file
+tests/log/logger_format_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/logger_format_test.dir/build.make CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.i
+.PHONY : tests/log/logger_format_test.cpp.i
+
+tests/log/logger_format_test.s: tests/log/logger_format_test.cpp.s
+.PHONY : tests/log/logger_format_test.s
+
+# target to generate assembly for a file
+tests/log/logger_format_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/logger_format_test.dir/build.make CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.s
+.PHONY : tests/log/logger_format_test.cpp.s
+
+tests/thread_pool_test.o: tests/thread_pool_test.cpp.o
+.PHONY : tests/thread_pool_test.o
+
+# target to build an object file
+tests/thread_pool_test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/thread_pool_test.dir/build.make CMakeFiles/thread_pool_test.dir/tests/thread_pool_test.cpp.o
+.PHONY : tests/thread_pool_test.cpp.o
+
+tests/thread_pool_test.i: tests/thread_pool_test.cpp.i
+.PHONY : tests/thread_pool_test.i
+
+# target to preprocess a source file
+tests/thread_pool_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/thread_pool_test.dir/build.make CMakeFiles/thread_pool_test.dir/tests/thread_pool_test.cpp.i
+.PHONY : tests/thread_pool_test.cpp.i
+
+tests/thread_pool_test.s: tests/thread_pool_test.cpp.s
+.PHONY : tests/thread_pool_test.s
+
+# target to generate assembly for a file
+tests/thread_pool_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/thread_pool_test.dir/build.make CMakeFiles/thread_pool_test.dir/tests/thread_pool_test.cpp.s
+.PHONY : tests/thread_pool_test.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -294,7 +415,11 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... test"
 	@echo "... demo_service"
+	@echo "... logger_format_test"
+	@echo "... posix_message_queue_test"
+	@echo "... thread_pool_test"
 	@echo "... vr_base_framework"
 	@echo "... demo/main.o"
 	@echo "... demo/main.i"
@@ -314,6 +439,15 @@ help:
 	@echo "... src/log/logger.o"
 	@echo "... src/log/logger.i"
 	@echo "... src/log/logger.s"
+	@echo "... tests/ipc/posix_message_queue_test.o"
+	@echo "... tests/ipc/posix_message_queue_test.i"
+	@echo "... tests/ipc/posix_message_queue_test.s"
+	@echo "... tests/log/logger_format_test.o"
+	@echo "... tests/log/logger_format_test.i"
+	@echo "... tests/log/logger_format_test.s"
+	@echo "... tests/thread_pool_test.o"
+	@echo "... tests/thread_pool_test.i"
+	@echo "... tests/thread_pool_test.s"
 .PHONY : help
 
 

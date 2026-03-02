@@ -5,21 +5,38 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(MSVC)
-    add_compile_options(/W4 /WX)
-else()
-    add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+option(ENABLE_TESTS "Build unit tests" OFF)
+option(ENABLE_SANITIZER "Enable address/undefined sanitizers for Debug on GCC/Clang" OFF)
+option(ENABLE_STRICT_WARNINGS "Enable strict warnings as errors" ON)
+
+if(ENABLE_STRICT_WARNINGS)
+    if(MSVC)
+        add_compile_options(/W4 /WX)
+    else()
+        add_compile_options(-Wall -Wextra -Wpedantic -Werror)
+    endif()
+endif()
+
+if(ENABLE_SANITIZER AND NOT MSVC)
+    add_compile_options(
+        $<$<CONFIG:Debug>:-fsanitize=address,undefined>
+        $<$<CONFIG:Debug>:-fno-omit-frame-pointer>
+    )
+    add_link_options($<$<CONFIG:Debug>:-fsanitize=address,undefined>)
 endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
+
+add_library(commonsvc_log STATIC src/log/logger.cpp)
 
 add_library(vr_base_framework
     src/core/error_code.cpp
     src/core/thread_pool.cpp
     src/core/process_guardian.cpp
     src/ipc/posix_message_queue.cpp
-    src/log/logger.cpp
 )
+
+target_link_libraries(vr_base_framework commonsvc_log)
 
 if(UNIX AND NOT APPLE)
     target_link_libraries(vr_base_framework rt pthread)
@@ -28,4 +45,23 @@ elseif(UNIX)
 endif()
 
 add_executable(demo_service demo/main.cpp)
-target_link_libraries(demo_service vr_base_framework)
+target_link_libraries(demo_service vr_base_framework commonsvc_log)
+
+if(ENABLE_TESTS)
+    enable_testing()
+
+    add_executable(thread_pool_test tests/thread_pool_test.cpp)
+    target_link_libraries(thread_pool_test vr_base_framework commonsvc_log)
+    add_test(NAME thread_pool_test COMMAND thread_pool_test)
+    set_tests_properties(thread_pool_test PROPERTIES LABELS "core" TIMEOUT 10)
+
+    add_executable(posix_message_queue_test tests/ipc/posix_message_queue_test.cpp)
+    target_link_libraries(posix_message_queue_test vr_base_framework commonsvc_log)
+    add_test(NAME posix_message_queue_test COMMAND posix_message_queue_test)
+    set_tests_properties(posix_message_queue_test PROPERTIES LABELS "ipc" TIMEOUT 10)
+
+    add_executable(logger_format_test tests/log/logger_format_test.cpp)
+    target_link_libraries(logger_format_test vr_base_framework commonsvc_log)
+    add_test(NAME logger_format_test COMMAND logger_format_test)
+    set_tests_properties(logger_format_test PROPERTIES LABELS "log" TIMEOUT 10)
+endif()

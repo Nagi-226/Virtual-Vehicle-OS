@@ -2,28 +2,49 @@
 #define VR_CORE_ERROR_CODE_HPP
 
 #include <cstdint>
-#include <string>
 
 namespace vr {
 namespace core {
 
+enum class ErrorDomain : std::uint16_t {
+    kCommon = 0x00,
+    kCore = 0x01,
+    kIpc = 0x02,
+    kLog = 0x03,
+    kDemo = 0x04
+};
+
+constexpr std::int32_t MakeErrorCode(const ErrorDomain domain, const std::uint16_t detail) noexcept {
+    return static_cast<std::int32_t>((static_cast<std::uint32_t>(domain) << 16U) | detail);
+}
+
 enum class ErrorCode : std::int32_t {
     kOk = 0,
-    kInvalidParam = 1000,
-    kTimeout = 1001,
-    kQueueCreateFailed = 2000,
-    kQueueSendFailed = 2001,
-    kQueueReceiveFailed = 2002,
-    kThreadStartFailed = 3000,
-    kThreadPrioritySetFailed = 3001,
-    kThreadQueueFull = 3002,
-    kThreadTaskRejected = 3003,
-    kProcessForkFailed = 4000,
-    kProcessWaitFailed = 4001,
-    kUnknown = 9000
+
+    kInvalidParam = MakeErrorCode(ErrorDomain::kCommon, 0x0001),
+    kTimeout = MakeErrorCode(ErrorDomain::kCommon, 0x0002),
+
+    kThreadStartFailed = MakeErrorCode(ErrorDomain::kCore, 0x0001),
+    kThreadPrioritySetFailed = MakeErrorCode(ErrorDomain::kCore, 0x0002),
+    kThreadQueueFull = MakeErrorCode(ErrorDomain::kCore, 0x0003),
+    kThreadTaskRejected = MakeErrorCode(ErrorDomain::kCore, 0x0004),
+    kProcessForkFailed = MakeErrorCode(ErrorDomain::kCore, 0x0005),
+    kProcessWaitFailed = MakeErrorCode(ErrorDomain::kCore, 0x0006),
+
+    kQueueCreateFailed = MakeErrorCode(ErrorDomain::kIpc, 0x0001),
+    kQueueSendFailed = MakeErrorCode(ErrorDomain::kIpc, 0x0002),
+    kQueueReceiveFailed = MakeErrorCode(ErrorDomain::kIpc, 0x0003),
+
+    kLogWriteFailed = MakeErrorCode(ErrorDomain::kLog, 0x0001),
+
+    kDemoServiceFailed = MakeErrorCode(ErrorDomain::kDemo, 0x0001),
+
+    kUnknown = MakeErrorCode(ErrorDomain::kCommon, 0xFFFF)
 };
 
 const char* ToString(ErrorCode code) noexcept;
+const char* ToDomainString(ErrorCode code) noexcept;
+std::uint16_t GetDetailCode(ErrorCode code) noexcept;
 
 }  // namespace core
 }  // namespace vr

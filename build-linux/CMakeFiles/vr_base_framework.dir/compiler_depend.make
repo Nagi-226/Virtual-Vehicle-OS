@@ -3,169 +3,43 @@
 
 CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o: /mnt/e/Virtual-Vehicle-OS/src/core/error_code.cpp \
   /mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp \
-  /usr/include/alloca.h \
-  /usr/include/asm-generic/errno-base.h \
-  /usr/include/asm-generic/errno.h \
-  /usr/include/c++/13/backward/binders.h \
-  /usr/include/c++/13/bit \
-  /usr/include/c++/13/bits/alloc_traits.h \
-  /usr/include/c++/13/bits/allocator.h \
-  /usr/include/c++/13/bits/basic_string.h \
-  /usr/include/c++/13/bits/basic_string.tcc \
-  /usr/include/c++/13/bits/char_traits.h \
-  /usr/include/c++/13/bits/charconv.h \
-  /usr/include/c++/13/bits/concept_check.h \
-  /usr/include/c++/13/bits/cpp_type_traits.h \
-  /usr/include/c++/13/bits/cxxabi_forced.h \
-  /usr/include/c++/13/bits/exception.h \
-  /usr/include/c++/13/bits/exception_defines.h \
-  /usr/include/c++/13/bits/functexcept.h \
-  /usr/include/c++/13/bits/functional_hash.h \
-  /usr/include/c++/13/bits/hash_bytes.h \
-  /usr/include/c++/13/bits/invoke.h \
-  /usr/include/c++/13/bits/localefwd.h \
-  /usr/include/c++/13/bits/memory_resource.h \
-  /usr/include/c++/13/bits/memoryfwd.h \
-  /usr/include/c++/13/bits/move.h \
-  /usr/include/c++/13/bits/new_allocator.h \
-  /usr/include/c++/13/bits/ostream_insert.h \
-  /usr/include/c++/13/bits/postypes.h \
-  /usr/include/c++/13/bits/predefined_ops.h \
-  /usr/include/c++/13/bits/ptr_traits.h \
-  /usr/include/c++/13/bits/range_access.h \
-  /usr/include/c++/13/bits/refwrap.h \
-  /usr/include/c++/13/bits/requires_hosted.h \
-  /usr/include/c++/13/bits/std_abs.h \
-  /usr/include/c++/13/bits/stl_algobase.h \
-  /usr/include/c++/13/bits/stl_construct.h \
-  /usr/include/c++/13/bits/stl_function.h \
-  /usr/include/c++/13/bits/stl_iterator.h \
-  /usr/include/c++/13/bits/stl_iterator_base_funcs.h \
-  /usr/include/c++/13/bits/stl_iterator_base_types.h \
-  /usr/include/c++/13/bits/stl_pair.h \
-  /usr/include/c++/13/bits/string_view.tcc \
-  /usr/include/c++/13/bits/stringfwd.h \
-  /usr/include/c++/13/bits/uses_allocator.h \
-  /usr/include/c++/13/bits/uses_allocator_args.h \
-  /usr/include/c++/13/bits/utility.h \
-  /usr/include/c++/13/cctype \
-  /usr/include/c++/13/cerrno \
-  /usr/include/c++/13/clocale \
-  /usr/include/c++/13/cstddef \
   /usr/include/c++/13/cstdint \
-  /usr/include/c++/13/cstdio \
-  /usr/include/c++/13/cstdlib \
-  /usr/include/c++/13/cwchar \
-  /usr/include/c++/13/debug/assertions.h \
-  /usr/include/c++/13/debug/debug.h \
-  /usr/include/c++/13/ext/alloc_traits.h \
-  /usr/include/c++/13/ext/numeric_traits.h \
-  /usr/include/c++/13/ext/string_conversions.h \
-  /usr/include/c++/13/ext/type_traits.h \
-  /usr/include/c++/13/initializer_list \
-  /usr/include/c++/13/iosfwd \
-  /usr/include/c++/13/new \
   /usr/include/c++/13/pstl/pstl_config.h \
-  /usr/include/c++/13/string \
-  /usr/include/c++/13/string_view \
-  /usr/include/c++/13/tuple \
-  /usr/include/c++/13/type_traits \
-  /usr/include/ctype.h \
-  /usr/include/endian.h \
-  /usr/include/errno.h \
   /usr/include/features-time64.h \
   /usr/include/features.h \
-  /usr/include/linux/errno.h \
-  /usr/include/locale.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdint.h \
-  /usr/include/stdio.h \
-  /usr/include/stdlib.h \
-  /usr/include/wchar.h \
-  /usr/include/x86_64-linux-gnu/asm/errno.h \
-  /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
-  /usr/include/x86_64-linux-gnu/bits/byteswap.h \
-  /usr/include/x86_64-linux-gnu/bits/endian.h \
-  /usr/include/x86_64-linux-gnu/bits/endianness.h \
-  /usr/include/x86_64-linux-gnu/bits/errno.h \
-  /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
-  /usr/include/x86_64-linux-gnu/bits/floatn.h \
   /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
-  /usr/include/x86_64-linux-gnu/bits/locale.h \
   /usr/include/x86_64-linux-gnu/bits/long-double.h \
-  /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
-  /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h \
-  /usr/include/x86_64-linux-gnu/bits/select.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
-  /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
-  /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
-  /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
-  /usr/include/x86_64-linux-gnu/bits/thread-shared-types.h \
   /usr/include/x86_64-linux-gnu/bits/time64.h \
   /usr/include/x86_64-linux-gnu/bits/timesize.h \
   /usr/include/x86_64-linux-gnu/bits/types.h \
-  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h \
-  /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
   /usr/include/x86_64-linux-gnu/bits/typesizes.h \
-  /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
-  /usr/include/x86_64-linux-gnu/bits/waitflags.h \
-  /usr/include/x86_64-linux-gnu/bits/waitstatus.h \
   /usr/include/x86_64-linux-gnu/bits/wchar.h \
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
-  /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
-  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs.h \
   /usr/include/x86_64-linux-gnu/sys/cdefs.h \
-  /usr/include/x86_64-linux-gnu/sys/select.h \
-  /usr/include/x86_64-linux-gnu/sys/types.h \
-  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h \
-  /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h
 
 CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: /mnt/e/Virtual-Vehicle-OS/src/core/process_guardian.cpp \
   /mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp \
   /mnt/e/Virtual-Vehicle-OS/src/core/process_guardian.hpp \
   /usr/include/alloca.h \
-  /usr/include/asm-generic/errno-base.h \
-  /usr/include/asm-generic/errno.h \
   /usr/include/c++/13/array \
   /usr/include/c++/13/backward/binders.h \
   /usr/include/c++/13/bit \
   /usr/include/c++/13/bits/algorithmfwd.h \
   /usr/include/c++/13/bits/alloc_traits.h \
   /usr/include/c++/13/bits/allocator.h \
-  /usr/include/c++/13/bits/basic_string.h \
-  /usr/include/c++/13/bits/basic_string.tcc \
-  /usr/include/c++/13/bits/char_traits.h \
-  /usr/include/c++/13/bits/charconv.h \
   /usr/include/c++/13/bits/concept_check.h \
   /usr/include/c++/13/bits/cpp_type_traits.h \
-  /usr/include/c++/13/bits/cxxabi_forced.h \
   /usr/include/c++/13/bits/enable_special_members.h \
   /usr/include/c++/13/bits/erase_if.h \
   /usr/include/c++/13/bits/exception.h \
@@ -176,14 +50,11 @@ CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: /mnt/e/Virtual
   /usr/include/c++/13/bits/hashtable.h \
   /usr/include/c++/13/bits/hashtable_policy.h \
   /usr/include/c++/13/bits/invoke.h \
-  /usr/include/c++/13/bits/localefwd.h \
   /usr/include/c++/13/bits/memory_resource.h \
   /usr/include/c++/13/bits/memoryfwd.h \
   /usr/include/c++/13/bits/move.h \
   /usr/include/c++/13/bits/new_allocator.h \
   /usr/include/c++/13/bits/node_handle.h \
-  /usr/include/c++/13/bits/ostream_insert.h \
-  /usr/include/c++/13/bits/postypes.h \
   /usr/include/c++/13/bits/predefined_ops.h \
   /usr/include/c++/13/bits/ptr_traits.h \
   /usr/include/c++/13/bits/range_access.h \
@@ -204,71 +75,51 @@ CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: /mnt/e/Virtual
   /usr/include/c++/13/bits/stl_tempbuf.h \
   /usr/include/c++/13/bits/stl_uninitialized.h \
   /usr/include/c++/13/bits/stl_vector.h \
-  /usr/include/c++/13/bits/string_view.tcc \
-  /usr/include/c++/13/bits/stringfwd.h \
   /usr/include/c++/13/bits/uniform_int_dist.h \
   /usr/include/c++/13/bits/unordered_map.h \
   /usr/include/c++/13/bits/uses_allocator.h \
   /usr/include/c++/13/bits/uses_allocator_args.h \
   /usr/include/c++/13/bits/utility.h \
   /usr/include/c++/13/bits/vector.tcc \
-  /usr/include/c++/13/cctype \
-  /usr/include/c++/13/cerrno \
-  /usr/include/c++/13/clocale \
   /usr/include/c++/13/compare \
   /usr/include/c++/13/cstddef \
   /usr/include/c++/13/cstdint \
-  /usr/include/c++/13/cstdio \
   /usr/include/c++/13/cstdlib \
-  /usr/include/c++/13/cwchar \
   /usr/include/c++/13/debug/assertions.h \
   /usr/include/c++/13/debug/debug.h \
   /usr/include/c++/13/ext/aligned_buffer.h \
   /usr/include/c++/13/ext/alloc_traits.h \
   /usr/include/c++/13/ext/numeric_traits.h \
-  /usr/include/c++/13/ext/string_conversions.h \
   /usr/include/c++/13/ext/type_traits.h \
   /usr/include/c++/13/functional \
   /usr/include/c++/13/initializer_list \
-  /usr/include/c++/13/iosfwd \
   /usr/include/c++/13/new \
   /usr/include/c++/13/pstl/pstl_config.h \
-  /usr/include/c++/13/string \
-  /usr/include/c++/13/string_view \
   /usr/include/c++/13/tuple \
   /usr/include/c++/13/type_traits \
   /usr/include/c++/13/typeinfo \
   /usr/include/c++/13/unordered_map \
   /usr/include/c++/13/vector \
-  /usr/include/ctype.h \
   /usr/include/endian.h \
-  /usr/include/errno.h \
   /usr/include/features-time64.h \
   /usr/include/features.h \
   /usr/include/linux/close_range.h \
-  /usr/include/linux/errno.h \
-  /usr/include/locale.h \
   /usr/include/signal.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdint.h \
-  /usr/include/stdio.h \
   /usr/include/stdlib.h \
   /usr/include/unistd.h \
-  /usr/include/wchar.h \
-  /usr/include/x86_64-linux-gnu/asm/errno.h \
   /usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h \
   /usr/include/x86_64-linux-gnu/bits/byteswap.h \
   /usr/include/x86_64-linux-gnu/bits/confname.h \
   /usr/include/x86_64-linux-gnu/bits/endian.h \
   /usr/include/x86_64-linux-gnu/bits/endianness.h \
   /usr/include/x86_64-linux-gnu/bits/environments.h \
-  /usr/include/x86_64-linux-gnu/bits/errno.h \
   /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
   /usr/include/x86_64-linux-gnu/bits/floatn.h \
   /usr/include/x86_64-linux-gnu/bits/getopt_core.h \
   /usr/include/x86_64-linux-gnu/bits/getopt_posix.h \
   /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
-  /usr/include/x86_64-linux-gnu/bits/locale.h \
   /usr/include/x86_64-linux-gnu/bits/long-double.h \
   /usr/include/x86_64-linux-gnu/bits/posix_opt.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
@@ -290,7 +141,6 @@ CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: /mnt/e/Virtual
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -298,34 +148,24 @@ CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: /mnt/e/Virtual
   /usr/include/x86_64-linux-gnu/bits/time64.h \
   /usr/include/x86_64-linux-gnu/bits/timesize.h \
   /usr/include/x86_64-linux-gnu/bits/types.h \
-  /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/idtype_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/sig_atomic_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/sigevent_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/sigval_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/stack_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h \
   /usr/include/x86_64-linux-gnu/bits/types/time_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/timer_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/wint_t.h \
   /usr/include/x86_64-linux-gnu/bits/typesizes.h \
   /usr/include/x86_64-linux-gnu/bits/uintn-identity.h \
   /usr/include/x86_64-linux-gnu/bits/unistd_ext.h \
@@ -335,7 +175,6 @@ CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: /mnt/e/Virtual
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
-  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h \
   /usr/include/x86_64-linux-gnu/gnu/stubs-64.h \
@@ -345,7 +184,6 @@ CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: /mnt/e/Virtual
   /usr/include/x86_64-linux-gnu/sys/types.h \
   /usr/include/x86_64-linux-gnu/sys/ucontext.h \
   /usr/include/x86_64-linux-gnu/sys/wait.h \
-  /usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h \
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h
 
@@ -365,10 +203,6 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/c++/13/bits/allocator.h \
   /usr/include/c++/13/bits/atomic_base.h \
   /usr/include/c++/13/bits/atomic_lockfree_defines.h \
-  /usr/include/c++/13/bits/basic_string.h \
-  /usr/include/c++/13/bits/basic_string.tcc \
-  /usr/include/c++/13/bits/char_traits.h \
-  /usr/include/c++/13/bits/charconv.h \
   /usr/include/c++/13/bits/chrono.h \
   /usr/include/c++/13/bits/concept_check.h \
   /usr/include/c++/13/bits/cpp_type_traits.h \
@@ -386,14 +220,12 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/c++/13/bits/hashtable.h \
   /usr/include/c++/13/bits/hashtable_policy.h \
   /usr/include/c++/13/bits/invoke.h \
-  /usr/include/c++/13/bits/localefwd.h \
   /usr/include/c++/13/bits/memory_resource.h \
   /usr/include/c++/13/bits/memoryfwd.h \
   /usr/include/c++/13/bits/move.h \
   /usr/include/c++/13/bits/nested_exception.h \
   /usr/include/c++/13/bits/new_allocator.h \
   /usr/include/c++/13/bits/node_handle.h \
-  /usr/include/c++/13/bits/ostream_insert.h \
   /usr/include/c++/13/bits/parse_numbers.h \
   /usr/include/c++/13/bits/postypes.h \
   /usr/include/c++/13/bits/predefined_ops.h \
@@ -422,7 +254,6 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/c++/13/bits/stl_tempbuf.h \
   /usr/include/c++/13/bits/stl_uninitialized.h \
   /usr/include/c++/13/bits/stl_vector.h \
-  /usr/include/c++/13/bits/string_view.tcc \
   /usr/include/c++/13/bits/stringfwd.h \
   /usr/include/c++/13/bits/this_thread_sleep.h \
   /usr/include/c++/13/bits/uniform_int_dist.h \
@@ -433,14 +264,11 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/c++/13/bits/uses_allocator_args.h \
   /usr/include/c++/13/bits/utility.h \
   /usr/include/c++/13/bits/vector.tcc \
-  /usr/include/c++/13/cctype \
   /usr/include/c++/13/cerrno \
-  /usr/include/c++/13/clocale \
   /usr/include/c++/13/compare \
   /usr/include/c++/13/condition_variable \
   /usr/include/c++/13/cstddef \
   /usr/include/c++/13/cstdint \
-  /usr/include/c++/13/cstdio \
   /usr/include/c++/13/cstdlib \
   /usr/include/c++/13/ctime \
   /usr/include/c++/13/cwchar \
@@ -453,7 +281,6 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/c++/13/ext/atomicity.h \
   /usr/include/c++/13/ext/concurrence.h \
   /usr/include/c++/13/ext/numeric_traits.h \
-  /usr/include/c++/13/ext/string_conversions.h \
   /usr/include/c++/13/ext/type_traits.h \
   /usr/include/c++/13/functional \
   /usr/include/c++/13/initializer_list \
@@ -464,26 +291,21 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/c++/13/pstl/pstl_config.h \
   /usr/include/c++/13/queue \
   /usr/include/c++/13/ratio \
-  /usr/include/c++/13/string \
-  /usr/include/c++/13/string_view \
   /usr/include/c++/13/thread \
   /usr/include/c++/13/tuple \
   /usr/include/c++/13/type_traits \
   /usr/include/c++/13/typeinfo \
   /usr/include/c++/13/unordered_map \
   /usr/include/c++/13/vector \
-  /usr/include/ctype.h \
   /usr/include/endian.h \
   /usr/include/errno.h \
   /usr/include/features-time64.h \
   /usr/include/features.h \
   /usr/include/linux/errno.h \
-  /usr/include/locale.h \
   /usr/include/pthread.h \
   /usr/include/sched.h \
   /usr/include/stdc-predef.h \
   /usr/include/stdint.h \
-  /usr/include/stdio.h \
   /usr/include/stdlib.h \
   /usr/include/time.h \
   /usr/include/wchar.h \
@@ -497,7 +319,6 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/x86_64-linux-gnu/bits/floatn-common.h \
   /usr/include/x86_64-linux-gnu/bits/floatn.h \
   /usr/include/x86_64-linux-gnu/bits/libc-header-start.h \
-  /usr/include/x86_64-linux-gnu/bits/locale.h \
   /usr/include/x86_64-linux-gnu/bits/long-double.h \
   /usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h \
   /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h \
@@ -508,7 +329,6 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/x86_64-linux-gnu/bits/stdint-intn.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-least.h \
   /usr/include/x86_64-linux-gnu/bits/stdint-uintn.h \
-  /usr/include/x86_64-linux-gnu/bits/stdio_lim.h \
   /usr/include/x86_64-linux-gnu/bits/stdlib-float.h \
   /usr/include/x86_64-linux-gnu/bits/struct_mutex.h \
   /usr/include/x86_64-linux-gnu/bits/struct_rwlock.h \
@@ -520,19 +340,15 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/x86_64-linux-gnu/bits/types.h \
   /usr/include/x86_64-linux-gnu/bits/types/FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/__FILE.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/__locale_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/clock_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/clockid_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/error_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/locale_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h \
   /usr/include/x86_64-linux-gnu/bits/types/sigset_t.h \
-  /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
   /usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h \
@@ -551,7 +367,6 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehi
   /usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
-  /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/error_constants.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/gthr-default.h \
@@ -748,6 +563,7 @@ CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.o: /mnt/e/Virtu
   /usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h
 
 CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS/src/log/logger.cpp \
+  /mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp \
   /mnt/e/Virtual-Vehicle-OS/src/log/logger.hpp \
   /usr/include/alloca.h \
   /usr/include/asm-generic/errno-base.h \
@@ -1017,11 +833,25 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 
 /usr/include/x86_64-linux-gnu/sys/stat.h:
 
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h:
+
 /usr/include/x86_64-linux-gnu/bits/types/struct_statx.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
+
+/usr/include/c++/13/sstream:
+
+/usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/struct_stat.h:
 
 /usr/include/x86_64-linux-gnu/bits/statx-generic.h:
+
+/usr/include/x86_64-linux-gnu/bits/locale.h:
 
 /usr/include/x86_64-linux-gnu/bits/fcntl.h:
 
@@ -1035,77 +865,49 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 
 /usr/include/x86_64-linux-gnu/asm/bitsperlong.h:
 
-/usr/include/mqueue.h:
+/mnt/e/Virtual-Vehicle-OS/src/core/process_guardian.cpp:
 
-/usr/include/linux/types.h:
+/usr/include/c++/13/bits/exception.h:
 
-/usr/include/linux/stddef.h:
+/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
 
-/usr/include/c++/13/bits/locale_facets.tcc:
+/usr/include/x86_64-linux-gnu/bits/stat.h:
 
-/usr/include/linux/stat.h:
+/usr/include/x86_64-linux-gnu/bits/sigstksz.h:
 
-/usr/include/linux/falloc.h:
+/usr/include/x86_64-linux-gnu/bits/sigstack.h:
 
-/usr/include/fcntl.h:
+/usr/include/c++/13/bits/stl_bvector.h:
 
-/usr/include/c++/13/bits/stl_queue.h:
+/usr/include/x86_64-linux-gnu/bits/siginfo-arch.h:
 
-/usr/include/x86_64-linux-gnu/asm/errno.h:
+/usr/include/c++/13/bits/locale_facets_nonio.h:
 
-/usr/include/c++/13/bits/atomic_lockfree_defines.h:
+/usr/include/x86_64-linux-gnu/bits/confname.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
-
-/usr/include/c++/13/cstdio:
+/usr/include/x86_64-linux-gnu/bits/sigthread.h:
 
 /usr/include/x86_64-linux-gnu/bits/sigevent-consts.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
+/usr/include/c++/13/cstdio:
 
-/usr/include/x86_64-linux-gnu/bits/types/struct_statx_timestamp.h:
+/usr/include/x86_64-linux-gnu/bits/sigaction.h:
 
-/mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp:
+/usr/include/stdio.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
-
-/usr/include/c++/13/bits/hashtable_policy.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/FILE.h:
-
-/usr/include/c++/13/iomanip:
-
-/usr/include/signal.h:
-
-/usr/include/c++/13/bits/locale_classes.h:
-
-/usr/include/x86_64-linux-gnu/bits/timesize.h:
-
-/usr/include/x86_64-linux-gnu/bits/time64.h:
-
-/usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
-
-/usr/include/x86_64-linux-gnu/bits/statx.h:
-
-/usr/include/unistd.h:
-
-/usr/include/x86_64-linux-gnu/bits/types.h:
-
-/usr/include/c++/13/bits/cpp_type_traits.h:
+/usr/include/c++/13/bits/stl_iterator_base_types.h:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes.h:
 
-/usr/include/x86_64-linux-gnu/bits/locale.h:
+/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
 
-/usr/include/c++/13/sstream:
+/mnt/e/Virtual-Vehicle-OS/src/log/logger.cpp:
 
-/usr/include/x86_64-linux-gnu/bits/types/cookie_io_functions_t.h:
+/usr/include/c++/13/typeinfo:
 
-/usr/include/x86_64-linux-gnu/bits/wchar.h:
+/usr/include/c++/13/bits/cxxabi_init_exception.h:
 
-/usr/include/c++/13/exception:
+/usr/include/c++/13/bits/stl_queue.h:
 
 /usr/include/c++/13/bits/basic_string.h:
 
@@ -1115,129 +917,43 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 
 /usr/include/c++/13/bits/deque.tcc:
 
-/usr/include/c++/13/bits/charconv.h:
+/usr/include/x86_64-linux-gnu/bits/statx.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
-
-/usr/include/c++/13/bits/uses_allocator_args.h:
-
-/usr/include/c++/13/bits/atomic_base.h:
-
-/usr/include/x86_64-linux-gnu/bits/byteswap.h:
-
-/usr/include/x86_64-linux-gnu/bits/siginfo-consts-arch.h:
-
-/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
-
-/usr/include/c++/13/bits/refwrap.h:
-
-/usr/include/c++/13/streambuf:
-
-/usr/include/c++/13/bits/memory_resource.h:
-
-/usr/include/c++/13/bits/this_thread_sleep.h:
+/usr/include/unistd.h:
 
 /usr/include/stdlib.h:
 
-/usr/include/c++/13/queue:
+/usr/include/c++/13/bits/invoke.h:
 
-/usr/include/locale.h:
+/usr/include/c++/13/iomanip:
 
-/usr/include/c++/13/ext/aligned_buffer.h:
+/usr/include/signal.h:
 
-/usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
+/usr/include/x86_64-linux-gnu/bits/types/FILE.h:
 
-/usr/include/features-time64.h:
+/usr/include/c++/13/bits/allocator.h:
 
-/usr/include/c++/13/string_view:
-
-/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
-
-/mnt/e/Virtual-Vehicle-OS/src/core/thread_pool.cpp:
-
-/usr/include/stdint.h:
-
-/usr/include/endian.h:
-
-/usr/include/ctype.h:
-
-/usr/include/c++/13/bits/range_access.h:
-
-/usr/include/x86_64-linux-gnu/bits/sigcontext.h:
-
-/usr/include/c++/13/pstl/pstl_config.h:
-
-/usr/include/c++/13/new:
-
-/usr/include/c++/13/ext/alloc_traits.h:
+/usr/include/c++/13/unordered_map:
 
 /usr/include/c++/13/ext/type_traits.h:
 
-/usr/include/c++/13/bits/postypes.h:
+/usr/include/c++/13/ext/aligned_buffer.h:
 
-/usr/include/c++/13/bits/uses_allocator.h:
+/usr/include/locale.h:
 
-/usr/include/c++/13/bits/ostream_insert.h:
+/usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h:
 
-/usr/include/x86_64-linux-gnu/bits/signum-generic.h:
+/usr/include/x86_64-linux-gnu/bits/environments.h:
 
-/usr/include/c++/13/iosfwd:
+/usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h:
 
-/usr/include/c++/13/bits/predefined_ops.h:
+/usr/include/c++/13/debug/assertions.h:
 
-/usr/include/c++/13/bits/invoke.h:
+/usr/include/c++/13/cstdlib:
 
-/mnt/e/Virtual-Vehicle-OS/src/log/logger.hpp:
+/usr/include/c++/13/cstdint:
 
-/usr/include/c++/13/condition_variable:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
-
-/usr/include/c++/13/bits/exception.h:
-
-/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
-
-/mnt/e/Virtual-Vehicle-OS/src/core/process_guardian.cpp:
-
-/usr/include/stdc-predef.h:
-
-/usr/include/asm-generic/posix_types.h:
-
-/usr/include/c++/13/bits/memoryfwd.h:
-
-/usr/include/c++/13/bits/functexcept.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
-
-/usr/include/c++/13/ext/numeric_traits.h:
-
-/usr/include/c++/13/bits/stl_iterator.h:
-
-/usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
-
-/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
-
-/usr/include/c++/13/bits/shared_ptr.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
-
-/usr/include/c++/13/string:
-
-/usr/include/c++/13/cerrno:
-
-/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
-
-/usr/include/c++/13/bits/cxxabi_forced.h:
-
-/usr/include/c++/13/ext/string_conversions.h:
-
-/usr/include/x86_64-linux-gnu/bits/floatn.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
+/usr/include/c++/13/bits/vector.tcc:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
 
@@ -1245,25 +961,49 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 
 /usr/include/c++/13/bits/stl_function.h:
 
-/usr/include/c++/13/bits/functional_hash.h:
+/usr/include/c++/13/bits/uses_allocator_args.h:
 
-/usr/include/errno.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
-
-/usr/include/c++/13/bits/stringfwd.h:
+/usr/include/c++/13/bits/atomic_base.h:
 
 /usr/include/c++/13/bits/locale_classes.tcc:
 
 /usr/include/c++/13/bits/uniform_int_dist.h:
 
-/usr/include/c++/13/backward/binders.h:
+/usr/include/c++/13/bits/stringfwd.h:
 
-/usr/include/c++/13/bits/stl_bvector.h:
+/usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h:
 
-/usr/include/c++/13/bits/hash_bytes.h:
+/usr/include/c++/13/bits/stl_vector.h:
+
+/usr/include/c++/13/bits/stl_tempbuf.h:
+
+/usr/include/c++/13/system_error:
+
+/usr/include/c++/13/compare:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
+
+/usr/include/asm-generic/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/libc-header-start.h:
+
+/usr/include/c++/13/bits/functexcept.h:
+
+/usr/include/c++/13/new:
+
+/usr/include/c++/13/ext/alloc_traits.h:
+
+/usr/include/c++/13/bits/stl_heap.h:
+
+/usr/include/c++/13/bits/stl_algobase.h:
+
+/usr/include/c++/13/bits/stl_algo.h:
+
+/usr/include/c++/13/cstddef:
+
+/usr/include/alloca.h:
+
+/usr/include/x86_64-linux-gnu/bits/time64.h:
 
 /usr/include/c++/13/bits/locale_conv.h:
 
@@ -1271,71 +1011,115 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 
 /mnt/e/Virtual-Vehicle-OS/src/core/error_code.cpp:
 
-/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
+/usr/include/c++/13/bits/unordered_map.h:
 
-/usr/include/c++/13/bits/string_view.tcc:
+/usr/include/c++/13/bits/new_allocator.h:
 
-/usr/include/c++/13/clocale:
+/usr/include/c++/13/bits/stl_uninitialized.h:
 
-/usr/include/c++/13/cstddef:
-
-/usr/include/c++/13/bits/stl_algo.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/__fpos64_t.h:
-
-/usr/include/c++/13/bits/move.h:
-
-/mnt/e/Virtual-Vehicle-OS/src/ipc/posix_message_queue.cpp:
-
-/usr/include/c++/13/bits/localefwd.h:
-
-/usr/include/c++/13/type_traits:
-
-/usr/include/x86_64-linux-gnu/sys/single_threaded.h:
-
-/usr/include/c++/13/bits/allocated_ptr.h:
-
-/usr/include/c++/13/bit:
-
-/usr/include/c++/13/bits/basic_string.tcc:
-
-/usr/include/c++/13/bits/concept_check.h:
-
-/usr/include/c++/13/bits/alloc_traits.h:
-
-/usr/include/stdio.h:
-
-/usr/include/c++/13/bits/stl_iterator_base_types.h:
-
-/usr/include/x86_64-linux-gnu/bits/sigaction.h:
-
-/usr/include/alloca.h:
-
-/usr/include/linux/posix_types.h:
-
-/usr/include/c++/13/bits/ptr_traits.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h:
+/usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/os_defines.h:
 
-/usr/include/linux/errno.h:
+/usr/include/x86_64-linux-gnu/bits/atomic_wide_counter.h:
 
-/usr/include/c++/13/debug/debug.h:
+/usr/include/x86_64-linux-gnu/bits/types.h:
 
-/usr/include/c++/13/bits/stl_algobase.h:
-
-/usr/include/x86_64-linux-gnu/bits/typesizes.h:
+/usr/include/c++/13/bits/cpp_type_traits.h:
 
 /usr/include/c++/13/bits/stl_construct.h:
 
 /usr/include/c++/13/bits/std_mutex.h:
 
-/usr/include/asm-generic/errno-base.h:
+/usr/include/x86_64-linux-gnu/bits/typesizes.h:
 
-/usr/include/x86_64-linux-gnu/sys/wait.h:
+/usr/include/c++/13/bits/hash_bytes.h:
 
-/usr/include/c++/13/bits/stl_iterator_base_funcs.h:
+/usr/include/c++/13/array:
+
+/usr/include/c++/13/type_traits:
+
+/usr/include/x86_64-linux-gnu/sys/single_threaded.h:
+
+/usr/include/c++/13/bits/basic_string.tcc:
+
+/usr/include/c++/13/bits/enable_special_members.h:
+
+/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+
+/usr/include/x86_64-linux-gnu/bits/siginfo-consts-arch.h:
+
+/usr/include/x86_64-linux-gnu/bits/byteswap.h:
+
+/usr/include/c++/13/pstl/pstl_config.h:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_statx_timestamp.h:
+
+/mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/types/locale_t.h:
+
+/usr/include/c++/13/bits/predefined_ops.h:
+
+/mnt/e/Virtual-Vehicle-OS/src/log/logger.hpp:
+
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
+
+/usr/include/c++/13/condition_variable:
+
+/usr/include/x86_64-linux-gnu/bits/wchar.h:
+
+/usr/include/x86_64-linux-gnu/bits/getopt_core.h:
+
+/usr/include/c++/13/bits/locale_classes.h:
+
+/usr/include/x86_64-linux-gnu/bits/timesize.h:
+
+/usr/include/fcntl.h:
+
+/usr/include/endian.h:
+
+/usr/include/stdint.h:
+
+/usr/include/c++/13/queue:
+
+/usr/include/c++/13/vector:
+
+/usr/include/c++/13/bits/erase_if.h:
+
+/usr/include/features-time64.h:
+
+/usr/include/c++/13/string_view:
+
+/usr/include/c++/13/functional:
+
+/usr/include/c++/13/bits/memoryfwd.h:
+
+/usr/include/stdc-predef.h:
+
+/usr/include/asm-generic/posix_types.h:
+
+/usr/include/x86_64-linux-gnu/bits/floatn.h:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h:
+
+/usr/include/c++/13/bits/uses_allocator.h:
+
+/usr/include/c++/13/bits/postypes.h:
+
+/usr/include/c++/13/bits/range_access.h:
+
+/usr/include/x86_64-linux-gnu/bits/sigcontext.h:
+
+/usr/include/c++/13/bits/string_view.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
+
+/usr/include/c++/13/backward/binders.h:
 
 /usr/include/features.h:
 
@@ -1343,51 +1127,23 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 
 /usr/include/c++/13/bits/requires_hosted.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/time_t.h:
+/usr/include/x86_64-linux-gnu/bits/long-double.h:
 
-/usr/include/c++/13/cctype:
+/usr/include/c++/13/bits/algorithmfwd.h:
 
-/usr/include/asm-generic/types.h:
+/usr/include/c++/13/bits/alloc_traits.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
+/usr/include/c++/13/bits/concept_check.h:
 
-/usr/include/asm-generic/bitsperlong.h:
+/usr/include/x86_64-linux-gnu/bits/stdint-least.h:
 
-/usr/include/c++/13/cstdint:
+/usr/include/c++/13/cerrno:
 
-/usr/include/c++/13/cstdlib:
+/usr/include/c++/13/bits/move.h:
 
-/usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h:
+/mnt/e/Virtual-Vehicle-OS/src/ipc/posix_message_queue.cpp:
 
-/usr/include/c++/13/bits/char_traits.h:
-
-/usr/include/x86_64-linux-gnu/bits/signal_ext.h:
-
-/usr/include/c++/13/bits/std_function.h:
-
-/usr/include/x86_64-linux-gnu/sys/select.h:
-
-/usr/include/c++/13/cwchar:
-
-/usr/include/x86_64-linux-gnu/bits/environments.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/siginfo_t.h:
-
-/usr/include/c++/13/debug/assertions.h:
-
-/usr/include/x86_64-linux-gnu/bits/waitflags.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
-
-/usr/include/c++/13/bits/unique_ptr.h:
-
-/usr/include/c++/13/bits/exception_defines.h:
-
-/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
-
-/usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h:
+/usr/include/linux/close_range.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h:
 
@@ -1397,107 +1153,57 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 
 /mnt/e/Virtual-Vehicle-OS/src/ipc/posix_message_queue.hpp:
 
-/usr/include/x86_64-linux-gnu/sys/cdefs.h:
+/usr/include/c++/13/bits/functional_hash.h:
 
-/usr/include/x86_64-linux-gnu/sys/types.h:
+/usr/include/x86_64-linux-gnu/bits/types/__sigval_t.h:
 
-/usr/lib/gcc/x86_64-linux-gnu/13/include/stdint.h:
+/usr/include/errno.h:
 
-/usr/include/c++/13/array:
+/usr/include/c++/13/iosfwd:
 
-/usr/include/x86_64-linux-gnu/bits/long-double.h:
+/usr/include/x86_64-linux-gnu/bits/signum-generic.h:
 
-/usr/include/c++/13/bits/algorithmfwd.h:
+/usr/include/x86_64-linux-gnu/bits/types/timer_t.h:
 
-/usr/include/c++/13/bits/enable_special_members.h:
+/mnt/e/Virtual-Vehicle-OS/src/core/thread_pool.cpp:
 
-/usr/include/c++/13/bits/erase_if.h:
+/usr/include/c++/13/bits/hashtable_policy.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/error_t.h:
+/usr/include/x86_64-linux-gnu/bits/types/clock_t.h:
 
-/usr/include/c++/13/bits/hashtable.h:
+/usr/include/x86_64-linux-gnu/c++/13/bits/ctype_inline.h:
+
+/usr/include/x86_64-linux-gnu/bits/signal_ext.h:
+
+/usr/include/c++/13/bits/std_function.h:
+
+/usr/include/c++/13/bits/char_traits.h:
+
+/usr/include/c++/13/streambuf:
+
+/usr/include/c++/13/bits/memory_resource.h:
+
+/usr/include/c++/13/bits/this_thread_sleep.h:
 
 /usr/include/x86_64-linux-gnu/gnu/stubs-64.h:
 
 /usr/include/c++/13/bits/node_handle.h:
 
-/usr/include/c++/13/bits/stl_heap.h:
+/usr/include/c++/13/bits/refwrap.h:
 
-/usr/include/c++/13/bits/stl_tempbuf.h:
+/usr/include/x86_64-linux-gnu/bits/struct_mutex.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
+/usr/include/c++/13/bits/shared_ptr.h:
+
+/usr/include/x86_64-linux-gnu/bits/struct_rwlock.h:
+
+/usr/include/c++/13/bits/charconv.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__sigset_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
 
-/usr/include/c++/13/bits/new_allocator.h:
-
-/usr/include/c++/13/bits/stl_uninitialized.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h:
-
-/usr/include/c++/13/bits/stl_vector.h:
-
-/usr/include/c++/13/bits/unordered_map.h:
-
-/usr/include/c++/13/bits/vector.tcc:
-
-/usr/include/c++/13/system_error:
-
-/usr/include/c++/13/compare:
-
-/usr/include/asm-generic/errno.h:
-
-/usr/include/x86_64-linux-gnu/bits/types/struct_sched_param.h:
-
-/usr/include/c++/13/functional:
-
-/mnt/e/Virtual-Vehicle-OS/src/log/logger.cpp:
-
-/usr/include/c++/13/typeinfo:
-
-/usr/include/time.h:
-
-/usr/include/x86_64-linux-gnu/bits/setjmp.h:
-
-/usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
-
-/usr/include/c++/13/bits/cxxabi_init_exception.h:
-
-/usr/include/c++/13/bits/allocator.h:
-
-/usr/include/c++/13/unordered_map:
-
-/usr/include/c++/13/vector:
-
-/usr/include/linux/close_range.h:
-
-/usr/include/c++/13/bits/locale_facets_nonio.h:
-
-/usr/include/x86_64-linux-gnu/bits/confname.h:
-
-/usr/include/x86_64-linux-gnu/bits/siginfo-arch.h:
-
-/usr/include/x86_64-linux-gnu/bits/getopt_core.h:
-
-/usr/include/x86_64-linux-gnu/bits/posix_opt.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h:
-
-/usr/include/x86_64-linux-gnu/bits/siginfo-consts.h:
-
-/usr/include/c++/13/bits/stl_pair.h:
-
-/usr/include/x86_64-linux-gnu/bits/errno.h:
-
-/usr/include/x86_64-linux-gnu/bits/signum-arch.h:
-
-/usr/include/x86_64-linux-gnu/bits/sigstack.h:
-
-/usr/include/x86_64-linux-gnu/bits/stat.h:
-
-/usr/include/x86_64-linux-gnu/bits/sigstksz.h:
-
-/usr/include/x86_64-linux-gnu/bits/sigthread.h:
+/usr/include/x86_64-linux-gnu/bits/types/clockid_t.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/idtype_t.h:
 
@@ -1515,17 +1221,63 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_sigstack.h:
 
+/usr/include/c++/13/ext/numeric_traits.h:
+
+/usr/include/c++/13/bits/stl_iterator.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
+
+/usr/include/c++/13/bits/atomic_lockfree_defines.h:
+
+/usr/include/x86_64-linux-gnu/asm/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/time_t.h:
+
 /usr/include/x86_64-linux-gnu/bits/unistd_ext.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/mbstate_t.h:
+
+/usr/include/c++/13/bits/unique_ptr.h:
+
+/usr/include/c++/13/bits/exception_defines.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitstatus.h:
+
+/usr/include/x86_64-linux-gnu/sys/types.h:
 
 /usr/include/x86_64-linux-gnu/sys/ucontext.h:
 
+/usr/include/mqueue.h:
+
+/usr/include/x86_64-linux-gnu/bits/getopt_posix.h:
+
+/usr/include/time.h:
+
+/usr/include/x86_64-linux-gnu/bits/setjmp.h:
+
 /mnt/e/Virtual-Vehicle-OS/src/core/thread_pool.hpp:
 
+/usr/include/c++/13/bits/stl_iterator_base_funcs.h:
+
+/usr/include/x86_64-linux-gnu/sys/wait.h:
+
+/usr/include/asm-generic/errno-base.h:
+
 /usr/include/c++/13/atomic:
+
+/usr/include/c++/13/bit:
+
+/usr/include/c++/13/bits/allocated_ptr.h:
+
+/usr/include/c++/13/clocale:
 
 /usr/include/x86_64-linux-gnu/bits/endianness.h:
 
 /usr/include/c++/13/bits/chrono.h:
+
+/usr/include/c++/13/bits/cxxabi_forced.h:
 
 /usr/include/c++/13/bits/exception_ptr.h:
 
@@ -1555,7 +1307,29 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 
 /usr/include/c++/13/deque:
 
+/usr/include/x86_64-linux-gnu/sys/select.h:
+
+/usr/include/c++/13/cwchar:
+
+/usr/include/c++/13/exception:
+
+/usr/include/x86_64-linux-gnu/bits/signum-arch.h:
+
+/usr/include/c++/13/bits/stl_pair.h:
+
+/usr/include/x86_64-linux-gnu/bits/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/sigset_t.h:
+
+/usr/include/asm-generic/types.h:
+
+/usr/include/asm-generic/bitsperlong.h:
+
+/usr/include/c++/13/cctype:
+
 /usr/include/c++/13/ext/concurrence.h:
+
+/usr/include/linux/falloc.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/wint_t.h:
 
@@ -1566,6 +1340,12 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 /usr/include/c++/13/thread:
 
 /usr/include/asm-generic/int-ll64.h:
+
+/usr/include/c++/13/debug/debug.h:
+
+/usr/include/linux/errno.h:
+
+/usr/include/x86_64-linux-gnu/bits/pthread_stack_min-dynamic.h:
 
 /usr/include/pthread.h:
 
@@ -1582,6 +1362,14 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 /usr/include/x86_64-linux-gnu/bits/select.h:
 
 /usr/include/x86_64-linux-gnu/bits/time.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__FILE.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/__mbstate_t.h:
+
+/usr/include/c++/13/bits/hashtable.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/error_t.h:
 
 /usr/include/c++/13/ext/atomicity.h:
 
@@ -1604,3 +1392,31 @@ CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS
 /usr/include/x86_64-linux-gnu/c++/13/bits/gthr-default.h:
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/gthr.h:
+
+/usr/include/linux/stddef.h:
+
+/usr/include/x86_64-linux-gnu/bits/siginfo-consts.h:
+
+/usr/lib/gcc/x86_64-linux-gnu/13/include/stdarg.h:
+
+/usr/include/c++/13/bits/localefwd.h:
+
+/usr/include/c++/13/bits/ptr_traits.h:
+
+/usr/include/linux/posix_types.h:
+
+/usr/include/c++/13/bits/ostream_insert.h:
+
+/usr/include/c++/13/ext/string_conversions.h:
+
+/usr/include/x86_64-linux-gnu/bits/stdint-intn.h:
+
+/usr/include/c++/13/string:
+
+/usr/include/ctype.h:
+
+/usr/include/c++/13/bits/locale_facets.tcc:
+
+/usr/include/linux/stat.h:
+
+/usr/include/linux/types.h:
