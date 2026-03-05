@@ -24,7 +24,11 @@ public:
     vr::core::ErrorCode Create(const QueueConfig& config) noexcept;
     vr::core::ErrorCode Open(const QueueConfig& config) noexcept;
     vr::core::ErrorCode Send(const std::string& message, std::uint32_t priority) noexcept;
+    vr::core::ErrorCode SendWithTimeout(const std::string& message, std::uint32_t priority,
+                                        std::int64_t timeout_ms) noexcept;
     vr::core::ErrorCode Receive(std::string* message, std::uint32_t* priority) noexcept;
+    vr::core::ErrorCode ReceiveWithTimeout(std::string* message, std::uint32_t* priority,
+                                           std::int64_t timeout_ms) noexcept;
     void Close() noexcept;
     void Unlink() noexcept;
 
@@ -38,4 +42,3 @@ private:
 }  // namespace vr
 
 #endif  // VR_IPC_POSIX_MESSAGE_QUEUE_HPP
-

@@ -1,5 +1,7 @@
 #include "ipc/posix_message_queue.hpp"
 
+#include <cerrno>
+#include <ctime>
 #include <fcntl.h>
 #include <mqueue.h>
 #include <sys/stat.h>
@@ -7,6 +9,28 @@
 
 namespace vr {
 namespace ipc {
+
+namespace {
+
+timespec MakeAbsTimeout(const std::int64_t timeout_ms) noexcept {
+    timespec ts{};
+    clock_gettime(CLOCK_REALTIME, &ts);
+
+    const std::int64_t sec = timeout_ms / 1000;
+    const std::int64_t nsec = (timeout_ms % 1000) * 1000000;
+
+    ts.tv_sec += static_cast<time_t>(sec);
+    ts.tv_nsec += static_cast<long>(nsec);
+
+    if (ts.tv_nsec >= 1000000000L) {
+        ts.tv_sec += 1;
+        ts.tv_nsec -= 1000000000L;
+    }
+
+    return ts;
+}
+
+}  // namespace
 
 PosixMessageQueue::~PosixMessageQueue() {
     Close();
@@ -50,28 +74,72 @@ vr::core::ErrorCode PosixMessageQueue::Open(const QueueConfig& config) noexcept 
     return vr::core::ErrorCode::kOk;
 }
 
-vr::core::ErrorCode PosixMessageQueue::Send(const std::string& message, const std::uint32_t priority) noexcept {
+vr::core::ErrorCode PosixMessageQueue::Send(const std::string& message,
+                                            const std::uint32_t priority) noexcept {
+    return SendWithTimeout(message, priority, -1);
+}
+
+vr::core::ErrorCode PosixMessageQueue::SendWithTimeout(const std::string& message,
+                                                       const std::uint32_t priority,
+                                                       const std::int64_t timeout_ms) noexcept {
     if (mqd_ < 0 || message.size() >= static_cast<std::size_t>(message_size_)) {
         return vr::core::ErrorCode::kInvalidParam;
     }
 
-    const int rc = mq_send(static_cast<mqd_t>(mqd_), message.c_str(), message.size() + 1U, priority);
+    if (timeout_ms < 0) {
+        const int rc = mq_send(static_cast<mqd_t>(mqd_), message.c_str(), message.size() + 1U,
+                               priority);
+        if (rc != 0) {
+            return vr::core::ErrorCode::kQueueSendFailed;
+        }
+        return vr::core::ErrorCode::kOk;
+    }
+
+    const timespec abs_timeout = MakeAbsTimeout(timeout_ms);
+    const int rc = mq_timedsend(static_cast<mqd_t>(mqd_), message.c_str(), message.size() + 1U,
+                                priority, &abs_timeout);
     if (rc != 0) {
+        if (errno == ETIMEDOUT) {
+            return vr::core::ErrorCode::kTimeout;
+        }
         return vr::core::ErrorCode::kQueueSendFailed;
     }
 
     return vr::core::ErrorCode::kOk;
 }
 
-vr::core::ErrorCode PosixMessageQueue::Receive(std::string* const message, std::uint32_t* const priority) noexcept {
+vr::core::ErrorCode PosixMessageQueue::Receive(std::string* const message,
+                                               std::uint32_t* const priority) noexcept {
+    return ReceiveWithTimeout(message, priority, -1);
+}
+
+vr::core::ErrorCode PosixMessageQueue::ReceiveWithTimeout(std::string* const message,
+                                                          std::uint32_t* const priority,
+                                                          const std::int64_t timeout_ms) noexcept {
     if (mqd_ < 0 || message == nullptr || priority == nullptr) {
         return vr::core::ErrorCode::kInvalidParam;
     }
 
     std::vector<char> buffer(static_cast<std::size_t>(message_size_), '\0');
-    const ssize_t bytes = mq_receive(static_cast<mqd_t>(mqd_), buffer.data(),
-                                     static_cast<std::size_t>(message_size_), priority);
+
+    if (timeout_ms < 0) {
+        const ssize_t bytes = mq_receive(static_cast<mqd_t>(mqd_), buffer.data(),
+                                         static_cast<std::size_t>(message_size_), priority);
+        if (bytes < 0) {
+            return vr::core::ErrorCode::kQueueReceiveFailed;
+        }
+        message->assign(buffer.data());
+        return vr::core::ErrorCode::kOk;
+    }
+
+    const timespec abs_timeout = MakeAbsTimeout(timeout_ms);
+    const ssize_t bytes = mq_timedreceive(static_cast<mqd_t>(mqd_), buffer.data(),
+                                          static_cast<std::size_t>(message_size_), priority,
+                                          &abs_timeout);
     if (bytes < 0) {
+        if (errno == ETIMEDOUT) {
+            return vr::core::ErrorCode::kTimeout;
+        }
         return vr::core::ErrorCode::kQueueReceiveFailed;
     }
 
@@ -94,4 +162,3 @@ void PosixMessageQueue::Unlink() noexcept {
 
 }  // namespace ipc
 }  // namespace vr
-

@@ -101,11 +101,61 @@ bool TestReceiveWithNullOutput() {
     return ExpectTrue(ec == ErrorCode::kInvalidParam, "Receive should fail when message pointer is null");
 }
 
+bool TestReceiveTimeout() {
+    PosixMessageQueue queue;
+    QueueConfig config;
+    config.name = "/vr_ipc_test_queue_timeout_recv";
+    config.max_messages = 8;
+    config.message_size = 64;
+
+    queue.Unlink();
+    if (!ExpectTrue(queue.Create(config) == ErrorCode::kOk, "Create queue failed for timeout recv test")) {
+        return false;
+    }
+
+    std::string recv_message;
+    std::uint32_t priority = 0U;
+    const ErrorCode ec = queue.ReceiveWithTimeout(&recv_message, &priority, 20);
+
+    queue.Close();
+    queue.Unlink();
+
+    return ExpectTrue(ec == ErrorCode::kTimeout, "ReceiveWithTimeout should return TIMEOUT on empty queue");
+}
+
+bool TestSendTimeout() {
+    PosixMessageQueue queue;
+    QueueConfig config;
+    config.name = "/vr_ipc_test_queue_timeout_send";
+    config.max_messages = 1;
+    config.message_size = 64;
+
+    queue.Unlink();
+    if (!ExpectTrue(queue.Create(config) == ErrorCode::kOk, "Create queue failed for timeout send test")) {
+        return false;
+    }
+
+    if (!ExpectTrue(queue.Send("first", 1U) == ErrorCode::kOk, "Priming queue with first message failed")) {
+        queue.Close();
+        queue.Unlink();
+        return false;
+    }
+
+    const ErrorCode ec = queue.SendWithTimeout("second", 1U, 20);
+
+    queue.Close();
+    queue.Unlink();
+
+    return ExpectTrue(ec == ErrorCode::kTimeout,
+                      "SendWithTimeout should return TIMEOUT when queue remains full");
+}
+
 }  // namespace
 
 int main() {
     const bool ok = TestCreateWithInvalidQueueName() && TestCreateSendReceiveAndCleanup() &&
-                    TestSendOversizedMessage() && TestReceiveWithNullOutput();
+                    TestSendOversizedMessage() && TestReceiveWithNullOutput() &&
+                    TestReceiveTimeout() && TestSendTimeout();
 
     if (!ok) {
         std::cerr << "POSIX message queue tests failed." << std::endl;
@@ -115,4 +165,3 @@ int main() {
     std::cout << "POSIX message queue tests passed." << std::endl;
     return 0;
 }
-

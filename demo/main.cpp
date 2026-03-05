@@ -18,12 +18,14 @@ int ServiceEntry() {
     using vr::core::ErrorCode;
     using vr::ipc::PosixMessageQueue;
 
+    // 设置日志级别、输出到控制台、设置默认上下文
     commonsvc::Logger::Instance().SetMinLevel(commonsvc::LogLevel::kDebug);
     commonsvc::Logger::Instance().EnableConsole(true);
     commonsvc::Logger::Instance().SetDefaultContext("demo", "service_entry");
 
     LOG_INFO("Service starting...");
 
+    // 配置 POSIX 消息队列的“基本参数”
     vr::ipc::QueueConfig queue_config;
     queue_config.name = "/vr_framework_demo_queue";
     queue_config.max_messages = 10;
@@ -43,6 +45,7 @@ int ServiceEntry() {
     thread_config.queue_capacity = 1;
     thread_config.rejection_policy = vr::core::RejectionPolicy::kCallerRuns;
 
+    // 启动线程池
     ec = pool.Start(thread_config);
     if (ec != ErrorCode::kOk) {
         LOG_ERROR_CODE(ec, std::string("ThreadPool start failed: ") + vr::core::ToString(ec));
@@ -51,6 +54,7 @@ int ServiceEntry() {
         return 2;
     }
 
+    // 投递发送任务
     ec = pool.Enqueue([&queue]() {
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
         const auto send_ec = queue.Send("hello_from_sender", 1U);
@@ -61,6 +65,7 @@ int ServiceEntry() {
         LOG_INFO("Message sent to POSIX queue");
     });
 
+    // 检查投递结果（发送任务有没有成功入队）
     if (ec != ErrorCode::kOk) {
         LOG_ERROR_CODE(ec, std::string("Enqueue sender failed: ") + vr::core::ToString(ec));
         pool.Stop();
@@ -69,6 +74,7 @@ int ServiceEntry() {
         return 3;
     }
 
+    // 投递接收任务
     ec = pool.Enqueue([&queue]() {
         std::string msg;
         std::uint32_t prio = 0;
