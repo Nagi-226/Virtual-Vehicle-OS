@@ -23,6 +23,7 @@ enum class ErrorCode : std::int32_t {
 
     kInvalidParam = MakeErrorCode(ErrorDomain::kCommon, 0x0001),
     kTimeout = MakeErrorCode(ErrorDomain::kCommon, 0x0002),
+    kWouldBlock = MakeErrorCode(ErrorDomain::kCommon, 0x0003),
 
     kThreadStartFailed = MakeErrorCode(ErrorDomain::kCore, 0x0001),
     kThreadPrioritySetFailed = MakeErrorCode(ErrorDomain::kCore, 0x0002),

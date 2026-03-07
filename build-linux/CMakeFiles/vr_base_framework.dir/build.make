@@ -69,24 +69,10 @@ include CMakeFiles/vr_base_framework.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/vr_base_framework.dir/flags.make
 
-CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o: CMakeFiles/vr_base_framework.dir/flags.make
-CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o: /mnt/e/Virtual-Vehicle-OS/src/core/error_code.cpp
-CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o: CMakeFiles/vr_base_framework.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o -MF CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o.d -o CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o -c /mnt/e/Virtual-Vehicle-OS/src/core/error_code.cpp
-
-CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/e/Virtual-Vehicle-OS/src/core/error_code.cpp > CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.i
-
-CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/e/Virtual-Vehicle-OS/src/core/error_code.cpp -o CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.s
-
 CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: CMakeFiles/vr_base_framework.dir/flags.make
 CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: /mnt/e/Virtual-Vehicle-OS/src/core/thread_pool.cpp
 CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o: CMakeFiles/vr_base_framework.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o -MF CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o.d -o CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o -c /mnt/e/Virtual-Vehicle-OS/src/core/thread_pool.cpp
 
 CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.i: cmake_force
@@ -100,7 +86,7 @@ CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.s: cmake_force
 CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: CMakeFiles/vr_base_framework.dir/flags.make
 CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: /mnt/e/Virtual-Vehicle-OS/src/core/process_guardian.cpp
 CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o: CMakeFiles/vr_base_framework.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o -MF CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o.d -o CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o -c /mnt/e/Virtual-Vehicle-OS/src/core/process_guardian.cpp
 
 CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.i: cmake_force
@@ -110,6 +96,20 @@ CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.i: cmake_force
 CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/e/Virtual-Vehicle-OS/src/core/process_guardian.cpp -o CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.s
+
+CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o: CMakeFiles/vr_base_framework.dir/flags.make
+CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o: /mnt/e/Virtual-Vehicle-OS/src/core/retry_policy.cpp
+CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o: CMakeFiles/vr_base_framework.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o -MF CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o.d -o CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o -c /mnt/e/Virtual-Vehicle-OS/src/core/retry_policy.cpp
+
+CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/e/Virtual-Vehicle-OS/src/core/retry_policy.cpp > CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.i
+
+CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/e/Virtual-Vehicle-OS/src/core/retry_policy.cpp -o CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.s
 
 CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.o: CMakeFiles/vr_base_framework.dir/flags.make
 CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.o: /mnt/e/Virtual-Vehicle-OS/src/ipc/posix_message_queue.cpp
@@ -125,39 +125,23 @@ CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/e/Virtual-Vehicle-OS/src/ipc/posix_message_queue.cpp -o CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.s
 
-CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: CMakeFiles/vr_base_framework.dir/flags.make
-CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: /mnt/e/Virtual-Vehicle-OS/src/log/logger.cpp
-CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o: CMakeFiles/vr_base_framework.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o -MF CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o.d -o CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o -c /mnt/e/Virtual-Vehicle-OS/src/log/logger.cpp
-
-CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /mnt/e/Virtual-Vehicle-OS/src/log/logger.cpp > CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.i
-
-CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /mnt/e/Virtual-Vehicle-OS/src/log/logger.cpp -o CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.s
-
 # Object files for target vr_base_framework
 vr_base_framework_OBJECTS = \
-"CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o" \
 "CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o" \
 "CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o" \
-"CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.o" \
-"CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o"
+"CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o" \
+"CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.o"
 
 # External object files for target vr_base_framework
 vr_base_framework_EXTERNAL_OBJECTS =
 
-libvr_base_framework.a: CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o
 libvr_base_framework.a: CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o
 libvr_base_framework.a: CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o
+libvr_base_framework.a: CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o
 libvr_base_framework.a: CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.o
-libvr_base_framework.a: CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o
 libvr_base_framework.a: CMakeFiles/vr_base_framework.dir/build.make
 libvr_base_framework.a: CMakeFiles/vr_base_framework.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Linking CXX static library libvr_base_framework.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX static library libvr_base_framework.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/vr_base_framework.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/vr_base_framework.dir/link.txt --verbose=$(VERBOSE)
 

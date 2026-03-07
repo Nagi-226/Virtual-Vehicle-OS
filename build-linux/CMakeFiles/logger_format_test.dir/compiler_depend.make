@@ -23,6 +23,7 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
   /usr/include/c++/13/bits/char_traits.h \
   /usr/include/c++/13/bits/charconv.h \
   /usr/include/c++/13/bits/chrono.h \
+  /usr/include/c++/13/bits/codecvt.h \
   /usr/include/c++/13/bits/concept_check.h \
   /usr/include/c++/13/bits/cpp_type_traits.h \
   /usr/include/c++/13/bits/cxxabi_forced.h \
@@ -32,6 +33,7 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
   /usr/include/c++/13/bits/exception.h \
   /usr/include/c++/13/bits/exception_defines.h \
   /usr/include/c++/13/bits/exception_ptr.h \
+  /usr/include/c++/13/bits/fstream.tcc \
   /usr/include/c++/13/bits/functexcept.h \
   /usr/include/c++/13/bits/functional_hash.h \
   /usr/include/c++/13/bits/hash_bytes.h \
@@ -64,6 +66,7 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
   /usr/include/c++/13/bits/std_abs.h \
   /usr/include/c++/13/bits/std_function.h \
   /usr/include/c++/13/bits/std_mutex.h \
+  /usr/include/c++/13/bits/std_thread.h \
   /usr/include/c++/13/bits/stl_algo.h \
   /usr/include/c++/13/bits/stl_algobase.h \
   /usr/include/c++/13/bits/stl_bvector.h \
@@ -81,8 +84,10 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
   /usr/include/c++/13/bits/streambuf_iterator.h \
   /usr/include/c++/13/bits/string_view.tcc \
   /usr/include/c++/13/bits/stringfwd.h \
+  /usr/include/c++/13/bits/this_thread_sleep.h \
   /usr/include/c++/13/bits/uniform_int_dist.h \
   /usr/include/c++/13/bits/unique_lock.h \
+  /usr/include/c++/13/bits/unique_ptr.h \
   /usr/include/c++/13/bits/unordered_map.h \
   /usr/include/c++/13/bits/uses_allocator.h \
   /usr/include/c++/13/bits/uses_allocator_args.h \
@@ -108,6 +113,7 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
   /usr/include/c++/13/ext/numeric_traits.h \
   /usr/include/c++/13/ext/string_conversions.h \
   /usr/include/c++/13/ext/type_traits.h \
+  /usr/include/c++/13/fstream \
   /usr/include/c++/13/functional \
   /usr/include/c++/13/initializer_list \
   /usr/include/c++/13/ios \
@@ -126,6 +132,7 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
   /usr/include/c++/13/string \
   /usr/include/c++/13/string_view \
   /usr/include/c++/13/system_error \
+  /usr/include/c++/13/thread \
   /usr/include/c++/13/tuple \
   /usr/include/c++/13/type_traits \
   /usr/include/c++/13/typeinfo \
@@ -210,8 +217,10 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
   /usr/include/x86_64-linux-gnu/bits/wctype-wchar.h \
   /usr/include/x86_64-linux-gnu/bits/wordsize.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h \
+  /usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++allocator.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++config.h \
+  /usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/c++locale.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/cpu_defines.h \
   /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h \
@@ -249,11 +258,11 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/x86_64-linux-gnu/c++/13/bits/ctype_base.h:
 
+/usr/include/x86_64-linux-gnu/c++/13/bits/basic_file.h:
+
 /usr/include/x86_64-linux-gnu/c++/13/bits/atomic_word.h:
 
 /usr/include/x86_64-linux-gnu/bits/waitstatus.h:
-
-/usr/include/x86_64-linux-gnu/bits/waitflags.h:
 
 /usr/include/x86_64-linux-gnu/bits/typesizes.h:
 
@@ -355,9 +364,27 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/c++/13/unordered_map:
 
-/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
+/usr/include/x86_64-linux-gnu/sys/single_threaded.h:
 
-/usr/include/c++/13/bits/refwrap.h:
+/usr/include/c++/13/type_traits:
+
+/usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h:
+
+/usr/include/c++/13/tuple:
+
+/usr/include/c++/13/thread:
+
+/usr/include/features-time64.h:
+
+/usr/include/c++/13/string_view:
+
+/usr/include/c++/13/string:
+
+/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
+
+/usr/include/c++/13/system_error:
+
+/usr/include/c++/13/bits/range_access.h:
 
 /usr/include/c++/13/debug/debug.h:
 
@@ -374,10 +401,6 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 /usr/include/time.h:
 
 /usr/include/c++/13/bits/memoryfwd.h:
-
-/usr/include/wchar.h:
-
-/usr/include/c++/13/bits/memory_resource.h:
 
 /usr/include/c++/13/bits/invoke.h:
 
@@ -403,10 +426,6 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/c++/13/array:
 
-/usr/include/features-time64.h:
-
-/usr/include/c++/13/string_view:
-
 /usr/include/errno.h:
 
 /usr/include/c++/13/bits/functional_hash.h:
@@ -417,11 +436,25 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/c++/13/bits/basic_ios.tcc:
 
-/usr/include/c++/13/bits/locale_facets.tcc:
+/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
 
-/usr/include/c++/13/bits/requires_hosted.h:
+/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
 
-/usr/include/c++/13/bits/string_view.tcc:
+/usr/include/c++/13/streambuf:
+
+/usr/include/c++/13/bits/exception.h:
+
+/usr/include/c++/13/typeinfo:
+
+/usr/include/c++/13/bits/cxxabi_init_exception.h:
+
+/usr/include/c++/13/bits/codecvt.h:
+
+/usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
+
+/usr/include/c++/13/bits/stl_tempbuf.h:
+
+/usr/include/c++/13/bits/stl_vector.h:
 
 /usr/include/c++/13/backward/binders.h:
 
@@ -432,10 +465,6 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 /usr/include/c++/13/bits/basic_string.tcc:
 
 /usr/include/c++/13/bit:
-
-/usr/include/x86_64-linux-gnu/sys/single_threaded.h:
-
-/usr/include/c++/13/type_traits:
 
 /usr/include/c++/13/bits/enable_special_members.h:
 
@@ -467,21 +496,11 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/c++/13/bits/basic_ios.h:
 
-/usr/include/c++/13/typeinfo:
-
-/usr/include/c++/13/bits/cxxabi_init_exception.h:
-
-/usr/include/x86_64-linux-gnu/bits/uintn-identity.h:
-
-/usr/include/x86_64-linux-gnu/bits/stdlib-float.h:
-
-/usr/include/c++/13/streambuf:
-
-/usr/include/c++/13/bits/exception.h:
-
 /usr/include/c++/13/bits/exception_defines.h:
 
 /usr/include/c++/13/bits/localefwd.h:
+
+/usr/include/x86_64-linux-gnu/c++/13/bits/c++io.h:
 
 /mnt/e/Virtual-Vehicle-OS/tests/log/logger_format_test.cpp:
 
@@ -509,6 +528,12 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/c++/13/bits/ptr_traits.h:
 
+/usr/include/c++/13/bits/fstream.tcc:
+
+/usr/include/x86_64-linux-gnu/bits/types/__fpos_t.h:
+
+/usr/include/c++/13/bits/refwrap.h:
+
 /usr/include/c++/13/bits/locale_facets.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_timeval.h:
@@ -531,6 +556,12 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/c++/13/bits/erase_if.h:
 
+/usr/include/c++/13/bits/locale_facets.tcc:
+
+/usr/include/c++/13/bits/requires_hosted.h:
+
+/usr/include/c++/13/bits/string_view.tcc:
+
 /usr/include/c++/13/bits/postypes.h:
 
 /usr/include/c++/13/bits/std_abs.h:
@@ -542,6 +573,8 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 /usr/include/wctype.h:
 
 /usr/include/c++/13/exception:
+
+/usr/include/c++/13/bits/std_thread.h:
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_timespec.h:
 
@@ -563,8 +596,6 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/c++/13/bits/stl_iterator.h:
 
-/usr/include/c++/13/string:
-
 /usr/include/asm-generic/errno.h:
 
 /usr/include/c++/13/bits/stl_iterator_base_funcs.h:
@@ -575,12 +606,6 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/c++/13/bits/stl_iterator_base_types.h:
 
-/usr/include/x86_64-linux-gnu/bits/types/struct___jmp_buf_tag.h:
-
-/usr/include/c++/13/bits/stl_tempbuf.h:
-
-/usr/include/c++/13/bits/stl_vector.h:
-
 /usr/include/c++/13/bits/stl_uninitialized.h:
 
 /usr/include/c++/13/bits/unordered_map.h:
@@ -589,9 +614,19 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/c++/13/bits/streambuf.tcc:
 
+/usr/include/wchar.h:
+
+/usr/include/c++/13/bits/memory_resource.h:
+
+/usr/include/c++/13/bits/this_thread_sleep.h:
+
 /usr/include/c++/13/bits/stringfwd.h:
 
 /usr/include/c++/13/bits/uniform_int_dist.h:
+
+/usr/include/x86_64-linux-gnu/bits/waitflags.h:
+
+/usr/include/c++/13/bits/unique_ptr.h:
 
 /usr/include/x86_64-linux-gnu/bits/long-double.h:
 
@@ -623,19 +658,17 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 
 /usr/include/x86_64-linux-gnu/bits/types/struct_FILE.h:
 
-/usr/include/c++/13/bits/charconv.h:
+/usr/include/c++/13/fstream:
 
 /usr/include/c++/13/bits/stl_pair.h:
+
+/usr/include/c++/13/bits/charconv.h:
 
 /usr/include/c++/13/cstdio:
 
 /usr/include/c++/13/ctime:
 
 /usr/include/c++/13/debug/assertions.h:
-
-/usr/lib/gcc/x86_64-linux-gnu/13/include/stddef.h:
-
-/usr/include/c++/13/tuple:
 
 /usr/include/x86_64-linux-gnu/bits/pthreadtypes-arch.h:
 
@@ -680,9 +713,3 @@ CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o: /mnt/e/Vir
 /usr/include/c++/13/bits/streambuf_iterator.h:
 
 /usr/include/c++/13/ostream:
-
-/usr/include/x86_64-linux-gnu/bits/thread-shared-types.h:
-
-/usr/include/c++/13/bits/range_access.h:
-
-/usr/include/c++/13/system_error:

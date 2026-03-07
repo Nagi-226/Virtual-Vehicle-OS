@@ -1,10 +1,10 @@
-Start testing: Mar 02 19:55 CST
+Start testing: Mar 07 08:21 CST
 ----------------------------------------------------------
-1/3 Testing: thread_pool_test
-1/3 Test: thread_pool_test
+1/4 Testing: thread_pool_test
+1/4 Test: thread_pool_test
 Command: "/mnt/e/Virtual-Vehicle-OS/build-linux/thread_pool_test"
 Directory: /mnt/e/Virtual-Vehicle-OS/build-linux
-"thread_pool_test" start time: Mar 02 19:55 CST
+"thread_pool_test" start time: Mar 07 08:21 CST
 Output:
 ----------------------------------------------------------
 ThreadPool tests passed.
@@ -12,31 +12,47 @@ ThreadPool tests passed.
 Test time =   0.21 sec
 ----------------------------------------------------------
 Test Passed.
-"thread_pool_test" end time: Mar 02 19:55 CST
+"thread_pool_test" end time: Mar 07 08:21 CST
 "thread_pool_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-2/3 Testing: posix_message_queue_test
-2/3 Test: posix_message_queue_test
+2/4 Testing: retry_policy_test
+2/4 Test: retry_policy_test
+Command: "/mnt/e/Virtual-Vehicle-OS/build-linux/retry_policy_test"
+Directory: /mnt/e/Virtual-Vehicle-OS/build-linux
+"retry_policy_test" start time: Mar 07 08:21 CST
+Output:
+----------------------------------------------------------
+RetryPolicy tests passed.
+<end of output>
+Test time =   0.06 sec
+----------------------------------------------------------
+Test Passed.
+"retry_policy_test" end time: Mar 07 08:21 CST
+"retry_policy_test" time elapsed: 00:00:00
+----------------------------------------------------------
+
+3/4 Testing: posix_message_queue_test
+3/4 Test: posix_message_queue_test
 Command: "/mnt/e/Virtual-Vehicle-OS/build-linux/posix_message_queue_test"
 Directory: /mnt/e/Virtual-Vehicle-OS/build-linux
-"posix_message_queue_test" start time: Mar 02 19:55 CST
+"posix_message_queue_test" start time: Mar 07 08:21 CST
 Output:
 ----------------------------------------------------------
 POSIX message queue tests passed.
 <end of output>
-Test time =   0.00 sec
+Test time =   0.05 sec
 ----------------------------------------------------------
 Test Passed.
-"posix_message_queue_test" end time: Mar 02 19:55 CST
+"posix_message_queue_test" end time: Mar 07 08:21 CST
 "posix_message_queue_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-3/3 Testing: logger_format_test
-3/3 Test: logger_format_test
+4/4 Testing: logger_format_test
+4/4 Test: logger_format_test
 Command: "/mnt/e/Virtual-Vehicle-OS/build-linux/logger_format_test"
 Directory: /mnt/e/Virtual-Vehicle-OS/build-linux
-"logger_format_test" start time: Mar 02 19:55 CST
+"logger_format_test" start time: Mar 07 08:21 CST
 Output:
 ----------------------------------------------------------
 Logger format tests passed.
@@ -44,8 +60,15 @@ Logger format tests passed.
 Test time =   0.01 sec
 ----------------------------------------------------------
 Test Passed.
-"logger_format_test" end time: Mar 02 19:55 CST
+"logger_format_test" end time: Mar 07 08:21 CST
 "logger_format_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Mar 02 19:55 CST
+End testing: Mar 07 08:21 CST
+
+core =   0.27 sec*proc
+
+ipc =   0.05 sec*proc
+
+log =   0.01 sec*proc
+

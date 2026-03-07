@@ -1,4 +1,5 @@
-thread_pool_test 1 0.208905
-posix_message_queue_test 2 0.00205942
-logger_format_test 2 0.00282456
+thread_pool_test 2 0.104291
+posix_message_queue_test 3 0.015501
+logger_format_test 3 0.00207901
+retry_policy_test 2 0.0305299
 ---

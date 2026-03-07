@@ -1,1 +1,1 @@
-/usr/bin/c++ -g CMakeFiles/posix_message_queue_test.dir/tests/ipc/posix_message_queue_test.cpp.o -o posix_message_queue_test  libvr_base_framework.a -lrt -lpthread 
+/usr/bin/c++ -g CMakeFiles/posix_message_queue_test.dir/tests/ipc/posix_message_queue_test.cpp.o -o posix_message_queue_test  libvr_base_framework.a libcommonsvc_log.a libvr_error_code.a -lrt -lpthread 

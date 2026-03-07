@@ -93,6 +93,8 @@ demo_service_EXTERNAL_OBJECTS =
 demo_service: CMakeFiles/demo_service.dir/demo/main.cpp.o
 demo_service: CMakeFiles/demo_service.dir/build.make
 demo_service: libvr_base_framework.a
+demo_service: libcommonsvc_log.a
+demo_service: libvr_error_code.a
 demo_service: CMakeFiles/demo_service.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable demo_service"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/demo_service.dir/link.txt --verbose=$(VERBOSE)

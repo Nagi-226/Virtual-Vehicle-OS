@@ -120,8 +120,13 @@ CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.o: \
  /usr/include/c++/13/bits/memory_resource.h \
  /usr/include/c++/13/bits/uses_allocator.h \
  /usr/include/c++/13/bits/uses_allocator_args.h /usr/include/c++/13/tuple \
- /mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp /usr/include/fcntl.h \
- /usr/include/x86_64-linux-gnu/bits/fcntl.h \
+ /mnt/e/Virtual-Vehicle-OS/src/core/error_code.hpp \
+ /usr/include/c++/13/ctime /usr/include/time.h \
+ /usr/include/x86_64-linux-gnu/bits/time.h \
+ /usr/include/x86_64-linux-gnu/bits/timex.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_tm.h \
+ /usr/include/x86_64-linux-gnu/bits/types/struct_itimerspec.h \
+ /usr/include/fcntl.h /usr/include/x86_64-linux-gnu/bits/fcntl.h \
  /usr/include/x86_64-linux-gnu/bits/fcntl-linux.h \
  /usr/include/x86_64-linux-gnu/bits/types/struct_iovec.h \
  /usr/include/linux/falloc.h /usr/include/x86_64-linux-gnu/bits/stat.h \

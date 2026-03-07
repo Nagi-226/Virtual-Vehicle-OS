@@ -40,9 +40,12 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
+  "CMakeFiles/vr_error_code.dir/DependInfo.cmake"
+  "CMakeFiles/commonsvc_log.dir/DependInfo.cmake"
   "CMakeFiles/vr_base_framework.dir/DependInfo.cmake"
   "CMakeFiles/demo_service.dir/DependInfo.cmake"
   "CMakeFiles/thread_pool_test.dir/DependInfo.cmake"
+  "CMakeFiles/retry_policy_test.dir/DependInfo.cmake"
   "CMakeFiles/posix_message_queue_test.dir/DependInfo.cmake"
   "CMakeFiles/logger_format_test.dir/DependInfo.cmake"
   )

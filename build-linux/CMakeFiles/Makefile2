@@ -63,9 +63,12 @@ CMAKE_BINARY_DIR = /mnt/e/Virtual-Vehicle-OS/build-linux
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
+all: CMakeFiles/vr_error_code.dir/all
+all: CMakeFiles/commonsvc_log.dir/all
 all: CMakeFiles/vr_base_framework.dir/all
 all: CMakeFiles/demo_service.dir/all
 all: CMakeFiles/thread_pool_test.dir/all
+all: CMakeFiles/retry_policy_test.dir/all
 all: CMakeFiles/posix_message_queue_test.dir/all
 all: CMakeFiles/logger_format_test.dir/all
 .PHONY : all
@@ -75,26 +78,82 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
+clean: CMakeFiles/vr_error_code.dir/clean
+clean: CMakeFiles/commonsvc_log.dir/clean
 clean: CMakeFiles/vr_base_framework.dir/clean
 clean: CMakeFiles/demo_service.dir/clean
 clean: CMakeFiles/thread_pool_test.dir/clean
+clean: CMakeFiles/retry_policy_test.dir/clean
 clean: CMakeFiles/posix_message_queue_test.dir/clean
 clean: CMakeFiles/logger_format_test.dir/clean
 .PHONY : clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/vr_error_code.dir
+
+# All Build rule for target.
+CMakeFiles/vr_error_code.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_error_code.dir/build.make CMakeFiles/vr_error_code.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_error_code.dir/build.make CMakeFiles/vr_error_code.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=18,19 "Built target vr_error_code"
+.PHONY : CMakeFiles/vr_error_code.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/vr_error_code.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/vr_error_code.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 0
+.PHONY : CMakeFiles/vr_error_code.dir/rule
+
+# Convenience name for target.
+vr_error_code: CMakeFiles/vr_error_code.dir/rule
+.PHONY : vr_error_code
+
+# clean rule for target.
+CMakeFiles/vr_error_code.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_error_code.dir/build.make CMakeFiles/vr_error_code.dir/clean
+.PHONY : CMakeFiles/vr_error_code.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/commonsvc_log.dir
+
+# All Build rule for target.
+CMakeFiles/commonsvc_log.dir/all: CMakeFiles/vr_error_code.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/commonsvc_log.dir/build.make CMakeFiles/commonsvc_log.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/commonsvc_log.dir/build.make CMakeFiles/commonsvc_log.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=1,2 "Built target commonsvc_log"
+.PHONY : CMakeFiles/commonsvc_log.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/commonsvc_log.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 4
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/commonsvc_log.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 0
+.PHONY : CMakeFiles/commonsvc_log.dir/rule
+
+# Convenience name for target.
+commonsvc_log: CMakeFiles/commonsvc_log.dir/rule
+.PHONY : commonsvc_log
+
+# clean rule for target.
+CMakeFiles/commonsvc_log.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/commonsvc_log.dir/build.make CMakeFiles/commonsvc_log.dir/clean
+.PHONY : CMakeFiles/commonsvc_log.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/vr_base_framework.dir
 
 # All Build rule for target.
-CMakeFiles/vr_base_framework.dir/all:
+CMakeFiles/vr_base_framework.dir/all: CMakeFiles/vr_error_code.dir/all
+CMakeFiles/vr_base_framework.dir/all: CMakeFiles/commonsvc_log.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=9,10,11,12,13,14 "Built target vr_base_framework"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=13,14,15,16,17 "Built target vr_base_framework"
 .PHONY : CMakeFiles/vr_base_framework.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/vr_base_framework.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 9
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/vr_base_framework.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 0
 .PHONY : CMakeFiles/vr_base_framework.dir/rule
@@ -112,15 +171,17 @@ CMakeFiles/vr_base_framework.dir/clean:
 # Target rules for target CMakeFiles/demo_service.dir
 
 # All Build rule for target.
+CMakeFiles/demo_service.dir/all: CMakeFiles/vr_error_code.dir/all
+CMakeFiles/demo_service.dir/all: CMakeFiles/commonsvc_log.dir/all
 CMakeFiles/demo_service.dir/all: CMakeFiles/vr_base_framework.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo_service.dir/build.make CMakeFiles/demo_service.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/demo_service.dir/build.make CMakeFiles/demo_service.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=1,2 "Built target demo_service"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=3,4 "Built target demo_service"
 .PHONY : CMakeFiles/demo_service.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/demo_service.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 11
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/demo_service.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 0
 .PHONY : CMakeFiles/demo_service.dir/rule
@@ -138,15 +199,17 @@ CMakeFiles/demo_service.dir/clean:
 # Target rules for target CMakeFiles/thread_pool_test.dir
 
 # All Build rule for target.
+CMakeFiles/thread_pool_test.dir/all: CMakeFiles/vr_error_code.dir/all
+CMakeFiles/thread_pool_test.dir/all: CMakeFiles/commonsvc_log.dir/all
 CMakeFiles/thread_pool_test.dir/all: CMakeFiles/vr_base_framework.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/thread_pool_test.dir/build.make CMakeFiles/thread_pool_test.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/thread_pool_test.dir/build.make CMakeFiles/thread_pool_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=7,8 "Built target thread_pool_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=11,12 "Built target thread_pool_test"
 .PHONY : CMakeFiles/thread_pool_test.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/thread_pool_test.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 11
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/thread_pool_test.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 0
 .PHONY : CMakeFiles/thread_pool_test.dir/rule
@@ -161,18 +224,48 @@ CMakeFiles/thread_pool_test.dir/clean:
 .PHONY : CMakeFiles/thread_pool_test.dir/clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/retry_policy_test.dir
+
+# All Build rule for target.
+CMakeFiles/retry_policy_test.dir/all: CMakeFiles/vr_error_code.dir/all
+CMakeFiles/retry_policy_test.dir/all: CMakeFiles/commonsvc_log.dir/all
+CMakeFiles/retry_policy_test.dir/all: CMakeFiles/vr_base_framework.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/retry_policy_test.dir/build.make CMakeFiles/retry_policy_test.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/retry_policy_test.dir/build.make CMakeFiles/retry_policy_test.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=9,10 "Built target retry_policy_test"
+.PHONY : CMakeFiles/retry_policy_test.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/retry_policy_test.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 11
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/retry_policy_test.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 0
+.PHONY : CMakeFiles/retry_policy_test.dir/rule
+
+# Convenience name for target.
+retry_policy_test: CMakeFiles/retry_policy_test.dir/rule
+.PHONY : retry_policy_test
+
+# clean rule for target.
+CMakeFiles/retry_policy_test.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/retry_policy_test.dir/build.make CMakeFiles/retry_policy_test.dir/clean
+.PHONY : CMakeFiles/retry_policy_test.dir/clean
+
+#=============================================================================
 # Target rules for target CMakeFiles/posix_message_queue_test.dir
 
 # All Build rule for target.
+CMakeFiles/posix_message_queue_test.dir/all: CMakeFiles/vr_error_code.dir/all
+CMakeFiles/posix_message_queue_test.dir/all: CMakeFiles/commonsvc_log.dir/all
 CMakeFiles/posix_message_queue_test.dir/all: CMakeFiles/vr_base_framework.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/posix_message_queue_test.dir/build.make CMakeFiles/posix_message_queue_test.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/posix_message_queue_test.dir/build.make CMakeFiles/posix_message_queue_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=5,6 "Built target posix_message_queue_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=7,8 "Built target posix_message_queue_test"
 .PHONY : CMakeFiles/posix_message_queue_test.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/posix_message_queue_test.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 11
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/posix_message_queue_test.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 0
 .PHONY : CMakeFiles/posix_message_queue_test.dir/rule
@@ -190,15 +283,17 @@ CMakeFiles/posix_message_queue_test.dir/clean:
 # Target rules for target CMakeFiles/logger_format_test.dir
 
 # All Build rule for target.
+CMakeFiles/logger_format_test.dir/all: CMakeFiles/vr_error_code.dir/all
+CMakeFiles/logger_format_test.dir/all: CMakeFiles/commonsvc_log.dir/all
 CMakeFiles/logger_format_test.dir/all: CMakeFiles/vr_base_framework.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/logger_format_test.dir/build.make CMakeFiles/logger_format_test.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/logger_format_test.dir/build.make CMakeFiles/logger_format_test.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=3,4 "Built target logger_format_test"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=5,6 "Built target logger_format_test"
 .PHONY : CMakeFiles/logger_format_test.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/logger_format_test.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 8
+	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 11
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/logger_format_test.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles 0
 .PHONY : CMakeFiles/logger_format_test.dir/rule

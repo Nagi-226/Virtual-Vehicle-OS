@@ -150,12 +150,66 @@ bool TestSendTimeout() {
                       "SendWithTimeout should return TIMEOUT when queue remains full");
 }
 
+bool TestReceiveNonBlockingWouldBlock() {
+    PosixMessageQueue queue;
+    QueueConfig config;
+    config.name = "/vr_ipc_test_queue_nb_recv";
+    config.max_messages = 4;
+    config.message_size = 64;
+
+    queue.Unlink();
+    if (!ExpectTrue(queue.Create(config) == ErrorCode::kOk,
+                    "Create queue failed for non-blocking receive test")) {
+        return false;
+    }
+
+    std::string message;
+    std::uint32_t priority = 0U;
+    const ErrorCode ec = queue.ReceiveNonBlocking(&message, &priority);
+
+    queue.Close();
+    queue.Unlink();
+
+    return ExpectTrue(ec == ErrorCode::kWouldBlock,
+                      "ReceiveNonBlocking should return WOULD_BLOCK on empty queue");
+}
+
+bool TestSendNonBlockingWouldBlock() {
+    PosixMessageQueue queue;
+    QueueConfig config;
+    config.name = "/vr_ipc_test_queue_nb_send";
+    config.max_messages = 1;
+    config.message_size = 64;
+
+    queue.Unlink();
+    if (!ExpectTrue(queue.Create(config) == ErrorCode::kOk,
+                    "Create queue failed for non-blocking send test")) {
+        return false;
+    }
+
+    if (!ExpectTrue(queue.Send("first", 1U) == ErrorCode::kOk,
+                    "Priming queue with first message failed")) {
+        queue.Close();
+        queue.Unlink();
+        return false;
+    }
+
+    const ErrorCode ec = queue.SendNonBlocking("second", 1U);
+
+    queue.Close();
+    queue.Unlink();
+
+    return ExpectTrue(ec == ErrorCode::kWouldBlock,
+                      "SendNonBlocking should return WOULD_BLOCK on full queue");
+}
+
 }  // namespace
 
 int main() {
     const bool ok = TestCreateWithInvalidQueueName() && TestCreateSendReceiveAndCleanup() &&
                     TestSendOversizedMessage() && TestReceiveWithNullOutput() &&
-                    TestReceiveTimeout() && TestSendTimeout();
+                    TestReceiveTimeout() && TestSendTimeout() &&
+                    TestReceiveNonBlockingWouldBlock() && TestSendNonBlockingWouldBlock();
 
     if (!ok) {
         std::cerr << "POSIX message queue tests failed." << std::endl;

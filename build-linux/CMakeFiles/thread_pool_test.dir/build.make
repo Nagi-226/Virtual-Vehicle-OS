@@ -93,6 +93,8 @@ thread_pool_test_EXTERNAL_OBJECTS =
 thread_pool_test: CMakeFiles/thread_pool_test.dir/tests/thread_pool_test.cpp.o
 thread_pool_test: CMakeFiles/thread_pool_test.dir/build.make
 thread_pool_test: libvr_base_framework.a
+thread_pool_test: libcommonsvc_log.a
+thread_pool_test: libvr_error_code.a
 thread_pool_test: CMakeFiles/thread_pool_test.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable thread_pool_test"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/thread_pool_test.dir/link.txt --verbose=$(VERBOSE)

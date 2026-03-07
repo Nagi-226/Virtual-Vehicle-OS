@@ -1,0 +1,2 @@
+/usr/bin/ar qc libvr_error_code.a CMakeFiles/vr_error_code.dir/src/core/error_code.cpp.o
+/usr/bin/ranlib libvr_error_code.a

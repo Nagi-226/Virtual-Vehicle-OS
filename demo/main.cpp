@@ -4,6 +4,7 @@
 
 #include "core/error_code.hpp"
 #include "core/process_guardian.hpp"
+#include "core/retry_policy.hpp"
 #include "core/thread_pool.hpp"
 #include "ipc/posix_message_queue.hpp"
 #include "log/logger.hpp"
@@ -18,17 +19,15 @@ int ServiceEntry() {
     using vr::core::ErrorCode;
     using vr::ipc::PosixMessageQueue;
 
-    // 设置日志级别、输出到控制台、设置默认上下文
     commonsvc::Logger::Instance().SetMinLevel(commonsvc::LogLevel::kDebug);
     commonsvc::Logger::Instance().EnableConsole(true);
     commonsvc::Logger::Instance().SetDefaultContext("demo", "service_entry");
 
     LOG_INFO("Service starting...");
 
-    // 配置 POSIX 消息队列的“基本参数”
     vr::ipc::QueueConfig queue_config;
     queue_config.name = "/vr_framework_demo_queue";
-    queue_config.max_messages = 10;
+    queue_config.max_messages = 1;
     queue_config.message_size = 256;
 
     PosixMessageQueue queue;
@@ -45,7 +44,6 @@ int ServiceEntry() {
     thread_config.queue_capacity = 1;
     thread_config.rejection_policy = vr::core::RejectionPolicy::kCallerRuns;
 
-    // 启动线程池
     ec = pool.Start(thread_config);
     if (ec != ErrorCode::kOk) {
         LOG_ERROR_CODE(ec, std::string("ThreadPool start failed: ") + vr::core::ToString(ec));
@@ -54,18 +52,23 @@ int ServiceEntry() {
         return 2;
     }
 
-    // 投递发送任务
-    ec = pool.Enqueue([&queue]() {
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
-        const auto send_ec = queue.Send("hello_from_sender", 1U);
+    const vr::core::RetryOptions retry_options{5, 10, 200};
+
+    ec = pool.Enqueue([&queue, retry_options]() {
+        std::this_thread::sleep_for(std::chrono::milliseconds(150));
+
+        const auto send_ec = vr::core::RetryPolicy::RetryOnWouldBlock(
+            [&queue]() { return queue.SendNonBlocking("hello_from_sender", 1U); }, retry_options);
+
         if (send_ec != ErrorCode::kOk) {
-            LOG_ERROR_CODE(send_ec, std::string("Send failed: ") + vr::core::ToString(send_ec));
+            LOG_ERROR_CODE(send_ec,
+                           std::string("Send retry policy failed: ") + vr::core::ToString(send_ec));
             return;
         }
-        LOG_INFO("Message sent to POSIX queue");
+
+        LOG_INFO("Message sent to POSIX queue with RetryPolicy template");
     });
 
-    // 检查投递结果（发送任务有没有成功入队）
     if (ec != ErrorCode::kOk) {
         LOG_ERROR_CODE(ec, std::string("Enqueue sender failed: ") + vr::core::ToString(ec));
         pool.Stop();
@@ -74,13 +77,16 @@ int ServiceEntry() {
         return 3;
     }
 
-    // 投递接收任务
-    ec = pool.Enqueue([&queue]() {
+    ec = pool.Enqueue([&queue, retry_options]() {
         std::string msg;
         std::uint32_t prio = 0;
-        const auto recv_ec = queue.Receive(&msg, &prio);
+
+        const auto recv_ec = vr::core::RetryPolicy::RetryOnWouldBlock(
+            [&queue, &msg, &prio]() { return queue.ReceiveNonBlocking(&msg, &prio); }, retry_options);
+
         if (recv_ec != ErrorCode::kOk) {
-            LOG_ERROR_CODE(recv_ec, std::string("Receive failed: ") + vr::core::ToString(recv_ec));
+            LOG_ERROR_CODE(recv_ec,
+                           std::string("Receive retry policy failed: ") + vr::core::ToString(recv_ec));
             return;
         }
 

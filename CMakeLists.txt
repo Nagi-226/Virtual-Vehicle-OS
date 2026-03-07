@@ -27,41 +27,51 @@ endif()
 
 include_directories(${CMAKE_SOURCE_DIR}/src)
 
+add_library(vr_error_code STATIC src/core/error_code.cpp)
+
 add_library(commonsvc_log STATIC src/log/logger.cpp)
+target_link_libraries(commonsvc_log PUBLIC vr_error_code)
 
 add_library(vr_base_framework
-    src/core/error_code.cpp
     src/core/thread_pool.cpp
     src/core/process_guardian.cpp
+    src/core/retry_policy.cpp
     src/ipc/posix_message_queue.cpp
 )
 
-target_link_libraries(vr_base_framework commonsvc_log)
+target_link_libraries(vr_base_framework
+    PUBLIC commonsvc_log vr_error_code
+)
 
 if(UNIX AND NOT APPLE)
-    target_link_libraries(vr_base_framework rt pthread)
+    target_link_libraries(vr_base_framework PUBLIC rt pthread)
 elseif(UNIX)
-    target_link_libraries(vr_base_framework pthread)
+    target_link_libraries(vr_base_framework PUBLIC pthread)
 endif()
 
 add_executable(demo_service demo/main.cpp)
-target_link_libraries(demo_service vr_base_framework commonsvc_log)
+target_link_libraries(demo_service PRIVATE vr_base_framework)
 
 if(ENABLE_TESTS)
     enable_testing()
 
     add_executable(thread_pool_test tests/thread_pool_test.cpp)
-    target_link_libraries(thread_pool_test vr_base_framework commonsvc_log)
+    target_link_libraries(thread_pool_test PRIVATE vr_base_framework)
     add_test(NAME thread_pool_test COMMAND thread_pool_test)
     set_tests_properties(thread_pool_test PROPERTIES LABELS "core" TIMEOUT 10)
 
+    add_executable(retry_policy_test tests/core/retry_policy_test.cpp)
+    target_link_libraries(retry_policy_test PRIVATE vr_base_framework)
+    add_test(NAME retry_policy_test COMMAND retry_policy_test)
+    set_tests_properties(retry_policy_test PROPERTIES LABELS "core" TIMEOUT 10)
+
     add_executable(posix_message_queue_test tests/ipc/posix_message_queue_test.cpp)
-    target_link_libraries(posix_message_queue_test vr_base_framework commonsvc_log)
+    target_link_libraries(posix_message_queue_test PRIVATE vr_base_framework)
     add_test(NAME posix_message_queue_test COMMAND posix_message_queue_test)
     set_tests_properties(posix_message_queue_test PROPERTIES LABELS "ipc" TIMEOUT 10)
 
     add_executable(logger_format_test tests/log/logger_format_test.cpp)
-    target_link_libraries(logger_format_test vr_base_framework commonsvc_log)
+    target_link_libraries(logger_format_test PRIVATE vr_base_framework)
     add_test(NAME logger_format_test COMMAND logger_format_test)
     set_tests_properties(logger_format_test PROPERTIES LABELS "log" TIMEOUT 10)
 endif()

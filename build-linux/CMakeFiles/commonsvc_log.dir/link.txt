@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcommonsvc_log.a CMakeFiles/commonsvc_log.dir/src/log/logger.cpp.o
+/usr/bin/ranlib libcommonsvc_log.a

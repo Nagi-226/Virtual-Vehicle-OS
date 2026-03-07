@@ -1,6 +1,9 @@
+/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/vr_error_code.dir
+/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/commonsvc_log.dir
 /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/vr_base_framework.dir
 /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/demo_service.dir
 /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/thread_pool_test.dir
+/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/retry_policy_test.dir
 /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/posix_message_queue_test.dir
 /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/logger_format_test.dir
 /mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles/test.dir

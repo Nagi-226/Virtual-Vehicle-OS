@@ -8,11 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/mnt/e/Virtual-Vehicle-OS/src/core/error_code.cpp" "CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o" "gcc" "CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o.d"
   "/mnt/e/Virtual-Vehicle-OS/src/core/process_guardian.cpp" "CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o" "gcc" "CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.o.d"
+  "/mnt/e/Virtual-Vehicle-OS/src/core/retry_policy.cpp" "CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o" "gcc" "CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o.d"
   "/mnt/e/Virtual-Vehicle-OS/src/core/thread_pool.cpp" "CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o" "gcc" "CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.o.d"
   "/mnt/e/Virtual-Vehicle-OS/src/ipc/posix_message_queue.cpp" "CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.o" "gcc" "CMakeFiles/vr_base_framework.dir/src/ipc/posix_message_queue.cpp.o.d"
-  "/mnt/e/Virtual-Vehicle-OS/src/log/logger.cpp" "CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o" "gcc" "CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

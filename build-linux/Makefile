@@ -127,6 +127,32 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named vr_error_code
+
+# Build rule for target.
+vr_error_code: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 vr_error_code
+.PHONY : vr_error_code
+
+# fast build rule for target.
+vr_error_code/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_error_code.dir/build.make CMakeFiles/vr_error_code.dir/build
+.PHONY : vr_error_code/fast
+
+#=============================================================================
+# Target rules for targets named commonsvc_log
+
+# Build rule for target.
+commonsvc_log: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 commonsvc_log
+.PHONY : commonsvc_log
+
+# fast build rule for target.
+commonsvc_log/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/commonsvc_log.dir/build.make CMakeFiles/commonsvc_log.dir/build
+.PHONY : commonsvc_log/fast
+
+#=============================================================================
 # Target rules for targets named vr_base_framework
 
 # Build rule for target.
@@ -164,6 +190,19 @@ thread_pool_test: cmake_check_build_system
 thread_pool_test/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/thread_pool_test.dir/build.make CMakeFiles/thread_pool_test.dir/build
 .PHONY : thread_pool_test/fast
+
+#=============================================================================
+# Target rules for targets named retry_policy_test
+
+# Build rule for target.
+retry_policy_test: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 retry_policy_test
+.PHONY : retry_policy_test
+
+# fast build rule for target.
+retry_policy_test/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/retry_policy_test.dir/build.make CMakeFiles/retry_policy_test.dir/build
+.PHONY : retry_policy_test/fast
 
 #=============================================================================
 # Target rules for targets named posix_message_queue_test
@@ -220,7 +259,7 @@ src/core/error_code.o: src/core/error_code.cpp.o
 
 # target to build an object file
 src/core/error_code.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_error_code.dir/build.make CMakeFiles/vr_error_code.dir/src/core/error_code.cpp.o
 .PHONY : src/core/error_code.cpp.o
 
 src/core/error_code.i: src/core/error_code.cpp.i
@@ -228,7 +267,7 @@ src/core/error_code.i: src/core/error_code.cpp.i
 
 # target to preprocess a source file
 src/core/error_code.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_error_code.dir/build.make CMakeFiles/vr_error_code.dir/src/core/error_code.cpp.i
 .PHONY : src/core/error_code.cpp.i
 
 src/core/error_code.s: src/core/error_code.cpp.s
@@ -236,7 +275,7 @@ src/core/error_code.s: src/core/error_code.cpp.s
 
 # target to generate assembly for a file
 src/core/error_code.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/core/error_code.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_error_code.dir/build.make CMakeFiles/vr_error_code.dir/src/core/error_code.cpp.s
 .PHONY : src/core/error_code.cpp.s
 
 src/core/process_guardian.o: src/core/process_guardian.cpp.o
@@ -262,6 +301,30 @@ src/core/process_guardian.s: src/core/process_guardian.cpp.s
 src/core/process_guardian.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/core/process_guardian.cpp.s
 .PHONY : src/core/process_guardian.cpp.s
+
+src/core/retry_policy.o: src/core/retry_policy.cpp.o
+.PHONY : src/core/retry_policy.o
+
+# target to build an object file
+src/core/retry_policy.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.o
+.PHONY : src/core/retry_policy.cpp.o
+
+src/core/retry_policy.i: src/core/retry_policy.cpp.i
+.PHONY : src/core/retry_policy.i
+
+# target to preprocess a source file
+src/core/retry_policy.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.i
+.PHONY : src/core/retry_policy.cpp.i
+
+src/core/retry_policy.s: src/core/retry_policy.cpp.s
+.PHONY : src/core/retry_policy.s
+
+# target to generate assembly for a file
+src/core/retry_policy.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.s
+.PHONY : src/core/retry_policy.cpp.s
 
 src/core/thread_pool.o: src/core/thread_pool.cpp.o
 .PHONY : src/core/thread_pool.o
@@ -316,7 +379,7 @@ src/log/logger.o: src/log/logger.cpp.o
 
 # target to build an object file
 src/log/logger.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/commonsvc_log.dir/build.make CMakeFiles/commonsvc_log.dir/src/log/logger.cpp.o
 .PHONY : src/log/logger.cpp.o
 
 src/log/logger.i: src/log/logger.cpp.i
@@ -324,7 +387,7 @@ src/log/logger.i: src/log/logger.cpp.i
 
 # target to preprocess a source file
 src/log/logger.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/commonsvc_log.dir/build.make CMakeFiles/commonsvc_log.dir/src/log/logger.cpp.i
 .PHONY : src/log/logger.cpp.i
 
 src/log/logger.s: src/log/logger.cpp.s
@@ -332,8 +395,32 @@ src/log/logger.s: src/log/logger.cpp.s
 
 # target to generate assembly for a file
 src/log/logger.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/vr_base_framework.dir/build.make CMakeFiles/vr_base_framework.dir/src/log/logger.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/commonsvc_log.dir/build.make CMakeFiles/commonsvc_log.dir/src/log/logger.cpp.s
 .PHONY : src/log/logger.cpp.s
+
+tests/core/retry_policy_test.o: tests/core/retry_policy_test.cpp.o
+.PHONY : tests/core/retry_policy_test.o
+
+# target to build an object file
+tests/core/retry_policy_test.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/retry_policy_test.dir/build.make CMakeFiles/retry_policy_test.dir/tests/core/retry_policy_test.cpp.o
+.PHONY : tests/core/retry_policy_test.cpp.o
+
+tests/core/retry_policy_test.i: tests/core/retry_policy_test.cpp.i
+.PHONY : tests/core/retry_policy_test.i
+
+# target to preprocess a source file
+tests/core/retry_policy_test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/retry_policy_test.dir/build.make CMakeFiles/retry_policy_test.dir/tests/core/retry_policy_test.cpp.i
+.PHONY : tests/core/retry_policy_test.cpp.i
+
+tests/core/retry_policy_test.s: tests/core/retry_policy_test.cpp.s
+.PHONY : tests/core/retry_policy_test.s
+
+# target to generate assembly for a file
+tests/core/retry_policy_test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/retry_policy_test.dir/build.make CMakeFiles/retry_policy_test.dir/tests/core/retry_policy_test.cpp.s
+.PHONY : tests/core/retry_policy_test.cpp.s
 
 tests/ipc/posix_message_queue_test.o: tests/ipc/posix_message_queue_test.cpp.o
 .PHONY : tests/ipc/posix_message_queue_test.o
@@ -416,11 +503,14 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... test"
+	@echo "... commonsvc_log"
 	@echo "... demo_service"
 	@echo "... logger_format_test"
 	@echo "... posix_message_queue_test"
+	@echo "... retry_policy_test"
 	@echo "... thread_pool_test"
 	@echo "... vr_base_framework"
+	@echo "... vr_error_code"
 	@echo "... demo/main.o"
 	@echo "... demo/main.i"
 	@echo "... demo/main.s"
@@ -430,6 +520,9 @@ help:
 	@echo "... src/core/process_guardian.o"
 	@echo "... src/core/process_guardian.i"
 	@echo "... src/core/process_guardian.s"
+	@echo "... src/core/retry_policy.o"
+	@echo "... src/core/retry_policy.i"
+	@echo "... src/core/retry_policy.s"
 	@echo "... src/core/thread_pool.o"
 	@echo "... src/core/thread_pool.i"
 	@echo "... src/core/thread_pool.s"
@@ -439,6 +532,9 @@ help:
 	@echo "... src/log/logger.o"
 	@echo "... src/log/logger.i"
 	@echo "... src/log/logger.s"
+	@echo "... tests/core/retry_policy_test.o"
+	@echo "... tests/core/retry_policy_test.i"
+	@echo "... tests/core/retry_policy_test.s"
 	@echo "... tests/ipc/posix_message_queue_test.o"
 	@echo "... tests/ipc/posix_message_queue_test.i"
 	@echo "... tests/ipc/posix_message_queue_test.s"

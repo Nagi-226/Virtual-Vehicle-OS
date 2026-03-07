@@ -1,1 +1,1 @@
-/usr/bin/c++ -g CMakeFiles/demo_service.dir/demo/main.cpp.o -o demo_service  libvr_base_framework.a -lrt -lpthread 
+/usr/bin/c++ -g CMakeFiles/demo_service.dir/demo/main.cpp.o -o demo_service  libvr_base_framework.a libcommonsvc_log.a libvr_error_code.a -lrt -lpthread 

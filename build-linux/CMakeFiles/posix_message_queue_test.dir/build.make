@@ -93,6 +93,8 @@ posix_message_queue_test_EXTERNAL_OBJECTS =
 posix_message_queue_test: CMakeFiles/posix_message_queue_test.dir/tests/ipc/posix_message_queue_test.cpp.o
 posix_message_queue_test: CMakeFiles/posix_message_queue_test.dir/build.make
 posix_message_queue_test: libvr_base_framework.a
+posix_message_queue_test: libcommonsvc_log.a
+posix_message_queue_test: libvr_error_code.a
 posix_message_queue_test: CMakeFiles/posix_message_queue_test.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable posix_message_queue_test"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/posix_message_queue_test.dir/link.txt --verbose=$(VERBOSE)

@@ -30,6 +30,31 @@ timespec MakeAbsTimeout(const std::int64_t timeout_ms) noexcept {
     return ts;
 }
 
+bool SetQueueNonBlocking(const int mqd, bool enable, long* original_flags) noexcept {
+    mq_attr attr{};
+    if (mq_getattr(static_cast<mqd_t>(mqd), &attr) != 0) {
+        return false;
+    }
+
+    *original_flags = attr.mq_flags;
+    if (enable) {
+        attr.mq_flags = attr.mq_flags | O_NONBLOCK;
+    } else {
+        attr.mq_flags = attr.mq_flags & (~O_NONBLOCK);
+    }
+
+    if (mq_setattr(static_cast<mqd_t>(mqd), &attr, nullptr) != 0) {
+        return false;
+    }
+    return true;
+}
+
+void RestoreQueueFlags(const int mqd, const long original_flags) noexcept {
+    mq_attr restore_attr{};
+    restore_attr.mq_flags = original_flags;
+    (void)mq_setattr(static_cast<mqd_t>(mqd), &restore_attr, nullptr);
+}
+
 }  // namespace
 
 PosixMessageQueue::~PosixMessageQueue() {
@@ -79,6 +104,30 @@ vr::core::ErrorCode PosixMessageQueue::Send(const std::string& message,
     return SendWithTimeout(message, priority, -1);
 }
 
+vr::core::ErrorCode PosixMessageQueue::SendNonBlocking(const std::string& message,
+                                                       const std::uint32_t priority) noexcept {
+    if (mqd_ < 0 || message.size() >= static_cast<std::size_t>(message_size_)) {
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
+    long original_flags = 0;
+    if (!SetQueueNonBlocking(mqd_, true, &original_flags)) {
+        return vr::core::ErrorCode::kQueueSendFailed;
+    }
+
+    const int rc = mq_send(static_cast<mqd_t>(mqd_), message.c_str(), message.size() + 1U, priority);
+    RestoreQueueFlags(mqd_, original_flags);
+
+    if (rc != 0) {
+        if (errno == EAGAIN) {
+            return vr::core::ErrorCode::kWouldBlock;
+        }
+        return vr::core::ErrorCode::kQueueSendFailed;
+    }
+
+    return vr::core::ErrorCode::kOk;
+}
+
 vr::core::ErrorCode PosixMessageQueue::SendWithTimeout(const std::string& message,
                                                        const std::uint32_t priority,
                                                        const std::int64_t timeout_ms) noexcept {
@@ -102,6 +151,9 @@ vr::core::ErrorCode PosixMessageQueue::SendWithTimeout(const std::string& messag
         if (errno == ETIMEDOUT) {
             return vr::core::ErrorCode::kTimeout;
         }
+        if (errno == EAGAIN) {
+            return vr::core::ErrorCode::kWouldBlock;
+        }
         return vr::core::ErrorCode::kQueueSendFailed;
     }
 
@@ -111,6 +163,33 @@ vr::core::ErrorCode PosixMessageQueue::SendWithTimeout(const std::string& messag
 vr::core::ErrorCode PosixMessageQueue::Receive(std::string* const message,
                                                std::uint32_t* const priority) noexcept {
     return ReceiveWithTimeout(message, priority, -1);
+}
+
+vr::core::ErrorCode PosixMessageQueue::ReceiveNonBlocking(std::string* const message,
+                                                          std::uint32_t* const priority) noexcept {
+    if (mqd_ < 0 || message == nullptr || priority == nullptr) {
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
+    long original_flags = 0;
+    if (!SetQueueNonBlocking(mqd_, true, &original_flags)) {
+        return vr::core::ErrorCode::kQueueReceiveFailed;
+    }
+
+    std::vector<char> buffer(static_cast<std::size_t>(message_size_), '\0');
+    const ssize_t bytes = mq_receive(static_cast<mqd_t>(mqd_), buffer.data(),
+                                     static_cast<std::size_t>(message_size_), priority);
+    RestoreQueueFlags(mqd_, original_flags);
+
+    if (bytes < 0) {
+        if (errno == EAGAIN) {
+            return vr::core::ErrorCode::kWouldBlock;
+        }
+        return vr::core::ErrorCode::kQueueReceiveFailed;
+    }
+
+    message->assign(buffer.data());
+    return vr::core::ErrorCode::kOk;
 }
 
 vr::core::ErrorCode PosixMessageQueue::ReceiveWithTimeout(std::string* const message,
@@ -139,6 +218,9 @@ vr::core::ErrorCode PosixMessageQueue::ReceiveWithTimeout(std::string* const mes
     if (bytes < 0) {
         if (errno == ETIMEDOUT) {
             return vr::core::ErrorCode::kTimeout;
+        }
+        if (errno == EAGAIN) {
+            return vr::core::ErrorCode::kWouldBlock;
         }
         return vr::core::ErrorCode::kQueueReceiveFailed;
     }

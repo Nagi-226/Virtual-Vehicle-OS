@@ -93,6 +93,8 @@ logger_format_test_EXTERNAL_OBJECTS =
 logger_format_test: CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.o
 logger_format_test: CMakeFiles/logger_format_test.dir/build.make
 logger_format_test: libvr_base_framework.a
+logger_format_test: libcommonsvc_log.a
+logger_format_test: libvr_error_code.a
 logger_format_test: CMakeFiles/logger_format_test.dir/link.txt
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/mnt/e/Virtual-Vehicle-OS/build-linux/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX executable logger_format_test"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/logger_format_test.dir/link.txt --verbose=$(VERBOSE)

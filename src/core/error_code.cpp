@@ -20,6 +20,8 @@ const char* ToString(const ErrorCode code) noexcept {
             return "INVALID_PARAM";
         case ErrorCode::kTimeout:
             return "TIMEOUT";
+        case ErrorCode::kWouldBlock:
+            return "WOULD_BLOCK";
         case ErrorCode::kThreadStartFailed:
             return "THREAD_START_FAILED";
         case ErrorCode::kThreadPrioritySetFailed:
