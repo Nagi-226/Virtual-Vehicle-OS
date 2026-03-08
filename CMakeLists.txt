@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-option(ENABLE_TESTS "Build unit tests" OFF)
+option(ENABLE_TESTS "Build unit tests" ON)
 option(ENABLE_SANITIZER "Enable address/undefined sanitizers for Debug on GCC/Clang" OFF)
 option(ENABLE_STRICT_WARNINGS "Enable strict warnings as errors" ON)
 
@@ -37,6 +37,10 @@ add_library(vr_base_framework
     src/core/process_guardian.cpp
     src/core/retry_policy.cpp
     src/ipc/posix_message_queue.cpp
+    src/interconnect/message_codec.cpp
+    src/interconnect/message_router.cpp
+    src/interconnect/posix_mq_transport.cpp
+    src/interconnect/interconnect_bridge.cpp
 )
 
 target_link_libraries(vr_base_framework
@@ -51,6 +55,9 @@ endif()
 
 add_executable(demo_service demo/main.cpp)
 target_link_libraries(demo_service PRIVATE vr_base_framework)
+
+add_executable(interconnect_learning_demo demo/interconnect_learning_demo.cpp)
+target_link_libraries(interconnect_learning_demo PRIVATE vr_base_framework)
 
 if(ENABLE_TESTS)
     enable_testing()
@@ -74,4 +81,19 @@ if(ENABLE_TESTS)
     target_link_libraries(logger_format_test PRIVATE vr_base_framework)
     add_test(NAME logger_format_test COMMAND logger_format_test)
     set_tests_properties(logger_format_test PROPERTIES LABELS "log" TIMEOUT 10)
+
+    add_executable(interconnect_codec_test tests/interconnect/interconnect_codec_test.cpp)
+    target_link_libraries(interconnect_codec_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_codec_test COMMAND interconnect_codec_test)
+    set_tests_properties(interconnect_codec_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    add_executable(interconnect_ttl_test tests/interconnect/interconnect_ttl_test.cpp)
+    target_link_libraries(interconnect_ttl_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_ttl_test COMMAND interconnect_ttl_test)
+    set_tests_properties(interconnect_ttl_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    add_executable(interconnect_router_exception_test tests/interconnect/interconnect_router_exception_test.cpp)
+    target_link_libraries(interconnect_router_exception_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_router_exception_test COMMAND interconnect_router_exception_test)
+    set_tests_properties(interconnect_router_exception_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 endif()

@@ -11,7 +11,8 @@ enum class ErrorDomain : std::uint16_t {
     kCore = 0x01,
     kIpc = 0x02,
     kLog = 0x03,
-    kDemo = 0x04
+    kDemo = 0x04,
+    kInterconnect = 0x05
 };
 
 constexpr std::int32_t MakeErrorCode(const ErrorDomain domain, const std::uint16_t detail) noexcept {
@@ -39,6 +40,9 @@ enum class ErrorCode : std::int32_t {
     kLogWriteFailed = MakeErrorCode(ErrorDomain::kLog, 0x0001),
 
     kDemoServiceFailed = MakeErrorCode(ErrorDomain::kDemo, 0x0001),
+
+    kInterconnectInvalidEnvelope = MakeErrorCode(ErrorDomain::kInterconnect, 0x0001),
+    kInterconnectRouteMiss = MakeErrorCode(ErrorDomain::kInterconnect, 0x0002),
 
     kUnknown = MakeErrorCode(ErrorDomain::kCommon, 0xFFFF)
 };

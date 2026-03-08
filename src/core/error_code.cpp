@@ -44,6 +44,10 @@ const char* ToString(const ErrorCode code) noexcept {
             return "LOG_WRITE_FAILED";
         case ErrorCode::kDemoServiceFailed:
             return "DEMO_SERVICE_FAILED";
+        case ErrorCode::kInterconnectInvalidEnvelope:
+            return "INTERCONNECT_INVALID_ENVELOPE";
+        case ErrorCode::kInterconnectRouteMiss:
+            return "INTERCONNECT_ROUTE_MISS";
         default:
             return "UNKNOWN";
     }
@@ -61,6 +65,8 @@ const char* ToDomainString(const ErrorCode code) noexcept {
             return "LOG";
         case ErrorDomain::kDemo:
             return "DEMO";
+        case ErrorDomain::kInterconnect:
+            return "INTERCONNECT";
         default:
             return "UNKNOWN";
     }

@@ -1,6 +1,12 @@
 #include "core/thread_pool.hpp"
 
+#include <exception>
+
+#include "log/logger.hpp"
+
+#if defined(__linux__) || defined(__APPLE__)
 #include <pthread.h>
+#endif
 
 namespace vr {
 namespace core {
@@ -26,6 +32,7 @@ ErrorCode ThreadPool::Start(const ThreadConfig& config) {
     submitted_count_.store(0U, std::memory_order_relaxed);
     executed_count_.store(0U, std::memory_order_relaxed);
     rejected_count_.store(0U, std::memory_order_relaxed);
+    task_exception_count_.store(0U, std::memory_order_relaxed);
 
     workers_.reserve(config.worker_count);
     for (std::size_t i = 0; i < config.worker_count; ++i) {
@@ -115,6 +122,7 @@ ThreadPoolMetrics ThreadPool::GetMetrics() const noexcept {
     metrics.submitted_count = submitted_count_.load(std::memory_order_relaxed);
     metrics.executed_count = executed_count_.load(std::memory_order_relaxed);
     metrics.rejected_count = rejected_count_.load(std::memory_order_relaxed);
+    metrics.task_exception_count = task_exception_count_.load(std::memory_order_relaxed);
     return metrics;
 }
 
@@ -139,6 +147,7 @@ void ThreadPool::WorkerLoop(const std::size_t /*index*/) {
 }
 
 ErrorCode ThreadPool::ConfigureRealtimePriority(std::thread& worker) noexcept {
+#if defined(__linux__) || defined(__APPLE__)
     sched_param sched{};
     sched.sched_priority = realtime_priority_;
 
@@ -148,10 +157,23 @@ ErrorCode ThreadPool::ConfigureRealtimePriority(std::thread& worker) noexcept {
     }
 
     return ErrorCode::kOk;
+#else
+    (void)worker;
+    return ErrorCode::kThreadPrioritySetFailed;
+#endif
 }
 
 void ThreadPool::ExecuteTask(const std::function<void()>& task) noexcept {
-    task();
+    try {
+        task();
+    } catch (const std::exception& ex) {
+        task_exception_count_.fetch_add(1U, std::memory_order_relaxed);
+        LOG_ERROR(std::string("ThreadPool task exception: ") + ex.what());
+    } catch (...) {
+        task_exception_count_.fetch_add(1U, std::memory_order_relaxed);
+        LOG_ERROR("ThreadPool task unknown exception");
+    }
+
     executed_count_.fetch_add(1U, std::memory_order_relaxed);
 }
 

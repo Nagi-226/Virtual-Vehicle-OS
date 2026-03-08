@@ -35,6 +35,7 @@ struct ThreadPoolMetrics {
     std::uint64_t submitted_count{0U};
     std::uint64_t executed_count{0U};
     std::uint64_t rejected_count{0U};
+    std::uint64_t task_exception_count{0U};
     std::size_t worker_count{0U};
     bool running{false};
 };
@@ -67,6 +68,7 @@ private:
     std::atomic<std::uint64_t> submitted_count_{0U};
     std::atomic<std::uint64_t> executed_count_{0U};
     std::atomic<std::uint64_t> rejected_count_{0U};
+    std::atomic<std::uint64_t> task_exception_count_{0U};
 };
 
 }  // namespace core
