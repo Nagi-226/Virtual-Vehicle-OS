@@ -1,0 +1,195 @@
+文件：src/interconnect/interconnect_bridge.cpp
+主题：InterconnectBridge 实现逻辑解析（业务学习手册）
+
+==================================================
+1. 模块定位
+==================================================
+InterconnectBridge 是“车端 <-> 机器人端”消息互通中枢，承担以下职责：
+- 双向消息桥接（vehicle->robot，robot->vehicle）
+- 消息校验、编解码、TTL/SLA 判断
+- 路由分发到对应业务处理器
+- 背压策略执行（kReject / kDropOldest）
+- 指标采集与聚合导出
+
+一句话理解：它是互通链路中的“网关 + 策略执行器 + 观测入口”。
+
+
+==================================================
+2. 关键辅助函数（匿名命名空间）
+==================================================
+2.1 NowUnixMs()
+- 获取当前系统毫秒时间戳。
+- 用于 TTL 判定和 metrics 时间语义。
+
+2.2 IsExpired(envelope, now_ms, max_latency_ms)
+- 计算 effective_ttl：
+  - envelope.ttl_ms == 0 时使用系统 max_latency_ms
+  - 否则使用 min(envelope.ttl_ms, max_latency_ms)
+- 若 effective_ttl == 0，视为不做过期判定。
+- 若 now_ms < envelope.timestamp_ms，视为时钟回拨/漂移场景，不判过期。
+- 最终条件：(now_ms - timestamp_ms) > effective_ttl。
+
+2.3 IsEnvelopeValidForPublish(envelope)
+- 基础合法性检查：source/target/topic 不能为空。
+
+
+==================================================
+3. 生命周期：构造、启动、停止
+==================================================
+3.1 构造函数
+- 注入两个 ITransport：
+  - vehicle_to_robot_transport_
+  - robot_to_vehicle_transport_
+- 体现“传输层可插拔”设计。
+
+3.2 Start(IConfigProvider*)
+- provider 为空 -> kInvalidParam
+- 调 provider->LoadBridgeConfig(...) 获取配置和来源
+- 记录 loaded_config_source_
+- 转调 Start(const BridgeConfig&)
+
+3.3 Start(const BridgeConfig&)
+核心步骤：
+1) 若已 running，直接返回 kOk（幂等）
+2) 设置默认 config source = "direct"（直传配置场景）
+3) 校验 transport 指针
+4) 创建两个 transport endpoint
+5) 启动 worker_pool_
+6) 设置 running_=true
+7) 在线程池入队两个收包循环：
+   - VehicleInboundLoop()
+   - RobotInboundLoop()
+8) 刷新聚合指标
+
+错误处理策略：
+- 任一环节失败会做必要清理（Close/Unlink/Stop）后返回错误码。
+
+3.4 Stop()
+- running_ 原子置 false（若本来就 false，直接返回）
+- 停止线程池
+- 关闭并解绑两个 transport
+- 刷新指标
+
+
+==================================================
+4. 发送路径（Publish）
+==================================================
+4.1 入口
+- PublishFromVehicle(envelope) -> Publish(vehicle_to_robot_transport_, envelope)
+- PublishFromRobot(envelope)   -> Publish(robot_to_vehicle_transport_, envelope)
+
+4.2 Publish(...)
+执行顺序：
+1) 运行态和 transport 检查
+   - 未启动或 transport 为空 -> tx_fail_count++，返回 kThreadStartFailed
+2) envelope 基础校验
+   - 不合法 -> invalid_envelope_count++，tx_fail_count++，返回 kInterconnectInvalidEnvelope
+3) 编码
+   - MessageCodec::Encode 失败 -> tx_fail_count++，decode_fail_count++，返回错误
+4) 背压发送
+   - 调 PublishWithBackpressure(...)
+5) 发送结果处理
+   - 失败 -> tx_fail_count++，transport_error_count++，返回错误
+   - 成功 -> tx_count++，返回 kOk
+
+
+==================================================
+5. 背压策略（v0.4 已接入）
+==================================================
+函数：PublishWithBackpressure(transport, encoded, priority)
+
+流程：
+1) 先调用 transport->SendWithTimeout(...)
+2) 若成功，直接返回 kOk
+3) 若失败，且策略=BackpressurePolicy::kDropOldest，且错误属于拥塞类：
+   - kTimeout / kThreadQueueFull / kWouldBlock
+   则执行：
+   a) transport->DiscardOldest()
+   b) backpressure_drop_count_++
+   c) 重试一次 SendWithTimeout
+4) 返回最终发送结果
+
+业务语义：
+- 在拥塞时优先牺牲“最旧消息”，争取“最新消息”成功发送，符合控制类场景时效优先原则。
+
+
+==================================================
+6. 接收路径（双循环 + 统一处理）
+==================================================
+6.1 两个循环入口
+- VehicleInboundLoop()：
+  从 vehicle_to_robot_transport_ 收包，路由到 robot_router_
+- RobotInboundLoop()：
+  从 robot_to_vehicle_transport_ 收包，路由到 vehicle_router_
+
+6.2 ProcessInbound(transport, router, loop_name)
+while(running_) 循环：
+1) ReceiveWithTimeout
+   - kTimeout / kWouldBlock：正常空轮询，continue
+2) 接收失败（其他错误）
+   - transport_error_count_++
+   - 记 WARN 日志
+   - sleep 10ms（避免忙等/刷日志）
+   - continue
+3) 接收成功
+   - rx_count_++
+4) Decode
+   - 失败 -> decode_fail_count_++，日志，continue
+5) envelope 合法性检查
+   - 失败 -> invalid_envelope_count_++，日志，continue
+6) TTL/SLA 过期检查
+   - 过期 -> expired_drop_count_++，日志，continue
+7) 路由
+   - Route 返回 false -> route_miss_count_++，日志，continue
+8) 每轮都刷新聚合指标
+
+
+==================================================
+7. 指标与观测
+==================================================
+7.1 原子计数器
+- tx_count / tx_fail_count / rx_count
+- decode_fail_count / expired_drop_count / route_miss_count
+- invalid_envelope_count / transport_error_count
+- backpressure_drop_count
+
+7.2 聚合刷新
+RefreshAggregatedMetrics() 会：
+- 读取上述原子计数，组装 BridgeMetrics
+- 读取 worker_pool_.GetMetrics()
+- 写入 SystemMetricsAggregator
+
+7.3 对外读取
+- GetBridgeMetrics()
+- GetThreadPoolMetrics()
+- CaptureMetricsSnapshot()
+- ExportMetricsDelta()
+
+
+==================================================
+8. 业务层理解要点
+==================================================
+1) 双向链路是对称的：
+   - 发包入口不同，收包后路由目标互换。
+
+2) 可靠性优先级顺序：
+   - 基础合法性 > 编解码正确性 > TTL时效 > 路由命中 > 传输成功。
+
+3) Backpressure 是“发送阶段”的退让机制：
+   - 不影响 decode/route 逻辑，单独处理发送拥塞。
+
+4) 指标设计是“可定位”的：
+   - 每个失败分支都有对应计数器，便于线上快速判断瓶颈位置。
+
+
+==================================================
+9. 后续学习建议（结合 v0.5）
+==================================================
+建议按以下顺序继续阅读：
+1) src/interconnect/interconnect_bridge.hpp（对外接口全貌）
+2) src/interconnect/bridge_policy.hpp（SLA/背压策略定义）
+3) src/interconnect/system_metrics_aggregator.hpp（快照与增量语义）
+4) src/interconnect/transport.hpp + 具体实现（传输抽象/实现边界）
+5) tests/interconnect/*（从测试反推设计意图）
+
+（本手册用于业务理解，不替代源码与测试作为最终事实依据。）

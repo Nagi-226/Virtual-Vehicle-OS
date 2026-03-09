@@ -23,6 +23,16 @@ vr::core::ErrorCode PosixMqTransport::ReceiveWithTimeout(std::string* const mess
     return queue_.ReceiveWithTimeout(message, priority, timeout_ms);
 }
 
+vr::core::ErrorCode PosixMqTransport::DiscardOldest() noexcept {
+    std::string ignored;
+    std::uint32_t priority = 0U;
+    const vr::core::ErrorCode ec = queue_.ReceiveNonBlocking(&ignored, &priority);
+    if (ec == vr::core::ErrorCode::kWouldBlock) {
+        return vr::core::ErrorCode::kOk;
+    }
+    return ec;
+}
+
 void PosixMqTransport::Close() noexcept {
     queue_.Close();
 }
@@ -33,4 +43,3 @@ void PosixMqTransport::Unlink() noexcept {
 
 }  // namespace interconnect
 }  // namespace vr
-

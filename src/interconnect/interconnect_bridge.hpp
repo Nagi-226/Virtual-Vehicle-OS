@@ -2,6 +2,7 @@
 #define VR_INTERCONNECT_INTERCONNECT_BRIDGE_HPP
 
 #include <atomic>
+#include <chrono>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -10,6 +11,7 @@
 #include "core/thread_pool.hpp"
 #include "interconnect/bridge_metrics.hpp"
 #include "interconnect/bridge_policy.hpp"
+#include "interconnect/config_provider.hpp"
 #include "interconnect/message_envelope.hpp"
 #include "interconnect/message_router.hpp"
 #include "interconnect/system_metrics_aggregator.hpp"
@@ -33,6 +35,7 @@ public:
     ~InterconnectBridge();
 
     vr::core::ErrorCode Start(const BridgeConfig& config) noexcept;
+    vr::core::ErrorCode Start(IConfigProvider* provider) noexcept;
     void Stop() noexcept;
 
     vr::core::ErrorCode PublishFromVehicle(const MessageEnvelope& envelope) noexcept;
@@ -43,16 +46,22 @@ public:
 
     BridgeMetrics GetBridgeMetrics() const noexcept;
     vr::core::ThreadPoolMetrics GetThreadPoolMetrics() const noexcept;
+    MetricsSnapshot CaptureMetricsSnapshot() noexcept;
+    MetricsDelta ExportMetricsDelta() noexcept;
+    std::string GetLoadedConfigSource() const;
 
 private:
     vr::core::ErrorCode Publish(ITransport* transport, const MessageEnvelope& envelope) noexcept;
+    vr::core::ErrorCode PublishWithBackpressure(ITransport* transport, const std::string& encoded,
+                                                std::uint32_t priority) noexcept;
 
     void VehicleInboundLoop() noexcept;
     void RobotInboundLoop() noexcept;
     void ProcessInbound(ITransport* transport, MessageRouter* router,
                         const std::string& loop_name) noexcept;
 
-    void RefreshAggregatedMetrics() noexcept;
+    void RefreshAggregatedMetrics(bool force = false) noexcept;
+    bool ShouldRefreshMetrics(const std::uint64_t now_ms) noexcept;
 
     std::atomic<bool> running_{false};
     vr::core::ThreadPool worker_pool_;
@@ -67,12 +76,18 @@ private:
     std::atomic<std::uint64_t> tx_count_{0U};
     std::atomic<std::uint64_t> tx_fail_count_{0U};
     std::atomic<std::uint64_t> rx_count_{0U};
+    std::atomic<std::uint64_t> encode_fail_count_{0U};
     std::atomic<std::uint64_t> decode_fail_count_{0U};
     std::atomic<std::uint64_t> expired_drop_count_{0U};
     std::atomic<std::uint64_t> route_miss_count_{0U};
     std::atomic<std::uint64_t> invalid_envelope_count_{0U};
     std::atomic<std::uint64_t> transport_error_count_{0U};
+    std::atomic<std::uint64_t> backpressure_drop_count_{0U};
 
+    std::atomic<std::uint64_t> last_metrics_refresh_ms_{0U};
+    static constexpr std::uint64_t kMetricsRefreshIntervalMs = 100U;
+
+    std::string loaded_config_source_;
     mutable SystemMetricsAggregator metrics_aggregator_;
 };
 

@@ -25,6 +25,8 @@ public:
                                                 std::int64_t timeout_ms) noexcept = 0;
     virtual vr::core::ErrorCode ReceiveWithTimeout(std::string* message, std::uint32_t* priority,
                                                    std::int64_t timeout_ms) noexcept = 0;
+    virtual vr::core::ErrorCode DiscardOldest() noexcept = 0;
+
     virtual void Close() noexcept = 0;
     virtual void Unlink() noexcept = 0;
 };

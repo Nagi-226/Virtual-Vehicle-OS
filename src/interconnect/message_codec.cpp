@@ -58,30 +58,23 @@ void SplitEscaped(const std::string& text, std::vector<std::string>* fields) {
     std::string current;
     current.reserve(text.size());
 
-    bool escaped = false;
+    std::size_t backslash_run = 0U;
     for (char ch : text) {
-        if (escaped) {
-            current.push_back(ch);
-            escaped = false;
-            continue;
-        }
-
-        if (ch == '\\') {
-            escaped = true;
-            continue;
-        }
-
-        if (ch == kFieldSeparator) {
+        const bool separator_escaped = (ch == kFieldSeparator) && ((backslash_run % 2U) == 1U);
+        if (ch == kFieldSeparator && !separator_escaped) {
             fields->push_back(current);
             current.clear();
+            backslash_run = 0U;
             continue;
         }
 
         current.push_back(ch);
-    }
 
-    if (escaped) {
-        current.push_back('\\');
+        if (ch == '\\') {
+            ++backslash_run;
+        } else {
+            backslash_run = 0U;
+        }
     }
 
     fields->push_back(current);

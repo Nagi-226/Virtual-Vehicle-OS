@@ -59,7 +59,7 @@ private:
     std::queue<std::function<void()>> tasks_;
     mutable std::mutex tasks_mutex_;
     std::condition_variable tasks_cv_;
-    bool running_{false};
+    std::atomic<bool> running_{false};
     bool enable_realtime_{false};
     std::int32_t realtime_priority_{10};
     std::size_t queue_capacity_{64U};

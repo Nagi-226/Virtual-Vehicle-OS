@@ -53,6 +53,15 @@ public:
         return vr::core::ErrorCode::kOk;
     }
 
+    vr::core::ErrorCode DiscardOldest() noexcept override {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (queue_.empty()) {
+            return vr::core::ErrorCode::kOk;
+        }
+        queue_.pop();
+        return vr::core::ErrorCode::kOk;
+    }
+
     void Close() noexcept override {}
     void Unlink() noexcept override {}
 

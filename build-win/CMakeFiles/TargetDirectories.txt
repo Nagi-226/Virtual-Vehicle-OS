@@ -1,0 +1,15 @@
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/vr_error_code.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/commonsvc_log.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/vr_base_framework.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/thread_pool_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/retry_policy_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/logger_format_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/interconnect_codec_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/interconnect_ttl_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/interconnect_router_exception_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/interconnect_backpressure_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/interconnect_metrics_delta_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/interconnect_config_provider_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/RUN_TESTS.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/ALL_BUILD.dir
+E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/ZERO_CHECK.dir

@@ -1,0 +1,10 @@
+^E:\GITHUB PROJECT\VIRTUAL-VEHICLE-OS\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SE:/Github Project/Virtual-Vehicle-OS" "-BE:/Github Project/Virtual-Vehicle-OS/build-win" --check-stamp-file "E:/Github Project/Virtual-Vehicle-OS/build-win/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

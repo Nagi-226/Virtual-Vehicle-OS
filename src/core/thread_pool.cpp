@@ -19,7 +19,7 @@ ErrorCode ThreadPool::Start(const ThreadConfig& config) {
     if (config.worker_count == 0U || config.queue_capacity == 0U) {
         return ErrorCode::kInvalidParam;
     }
-    if (running_) {
+    if (running_.load(std::memory_order_acquire)) {
         return ErrorCode::kOk;
     }
 
@@ -27,7 +27,7 @@ ErrorCode ThreadPool::Start(const ThreadConfig& config) {
     realtime_priority_ = config.realtime_priority;
     queue_capacity_ = config.queue_capacity;
     rejection_policy_ = config.rejection_policy;
-    running_ = true;
+    running_.store(true, std::memory_order_release);
 
     submitted_count_.store(0U, std::memory_order_relaxed);
     executed_count_.store(0U, std::memory_order_relaxed);
@@ -53,10 +53,10 @@ ErrorCode ThreadPool::Start(const ThreadConfig& config) {
 void ThreadPool::Stop() noexcept {
     {
         std::lock_guard<std::mutex> lock(tasks_mutex_);
-        if (!running_) {
+        if (!running_.load(std::memory_order_acquire)) {
             return;
         }
-        running_ = false;
+        running_.store(false, std::memory_order_release);
     }
 
     tasks_cv_.notify_all();
@@ -83,7 +83,7 @@ ErrorCode ThreadPool::Enqueue(const std::function<void()>& task) {
     bool run_in_caller = false;
     {
         std::lock_guard<std::mutex> lock(tasks_mutex_);
-        if (!running_) {
+        if (!running_.load(std::memory_order_acquire)) {
             return ErrorCode::kThreadStartFailed;
         }
 
@@ -116,7 +116,7 @@ ThreadPoolMetrics ThreadPool::GetMetrics() const noexcept {
         metrics.queue_size = tasks_.size();
         metrics.queue_capacity = queue_capacity_;
         metrics.worker_count = workers_.size();
-        metrics.running = running_;
+        metrics.running = running_.load(std::memory_order_relaxed);
     }
 
     metrics.submitted_count = submitted_count_.load(std::memory_order_relaxed);
@@ -132,9 +132,11 @@ void ThreadPool::WorkerLoop(const std::size_t /*index*/) {
 
         {
             std::unique_lock<std::mutex> lock(tasks_mutex_);
-            tasks_cv_.wait(lock, [this]() { return !running_ || !tasks_.empty(); });
+            tasks_cv_.wait(lock, [this]() {
+                return !running_.load(std::memory_order_acquire) || !tasks_.empty();
+            });
 
-            if (!running_ && tasks_.empty()) {
+            if (!running_.load(std::memory_order_acquire) && tasks_.empty()) {
                 return;
             }
 

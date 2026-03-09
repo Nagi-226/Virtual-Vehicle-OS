@@ -1,0 +1,10 @@
+^E:\GITHUB PROJECT\VIRTUAL-VEHICLE-OS\BUILD-WIN\CMAKEFILES\3EA4AD924D42D9EBA8C126126BE9399A\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" "-SE:/Github Project/Virtual-Vehicle-OS" "-BE:/Github Project/Virtual-Vehicle-OS/build-win" --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file "E:/Github Project/Virtual-Vehicle-OS/build-win/VehicleRobotBaseFramework.sln"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

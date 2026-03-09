@@ -1,5 +1,6 @@
 #include "interconnect/interconnect_bridge.hpp"
 
+#include <algorithm>
 #include <chrono>
 #include <string>
 #include <thread>
@@ -18,6 +19,7 @@ std::uint64_t NowUnixMs() {
     return static_cast<std::uint64_t>(now.time_since_epoch().count());
 }
 
+//消息过期判断
 bool IsExpired(const MessageEnvelope& envelope, const std::uint64_t now_ms,
                const std::uint32_t max_latency_ms) {
     const std::uint32_t effective_ttl =
@@ -47,9 +49,29 @@ InterconnectBridge::~InterconnectBridge() {
     Stop();
 }
 
+vr::core::ErrorCode InterconnectBridge::Start(IConfigProvider* const provider) noexcept {
+    if (provider == nullptr) {
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
+    BridgeConfig cfg;
+    std::string source;
+    const vr::core::ErrorCode ec = provider->LoadBridgeConfig(&cfg, &source);
+    if (ec != vr::core::ErrorCode::kOk) {
+        return ec;
+    }
+
+    loaded_config_source_ = source;
+    return Start(cfg);
+}
+
 vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexcept {
     if (running_.load(std::memory_order_acquire)) {
         return vr::core::ErrorCode::kOk;
+    }
+
+    if (loaded_config_source_.empty()) {
+        loaded_config_source_ = "direct";
     }
 
     if (!vehicle_to_robot_transport_ || !robot_to_vehicle_transport_) {
@@ -58,8 +80,7 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
 
     config_ = config;
 
-    vr::core::ErrorCode ec =
-        vehicle_to_robot_transport_->Create(config_.vehicle_to_robot_endpoint);
+    vr::core::ErrorCode ec = vehicle_to_robot_transport_->Create(config_.vehicle_to_robot_endpoint);
     if (ec != vr::core::ErrorCode::kOk) {
         return ec;
     }
@@ -115,7 +136,7 @@ void InterconnectBridge::Stop() noexcept {
         robot_to_vehicle_transport_->Unlink();
     }
 
-    RefreshAggregatedMetrics();
+    RefreshAggregatedMetrics(true);
 }
 
 vr::core::ErrorCode InterconnectBridge::PublishFromVehicle(const MessageEnvelope& envelope) noexcept {
@@ -142,6 +163,43 @@ vr::core::ThreadPoolMetrics InterconnectBridge::GetThreadPoolMetrics() const noe
     return metrics_aggregator_.GetThreadPoolMetrics();
 }
 
+MetricsSnapshot InterconnectBridge::CaptureMetricsSnapshot() noexcept {
+    RefreshAggregatedMetrics(true);
+    return metrics_aggregator_.CaptureSnapshot();
+}
+
+MetricsDelta InterconnectBridge::ExportMetricsDelta() noexcept {
+    RefreshAggregatedMetrics(true);
+    return metrics_aggregator_.ExportDeltaSinceLastCall();
+}
+
+std::string InterconnectBridge::GetLoadedConfigSource() const {
+    return loaded_config_source_;
+}
+
+vr::core::ErrorCode InterconnectBridge::PublishWithBackpressure(ITransport* const transport,
+                                                                const std::string& encoded,
+                                                                const std::uint32_t priority) noexcept {
+    vr::core::ErrorCode send_ec =
+        transport->SendWithTimeout(encoded, priority, config_.sla_policy.transport_send_timeout_ms);
+    if (send_ec == vr::core::ErrorCode::kOk) {
+        return send_ec;
+    }
+
+    if (config_.sla_policy.backpressure_policy == BackpressurePolicy::kDropOldest &&
+        (send_ec == vr::core::ErrorCode::kTimeout || send_ec == vr::core::ErrorCode::kThreadQueueFull ||
+         send_ec == vr::core::ErrorCode::kWouldBlock)) {
+        const vr::core::ErrorCode discard_ec = transport->DiscardOldest();
+        if (discard_ec == vr::core::ErrorCode::kOk) {
+            backpressure_drop_count_.fetch_add(1U, std::memory_order_relaxed);
+            send_ec = transport->SendWithTimeout(encoded, priority,
+                                                 config_.sla_policy.transport_send_timeout_ms);
+        }
+    }
+
+    return send_ec;
+}
+
 vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
                                                 const MessageEnvelope& envelope) noexcept {
     if (!running_.load(std::memory_order_acquire) || transport == nullptr) {
@@ -161,14 +219,13 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
     const vr::core::ErrorCode encode_ec = MessageCodec::Encode(envelope, &encoded);
     if (encode_ec != vr::core::ErrorCode::kOk) {
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
-        decode_fail_count_.fetch_add(1U, std::memory_order_relaxed);
+        encode_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         RefreshAggregatedMetrics();
         return encode_ec;
     }
 
     const vr::core::ErrorCode send_ec =
-        transport->SendWithTimeout(encoded, config_.receive_priority,
-                                   config_.sla_policy.transport_send_timeout_ms);
+        PublishWithBackpressure(transport, encoded, config_.receive_priority);
 
     if (send_ec != vr::core::ErrorCode::kOk) {
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
@@ -248,16 +305,33 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
     }
 }
 
-void InterconnectBridge::RefreshAggregatedMetrics() noexcept {
+bool InterconnectBridge::ShouldRefreshMetrics(const std::uint64_t now_ms) noexcept {
+    const std::uint64_t last = last_metrics_refresh_ms_.load(std::memory_order_relaxed);
+    if (now_ms < last) {
+        return true;
+    }
+    return (now_ms - last) >= kMetricsRefreshIntervalMs;
+}
+
+void InterconnectBridge::RefreshAggregatedMetrics(const bool force) noexcept {
+    const std::uint64_t now_ms = NowUnixMs();
+    if (!force && !ShouldRefreshMetrics(now_ms)) {
+        return;
+    }
+
+    last_metrics_refresh_ms_.store(now_ms, std::memory_order_relaxed);
+
     BridgeMetrics bridge_metrics;
     bridge_metrics.tx_count = tx_count_.load(std::memory_order_relaxed);
     bridge_metrics.tx_fail_count = tx_fail_count_.load(std::memory_order_relaxed);
     bridge_metrics.rx_count = rx_count_.load(std::memory_order_relaxed);
+    bridge_metrics.encode_fail_count = encode_fail_count_.load(std::memory_order_relaxed);
     bridge_metrics.decode_fail_count = decode_fail_count_.load(std::memory_order_relaxed);
     bridge_metrics.expired_drop_count = expired_drop_count_.load(std::memory_order_relaxed);
     bridge_metrics.route_miss_count = route_miss_count_.load(std::memory_order_relaxed);
     bridge_metrics.invalid_envelope_count = invalid_envelope_count_.load(std::memory_order_relaxed);
     bridge_metrics.transport_error_count = transport_error_count_.load(std::memory_order_relaxed);
+    bridge_metrics.backpressure_drop_count = backpressure_drop_count_.load(std::memory_order_relaxed);
 
     metrics_aggregator_.UpdateBridgeMetrics(bridge_metrics);
     metrics_aggregator_.UpdateThreadPoolMetrics(worker_pool_.GetMetrics());
@@ -265,3 +339,4 @@ void InterconnectBridge::RefreshAggregatedMetrics() noexcept {
 
 }  // namespace interconnect
 }  // namespace vr
+

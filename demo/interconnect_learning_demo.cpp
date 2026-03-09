@@ -44,6 +44,7 @@ int main() {
     config.sla_policy.max_end_to_end_latency_ms = 300;
     config.sla_policy.transport_receive_timeout_ms = 50;
     config.sla_policy.transport_send_timeout_ms = 50;
+    config.sla_policy.backpressure_policy = vr::interconnect::BackpressurePolicy::kDropOldest;
 
     vr::interconnect::InterconnectBridge bridge(std::make_unique<vr::interconnect::PosixMqTransport>(),
                                                 std::make_unique<vr::interconnect::PosixMqTransport>());
@@ -94,12 +95,18 @@ int main() {
 
     std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
-    const auto bridge_metrics = bridge.GetBridgeMetrics();
-    LOG_INFO("Bridge metrics => tx=" + std::to_string(bridge_metrics.tx_count) +
-             ", rx=" + std::to_string(bridge_metrics.rx_count) +
-             ", decode_fail=" + std::to_string(bridge_metrics.decode_fail_count) +
-             ", expired=" + std::to_string(bridge_metrics.expired_drop_count) +
-             ", route_miss=" + std::to_string(bridge_metrics.route_miss_count));
+    const auto snapshot = bridge.CaptureMetricsSnapshot();
+    const auto delta = bridge.ExportMetricsDelta();
+    LOG_INFO("Bridge snapshot => tx=" + std::to_string(snapshot.bridge_metrics.tx_count) +
+             ", rx=" + std::to_string(snapshot.bridge_metrics.rx_count) +
+             ", decode_fail=" + std::to_string(snapshot.bridge_metrics.decode_fail_count) +
+             ", expired=" + std::to_string(snapshot.bridge_metrics.expired_drop_count) +
+             ", route_miss=" + std::to_string(snapshot.bridge_metrics.route_miss_count) +
+             ", backpressure_drop=" +
+             std::to_string(snapshot.bridge_metrics.backpressure_drop_count));
+
+    LOG_INFO("Bridge delta => tx_delta=" + std::to_string(delta.bridge_metrics_delta.tx_count) +
+             ", rx_delta=" + std::to_string(delta.bridge_metrics_delta.rx_count));
 
     bridge.Stop();
 

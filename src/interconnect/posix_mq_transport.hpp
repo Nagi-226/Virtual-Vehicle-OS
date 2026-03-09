@@ -14,6 +14,7 @@ public:
                                         std::int64_t timeout_ms) noexcept override;
     vr::core::ErrorCode ReceiveWithTimeout(std::string* message, std::uint32_t* priority,
                                            std::int64_t timeout_ms) noexcept override;
+    vr::core::ErrorCode DiscardOldest() noexcept override;
     void Close() noexcept override;
     void Unlink() noexcept override;
 
@@ -25,4 +26,3 @@ private:
 }  // namespace vr
 
 #endif  // VR_INTERCONNECT_POSIX_MQ_TRANSPORT_HPP
-

@@ -32,16 +32,23 @@ add_library(vr_error_code STATIC src/core/error_code.cpp)
 add_library(commonsvc_log STATIC src/log/logger.cpp)
 target_link_libraries(commonsvc_log PUBLIC vr_error_code)
 
-add_library(vr_base_framework
+set(VR_BASE_SOURCES
     src/core/thread_pool.cpp
-    src/core/process_guardian.cpp
     src/core/retry_policy.cpp
-    src/ipc/posix_message_queue.cpp
     src/interconnect/message_codec.cpp
     src/interconnect/message_router.cpp
-    src/interconnect/posix_mq_transport.cpp
     src/interconnect/interconnect_bridge.cpp
 )
+
+if(NOT WIN32)
+    list(APPEND VR_BASE_SOURCES
+        src/core/process_guardian.cpp
+        src/ipc/posix_message_queue.cpp
+        src/interconnect/posix_mq_transport.cpp
+    )
+endif()
+
+add_library(vr_base_framework ${VR_BASE_SOURCES})
 
 target_link_libraries(vr_base_framework
     PUBLIC commonsvc_log vr_error_code
@@ -53,11 +60,13 @@ elseif(UNIX)
     target_link_libraries(vr_base_framework PUBLIC pthread)
 endif()
 
-add_executable(demo_service demo/main.cpp)
-target_link_libraries(demo_service PRIVATE vr_base_framework)
+if(NOT WIN32)
+    add_executable(demo_service demo/main.cpp)
+    target_link_libraries(demo_service PRIVATE vr_base_framework)
 
-add_executable(interconnect_learning_demo demo/interconnect_learning_demo.cpp)
-target_link_libraries(interconnect_learning_demo PRIVATE vr_base_framework)
+    add_executable(interconnect_learning_demo demo/interconnect_learning_demo.cpp)
+    target_link_libraries(interconnect_learning_demo PRIVATE vr_base_framework)
+endif()
 
 if(ENABLE_TESTS)
     enable_testing()
@@ -71,11 +80,6 @@ if(ENABLE_TESTS)
     target_link_libraries(retry_policy_test PRIVATE vr_base_framework)
     add_test(NAME retry_policy_test COMMAND retry_policy_test)
     set_tests_properties(retry_policy_test PROPERTIES LABELS "core" TIMEOUT 10)
-
-    add_executable(posix_message_queue_test tests/ipc/posix_message_queue_test.cpp)
-    target_link_libraries(posix_message_queue_test PRIVATE vr_base_framework)
-    add_test(NAME posix_message_queue_test COMMAND posix_message_queue_test)
-    set_tests_properties(posix_message_queue_test PROPERTIES LABELS "ipc" TIMEOUT 10)
 
     add_executable(logger_format_test tests/log/logger_format_test.cpp)
     target_link_libraries(logger_format_test PRIVATE vr_base_framework)
@@ -96,4 +100,27 @@ if(ENABLE_TESTS)
     target_link_libraries(interconnect_router_exception_test PRIVATE vr_base_framework)
     add_test(NAME interconnect_router_exception_test COMMAND interconnect_router_exception_test)
     set_tests_properties(interconnect_router_exception_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    add_executable(interconnect_backpressure_test tests/interconnect/interconnect_backpressure_test.cpp)
+    target_link_libraries(interconnect_backpressure_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_backpressure_test COMMAND interconnect_backpressure_test)
+    set_tests_properties(interconnect_backpressure_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    add_executable(interconnect_metrics_delta_test tests/interconnect/interconnect_metrics_delta_test.cpp)
+    target_link_libraries(interconnect_metrics_delta_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_metrics_delta_test COMMAND interconnect_metrics_delta_test)
+    set_tests_properties(interconnect_metrics_delta_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    add_executable(interconnect_config_provider_test tests/interconnect/interconnect_config_provider_test.cpp)
+    target_link_libraries(interconnect_config_provider_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_config_provider_test COMMAND interconnect_config_provider_test)
+    set_tests_properties(interconnect_config_provider_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    if(NOT WIN32)
+        add_executable(posix_message_queue_test tests/ipc/posix_message_queue_test.cpp)
+        target_link_libraries(posix_message_queue_test PRIVATE vr_base_framework)
+        add_test(NAME posix_message_queue_test COMMAND posix_message_queue_test)
+        set_tests_properties(posix_message_queue_test PROPERTIES LABELS "ipc" TIMEOUT 10)
+    endif()
 endif()
+

@@ -1,0 +1,87 @@
+Virtual-Vehicle-OS v0.5 可执行任务清单
+
+目标
+- 将 v0.4 的“可插拔 + 可观测 + 可配置”能力推进到“可热更新 + 可运维 + 可扩展传输 + 可压测验收”。
+- 形成可按周推进、可验收、可回归的工程任务闭环。
+
+范围
+- 配置层：IConfigProvider 扩展为可版本化、可热更新、可回滚。
+- 策略层：SLA/Backpressure/Retry 按 topic/channel 策略化。
+- 观测层：快照/增量导出对接 Prometheus 与车端诊断。
+- 传输层：新增跨平台 Transport（建议 TcpTransport）。
+- 质量层：故障注入 + 压测 + 版本兼容测试。
+
+里程碑与任务
+
+M1（第1周）：配置热更新基础设施
+1. 扩展 IConfigProvider 接口
+   - 新增：GetVersion()、WatchChanges(callback)（可选轮询实现）。
+   - 统一返回：配置版本、来源、校验结果。
+2. Bridge 热更新入口
+   - 新增：ReloadConfigIfChanged()。
+   - 要求：原子替换策略对象；失败不影响当前运行态。
+3. 回滚机制
+   - 保留 last_known_good_config。
+   - 热更新失败时自动回滚并记录事件。
+4. 验收标准
+   - 配置变更后可在运行中生效。
+   - 异常配置注入时系统持续可用，且来源/版本可追踪。
+
+M2（第2周）：SLA 策略引擎化
+1. 新增策略表结构
+   - 维度：channel + topic（支持通配符）。
+   - 字段：deadline_ms、retry_budget、backpressure_policy、drop_policy。
+2. Bridge 发送/接收路径接入策略决策
+   - Publish/ProcessInbound 统一走策略解析。
+3. 默认策略与兜底
+   - 无匹配时使用 default_policy，保证行为稳定。
+4. 验收标准
+   - 同一进程内不同 topic 呈现差异化重试/丢弃行为。
+   - 指标可区分策略命中次数。
+
+M3（第3周）：指标导出与诊断闭环
+1. SystemMetricsAggregator 导出增强
+   - 新增：ExportPrometheusText() 或 ExportJsonReport()。
+   - 提供：snapshot 与 delta 的时间窗信息。
+2. 诊断事件流
+   - 事件：配置重载、回滚、背压触发、路由miss、解码失败。
+3. Demo/工具对接
+   - 增加简单 metrics pull 示例（脚本或 demo 接口）。
+4. 验收标准
+   - 可周期抓取指标并可读。
+   - 故障事件可与指标关联定位。
+
+M4（第4周）：跨平台传输扩展 + 可靠性测试
+1. 新增 TcpTransport（建议）
+   - 满足 ITransport：Create/SendWithTimeout/ReceiveWithTimeout/DiscardOldest。
+2. 传输一致性测试
+   - 同一消息模型在 PosixMqTransport/TcpTransport 下行为一致。
+3. 故障注入测试
+   - 注入：超时、阻塞、乱序、重复、异常 handler。
+4. 验收标准
+   - 核心 interconnect 测试在 Windows/Linux 均可通过。
+   - 故障注入下无崩溃，指标可反映退化过程。
+
+交付件清单
+- 代码
+  - src/interconnect/config_provider.hpp（扩展）
+  - src/interconnect/interconnect_bridge.hpp/.cpp（热更新与策略接入）
+  - src/interconnect/system_metrics_aggregator.hpp（导出增强）
+  - src/interconnect/tcp_transport.hpp/.cpp（新增）
+- 测试
+  - tests/interconnect/interconnect_config_reload_test.cpp
+  - tests/interconnect/interconnect_policy_matrix_test.cpp
+  - tests/interconnect/interconnect_transport_consistency_test.cpp
+  - tests/interconnect/interconnect_fault_injection_test.cpp
+- 构建
+  - CMakeLists.txt（按平台启用对应 transport 与测试）
+
+验收 KPI（建议）
+- 功能：新增/改造测试通过率 100%。
+- 稳定性：故障注入场景下进程不崩溃，自动恢复率 >= 99%。
+- 性能：关键 topic P99 端到端延迟满足策略阈值。
+- 可观测性：指标与事件可覆盖 90%+ 常见故障定位场景。
+
+执行建议
+- 每周一冻结目标，每周五跑全量回归并输出周报（问题、风险、下周计划）。
+- 每个里程碑至少保留 1 天用于回归与文档化（接口变更说明 + 升级注意事项）。
