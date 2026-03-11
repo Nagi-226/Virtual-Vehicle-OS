@@ -1,12 +1,12 @@
-thread_pool_test 3 0.102168
-retry_policy_test 3 0.0610137
-logger_format_test 3 0.0135316
-interconnect_codec_test 2 0.0162804
+thread_pool_test 4 0.0744014
+retry_policy_test 4 0.0462862
+logger_format_test 4 0.0125116
+interconnect_codec_test 3 0.0150848
 interconnect_ttl_test 2 0
-interconnect_router_exception_test 3 0.0118297
+interconnect_router_exception_test 4 0.0116405
 interconnect_backpressure_test 2 0
-interconnect_metrics_delta_test 3 0.0111547
-interconnect_config_provider_test 3 0.0119737
+interconnect_metrics_delta_test 4 0.015655
+interconnect_config_provider_test 4 0.0104464
 ---
 interconnect_ttl_test
 interconnect_backpressure_test

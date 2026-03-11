@@ -75,6 +75,9 @@ bool TestDropOldestBackpressure() {
     config.thread_pool.worker_count = 1;
     config.thread_pool.queue_capacity = 4;
     config.sla_policy.backpressure_policy = vr::interconnect::BackpressurePolicy::kDropOldest;
+    config.policy_table.default_policy = config.sla_policy;
+    config.policy_table.default_policy.backpressure_policy =
+        vr::interconnect::BackpressurePolicy::kDropOldest;
 
     if (!ExpectTrue(bridge.Start(config) == vr::core::ErrorCode::kOk, "bridge start failed")) {
         return false;

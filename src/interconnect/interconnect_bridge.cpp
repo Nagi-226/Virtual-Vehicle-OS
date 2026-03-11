@@ -62,6 +62,7 @@ vr::core::ErrorCode InterconnectBridge::Start(IConfigProvider* const provider) n
     }
 
     loaded_config_source_ = source;
+    loaded_config_version_ = provider->GetVersion();
     return Start(cfg);
 }
 
@@ -79,6 +80,13 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
     }
 
     config_ = config;
+    if (config_.policy_table.rules.empty() &&
+        config_.policy_table.default_policy.max_end_to_end_latency_ms == 100U &&
+        config_.policy_table.default_policy.transport_receive_timeout_ms == 50 &&
+        config_.policy_table.default_policy.transport_send_timeout_ms == 50 &&
+        config_.policy_table.default_policy.backpressure_policy == BackpressurePolicy::kReject) {
+        config_.policy_table.default_policy = config_.sla_policy;
+    }
 
     vr::core::ErrorCode ec = vehicle_to_robot_transport_->Create(config_.vehicle_to_robot_endpoint);
     if (ec != vr::core::ErrorCode::kOk) {
@@ -177,23 +185,63 @@ std::string InterconnectBridge::GetLoadedConfigSource() const {
     return loaded_config_source_;
 }
 
+std::uint64_t InterconnectBridge::GetLoadedConfigVersion() const noexcept {
+    return loaded_config_version_;
+}
+
+vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
+    IConfigProvider* const provider) noexcept {
+    if (provider == nullptr) {
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
+    const vr::core::ErrorCode reload_ec = provider->Reload();
+    if (reload_ec != vr::core::ErrorCode::kOk) {
+        return reload_ec;
+    }
+
+    const std::uint64_t new_version = provider->GetVersion();
+    if (new_version == loaded_config_version_) {
+        return vr::core::ErrorCode::kOk;
+    }
+
+    BridgeConfig cfg;
+    std::string source;
+    const vr::core::ErrorCode load_ec = provider->LoadBridgeConfig(&cfg, &source);
+    if (load_ec != vr::core::ErrorCode::kOk) {
+        return load_ec;
+    }
+
+    config_ = cfg;
+    if (config_.policy_table.rules.empty() &&
+        config_.policy_table.default_policy.max_end_to_end_latency_ms == 100U &&
+        config_.policy_table.default_policy.transport_receive_timeout_ms == 50 &&
+        config_.policy_table.default_policy.transport_send_timeout_ms == 50 &&
+        config_.policy_table.default_policy.backpressure_policy == BackpressurePolicy::kReject) {
+        config_.policy_table.default_policy = config_.sla_policy;
+    }
+    loaded_config_source_ = source;
+    loaded_config_version_ = new_version;
+    return vr::core::ErrorCode::kOk;
+}
+
 vr::core::ErrorCode InterconnectBridge::PublishWithBackpressure(ITransport* const transport,
                                                                 const std::string& encoded,
-                                                                const std::uint32_t priority) noexcept {
+                                                                const std::uint32_t priority,
+                                                                const BridgeSlaPolicy& policy) noexcept {
     vr::core::ErrorCode send_ec =
-        transport->SendWithTimeout(encoded, priority, config_.sla_policy.transport_send_timeout_ms);
+        transport->SendWithTimeout(encoded, priority, policy.transport_send_timeout_ms);
     if (send_ec == vr::core::ErrorCode::kOk) {
         return send_ec;
     }
 
-    if (config_.sla_policy.backpressure_policy == BackpressurePolicy::kDropOldest &&
+    if (policy.backpressure_policy == BackpressurePolicy::kDropOldest &&
         (send_ec == vr::core::ErrorCode::kTimeout || send_ec == vr::core::ErrorCode::kThreadQueueFull ||
          send_ec == vr::core::ErrorCode::kWouldBlock)) {
         const vr::core::ErrorCode discard_ec = transport->DiscardOldest();
         if (discard_ec == vr::core::ErrorCode::kOk) {
             backpressure_drop_count_.fetch_add(1U, std::memory_order_relaxed);
-            send_ec = transport->SendWithTimeout(encoded, priority,
-                                                 config_.sla_policy.transport_send_timeout_ms);
+            send_ec = transport->SendWithTimeout(encoded, priority, policy.transport_send_timeout_ms);
         }
     }
 
@@ -224,8 +272,9 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
         return encode_ec;
     }
 
+    const BridgeSlaPolicy& policy = ResolvePolicy(envelope);
     const vr::core::ErrorCode send_ec =
-        PublishWithBackpressure(transport, encoded, config_.receive_priority);
+        PublishWithBackpressure(transport, encoded, config_.receive_priority, policy);
 
     if (send_ec != vr::core::ErrorCode::kOk) {
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
@@ -243,6 +292,22 @@ void InterconnectBridge::VehicleInboundLoop() noexcept {
     ProcessInbound(vehicle_to_robot_transport_.get(), &robot_router_, "vehicle_to_robot");
 }
 
+const BridgeSlaPolicy& InterconnectBridge::ResolvePolicy(
+    const MessageEnvelope& envelope) const noexcept {
+    for (const auto& rule : config_.policy_table.rules) {
+        const bool channel_match = rule.match_any_channel || rule.channel == envelope.channel;
+        if (!channel_match) {
+            continue;
+        }
+
+        if (rule.topic == "*" || rule.topic == envelope.topic) {
+            return rule.policy;
+        }
+    }
+
+    return config_.policy_table.default_policy;
+}
+
 void InterconnectBridge::RobotInboundLoop() noexcept {
     ProcessInbound(robot_to_vehicle_transport_.get(), &vehicle_router_, "robot_to_vehicle");
 }
@@ -253,9 +318,10 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
         std::string text;
         std::uint32_t priority = 0U;
 
+        const std::int64_t receive_timeout_ms =
+            config_.policy_table.default_policy.transport_receive_timeout_ms;
         const vr::core::ErrorCode recv_ec =
-            transport->ReceiveWithTimeout(&text, &priority,
-                                          config_.sla_policy.transport_receive_timeout_ms);
+            transport->ReceiveWithTimeout(&text, &priority, receive_timeout_ms);
         if (recv_ec == vr::core::ErrorCode::kTimeout || recv_ec == vr::core::ErrorCode::kWouldBlock) {
             continue;
         }
@@ -286,8 +352,9 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
             continue;
         }
 
+        const BridgeSlaPolicy& policy = ResolvePolicy(envelope);
         const std::uint64_t now_ms = NowUnixMs();
-        if (IsExpired(envelope, now_ms, config_.sla_policy.max_end_to_end_latency_ms)) {
+        if (IsExpired(envelope, now_ms, policy.max_end_to_end_latency_ms)) {
             expired_drop_count_.fetch_add(1U, std::memory_order_relaxed);
             LOG_WARN("Bridge dropped expired message topic: " + envelope.topic);
             RefreshAggregatedMetrics();

@@ -116,6 +116,11 @@ if(ENABLE_TESTS)
     add_test(NAME interconnect_config_provider_test COMMAND interconnect_config_provider_test)
     set_tests_properties(interconnect_config_provider_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
+    add_executable(interconnect_policy_matrix_test tests/interconnect/interconnect_policy_matrix_test.cpp)
+    target_link_libraries(interconnect_policy_matrix_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_policy_matrix_test COMMAND interconnect_policy_matrix_test)
+    set_tests_properties(interconnect_policy_matrix_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
     if(NOT WIN32)
         add_executable(posix_message_queue_test tests/ipc/posix_message_queue_test.cpp)
         target_link_libraries(posix_message_queue_test PRIVATE vr_base_framework)

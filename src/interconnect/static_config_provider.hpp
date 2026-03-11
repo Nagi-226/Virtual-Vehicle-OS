@@ -1,6 +1,7 @@
 #ifndef VR_INTERCONNECT_STATIC_CONFIG_PROVIDER_HPP
 #define VR_INTERCONNECT_STATIC_CONFIG_PROVIDER_HPP
 
+#include <cstdint>
 #include <string>
 #include <utility>
 
@@ -26,9 +27,22 @@ public:
         return vr::core::ErrorCode::kOk;
     }
 
+    std::uint64_t GetVersion() const noexcept override { return version_; }
+
+    vr::core::ErrorCode Reload() noexcept override {
+        return vr::core::ErrorCode::kOk;
+    }
+
+    void UpdateConfigForTest(BridgeConfig config, std::string source) {
+        config_ = std::move(config);
+        source_ = std::move(source);
+        ++version_;
+    }
+
 private:
     BridgeConfig config_;
     std::string source_;
+    std::uint64_t version_{1U};
 };
 
 }  // namespace interconnect

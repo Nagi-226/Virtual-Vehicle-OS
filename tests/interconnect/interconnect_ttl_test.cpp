@@ -92,6 +92,9 @@ bool TestExpiredMessageDropped() {
     config.sla_policy.max_end_to_end_latency_ms = 5;
     config.sla_policy.transport_receive_timeout_ms = 5;
     config.sla_policy.transport_send_timeout_ms = 5;
+    config.policy_table.default_policy = config.sla_policy;
+    config.policy_table.default_policy.max_end_to_end_latency_ms = 5;
+    config.policy_table.default_policy.transport_receive_timeout_ms = 5;
 
     std::uint32_t routed_count = 0U;
     bridge.RobotRouter().Register("vehicle.command", [&routed_count](const vr::interconnect::MessageEnvelope&) {

@@ -2,6 +2,10 @@
 #define VR_INTERCONNECT_BRIDGE_POLICY_HPP
 
 #include <cstdint>
+#include <string>
+#include <vector>
+
+#include "interconnect/message_envelope.hpp"
 
 namespace vr {
 namespace interconnect {
@@ -16,6 +20,18 @@ struct BridgeSlaPolicy {
     std::int64_t transport_receive_timeout_ms{50};
     std::int64_t transport_send_timeout_ms{50};
     BackpressurePolicy backpressure_policy{BackpressurePolicy::kReject};
+};
+
+struct PolicyRule {
+    bool match_any_channel{true};
+    ChannelType channel{ChannelType::kEvent};
+    std::string topic;
+    BridgeSlaPolicy policy;
+};
+
+struct BridgePolicyTable {
+    BridgeSlaPolicy default_policy;
+    std::vector<PolicyRule> rules;
 };
 
 }  // namespace interconnect

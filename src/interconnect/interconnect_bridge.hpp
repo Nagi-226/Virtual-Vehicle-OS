@@ -25,6 +25,7 @@ struct BridgeConfig {
     TransportEndpointConfig robot_to_vehicle_endpoint;
     vr::core::ThreadConfig thread_pool;
     BridgeSlaPolicy sla_policy;
+    BridgePolicyTable policy_table;
     std::uint32_t receive_priority{0U};
 };
 
@@ -49,11 +50,15 @@ public:
     MetricsSnapshot CaptureMetricsSnapshot() noexcept;
     MetricsDelta ExportMetricsDelta() noexcept;
     std::string GetLoadedConfigSource() const;
+    std::uint64_t GetLoadedConfigVersion() const noexcept;
+    vr::core::ErrorCode ReloadConfigIfChanged(IConfigProvider* provider) noexcept;
 
 private:
     vr::core::ErrorCode Publish(ITransport* transport, const MessageEnvelope& envelope) noexcept;
     vr::core::ErrorCode PublishWithBackpressure(ITransport* transport, const std::string& encoded,
-                                                std::uint32_t priority) noexcept;
+                                                std::uint32_t priority,
+                                                const BridgeSlaPolicy& policy) noexcept;
+    const BridgeSlaPolicy& ResolvePolicy(const MessageEnvelope& envelope) const noexcept;
 
     void VehicleInboundLoop() noexcept;
     void RobotInboundLoop() noexcept;
@@ -87,6 +92,7 @@ private:
     std::atomic<std::uint64_t> last_metrics_refresh_ms_{0U};
     static constexpr std::uint64_t kMetricsRefreshIntervalMs = 100U;
 
+    std::uint64_t loaded_config_version_{0U};
     std::string loaded_config_source_;
     mutable SystemMetricsAggregator metrics_aggregator_;
 };

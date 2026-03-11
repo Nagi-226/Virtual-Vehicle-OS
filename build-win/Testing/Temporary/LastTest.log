@@ -1,18 +1,18 @@
-Start testing: Mar 09 21:28 中国标准时间
+Start testing: Mar 10 20:08 中国标准时间
 ----------------------------------------------------------
 1/9 Testing: thread_pool_test
 1/9 Test: thread_pool_test
 Command: "E:/Github Project/Virtual-Vehicle-OS/build-win/Debug/thread_pool_test.exe"
 Directory: E:/Github Project/Virtual-Vehicle-OS/build-win
-"thread_pool_test" start time: Mar 09 21:28 中国标准时间
+"thread_pool_test" start time: Mar 10 20:08 中国标准时间
 Output:
 ----------------------------------------------------------
 ThreadPool tests passed.
 <end of output>
-Test time =   0.31 sec
+Test time =   0.30 sec
 ----------------------------------------------------------
 Test Passed.
-"thread_pool_test" end time: Mar 09 21:28 中国标准时间
+"thread_pool_test" end time: Mar 10 20:08 中国标准时间
 "thread_pool_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -20,15 +20,15 @@ Test Passed.
 2/9 Test: retry_policy_test
 Command: "E:/Github Project/Virtual-Vehicle-OS/build-win/Debug/retry_policy_test.exe"
 Directory: E:/Github Project/Virtual-Vehicle-OS/build-win
-"retry_policy_test" start time: Mar 09 21:28 中国标准时间
+"retry_policy_test" start time: Mar 10 20:08 中国标准时间
 Output:
 ----------------------------------------------------------
 RetryPolicy tests passed.
 <end of output>
-Test time =   0.18 sec
+Test time =   0.19 sec
 ----------------------------------------------------------
 Test Passed.
-"retry_policy_test" end time: Mar 09 21:28 中国标准时间
+"retry_policy_test" end time: Mar 10 20:08 中国标准时间
 "retry_policy_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -36,15 +36,15 @@ Test Passed.
 3/9 Test: logger_format_test
 Command: "E:/Github Project/Virtual-Vehicle-OS/build-win/Debug/logger_format_test.exe"
 Directory: E:/Github Project/Virtual-Vehicle-OS/build-win
-"logger_format_test" start time: Mar 09 21:28 中国标准时间
+"logger_format_test" start time: Mar 10 20:08 中国标准时间
 Output:
 ----------------------------------------------------------
 Logger format tests passed.
 <end of output>
-Test time =   0.04 sec
+Test time =   0.05 sec
 ----------------------------------------------------------
 Test Passed.
-"logger_format_test" end time: Mar 09 21:28 中国标准时间
+"logger_format_test" end time: Mar 10 20:08 中国标准时间
 "logger_format_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -52,15 +52,15 @@ Test Passed.
 4/9 Test: interconnect_codec_test
 Command: "E:/Github Project/Virtual-Vehicle-OS/build-win/Debug/interconnect_codec_test.exe"
 Directory: E:/Github Project/Virtual-Vehicle-OS/build-win
-"interconnect_codec_test" start time: Mar 09 21:28 中国标准时间
+"interconnect_codec_test" start time: Mar 10 20:08 中国标准时间
 Output:
 ----------------------------------------------------------
 interconnect codec test passed.
 <end of output>
-Test time =   0.03 sec
+Test time =   0.05 sec
 ----------------------------------------------------------
 Test Passed.
-"interconnect_codec_test" end time: Mar 09 21:28 中国标准时间
+"interconnect_codec_test" end time: Mar 10 20:08 中国标准时间
 "interconnect_codec_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -68,17 +68,17 @@ Test Passed.
 5/9 Test: interconnect_ttl_test
 Command: "E:/Github Project/Virtual-Vehicle-OS/build-win/Debug/interconnect_ttl_test.exe"
 Directory: E:/Github Project/Virtual-Vehicle-OS/build-win
-"interconnect_ttl_test" start time: Mar 09 21:28 中国标准时间
+"interconnect_ttl_test" start time: Mar 10 20:08 中国标准时间
 Output:
 ----------------------------------------------------------
-2026-03-09 21:28:30 [WARN] module=general context=default error_domain=COMMON error_code=0x0 [tid=60008] [E:\Github Project\Virtual-Vehicle-OS\src\interconnect\interconnect_bridge.cpp:292] Bridge dropped expired message topic: vehicle.command
+2026-03-10 20:08:17 [WARN] module=general context=default error_domain=COMMON error_code=0x0 [tid=27672] [E:\Github Project\Virtual-Vehicle-OS\src\interconnect\interconnect_bridge.cpp:292] Bridge dropped expired message topic: vehicle.command
 [FAILED] expired_drop_count should increase
 interconnect ttl test failed.
 <end of output>
-Test time =   0.11 sec
+Test time =   0.12 sec
 ----------------------------------------------------------
 Test Failed.
-"interconnect_ttl_test" end time: Mar 09 21:28 中国标准时间
+"interconnect_ttl_test" end time: Mar 10 20:08 中国标准时间
 "interconnect_ttl_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -86,15 +86,15 @@ Test Failed.
 6/9 Test: interconnect_router_exception_test
 Command: "E:/Github Project/Virtual-Vehicle-OS/build-win/Debug/interconnect_router_exception_test.exe"
 Directory: E:/Github Project/Virtual-Vehicle-OS/build-win
-"interconnect_router_exception_test" start time: Mar 09 21:28 中国标准时间
+"interconnect_router_exception_test" start time: Mar 10 20:08 中国标准时间
 Output:
 ----------------------------------------------------------
 interconnect router exception test passed.
 <end of output>
-Test time =   0.04 sec
+Test time =   0.05 sec
 ----------------------------------------------------------
 Test Passed.
-"interconnect_router_exception_test" end time: Mar 09 21:28 中国标准时间
+"interconnect_router_exception_test" end time: Mar 10 20:08 中国标准时间
 "interconnect_router_exception_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -102,16 +102,16 @@ Test Passed.
 7/9 Test: interconnect_backpressure_test
 Command: "E:/Github Project/Virtual-Vehicle-OS/build-win/Debug/interconnect_backpressure_test.exe"
 Directory: E:/Github Project/Virtual-Vehicle-OS/build-win
-"interconnect_backpressure_test" start time: Mar 09 21:28 中国标准时间
+"interconnect_backpressure_test" start time: Mar 10 20:08 中国标准时间
 Output:
 ----------------------------------------------------------
 [FAILED] backpressure metric should increase
 interconnect backpressure test failed.
 <end of output>
-Test time =   0.03 sec
+Test time =   0.04 sec
 ----------------------------------------------------------
 Test Failed.
-"interconnect_backpressure_test" end time: Mar 09 21:28 中国标准时间
+"interconnect_backpressure_test" end time: Mar 10 20:08 中国标准时间
 "interconnect_backpressure_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -119,15 +119,15 @@ Test Failed.
 8/9 Test: interconnect_metrics_delta_test
 Command: "E:/Github Project/Virtual-Vehicle-OS/build-win/Debug/interconnect_metrics_delta_test.exe"
 Directory: E:/Github Project/Virtual-Vehicle-OS/build-win
-"interconnect_metrics_delta_test" start time: Mar 09 21:28 中国标准时间
+"interconnect_metrics_delta_test" start time: Mar 10 20:08 中国标准时间
 Output:
 ----------------------------------------------------------
 interconnect metrics delta test passed.
 <end of output>
-Test time =   0.03 sec
+Test time =   0.06 sec
 ----------------------------------------------------------
 Test Passed.
-"interconnect_metrics_delta_test" end time: Mar 09 21:28 中国标准时间
+"interconnect_metrics_delta_test" end time: Mar 10 20:08 中国标准时间
 "interconnect_metrics_delta_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
@@ -135,7 +135,7 @@ Test Passed.
 9/9 Test: interconnect_config_provider_test
 Command: "E:/Github Project/Virtual-Vehicle-OS/build-win/Debug/interconnect_config_provider_test.exe"
 Directory: E:/Github Project/Virtual-Vehicle-OS/build-win
-"interconnect_config_provider_test" start time: Mar 09 21:28 中国标准时间
+"interconnect_config_provider_test" start time: Mar 10 20:08 中国标准时间
 Output:
 ----------------------------------------------------------
 interconnect config provider test passed.
@@ -143,15 +143,15 @@ interconnect config provider test passed.
 Test time =   0.04 sec
 ----------------------------------------------------------
 Test Passed.
-"interconnect_config_provider_test" end time: Mar 09 21:28 中国标准时间
+"interconnect_config_provider_test" end time: Mar 10 20:08 中国标准时间
 "interconnect_config_provider_test" time elapsed: 00:00:00
 ----------------------------------------------------------
 
-End testing: Mar 09 21:28 中国标准时间
+End testing: Mar 10 20:08 中国标准时间
 
-core =   0.49 sec*proc
+core =   0.48 sec*proc
 
-interconnect =   0.28 sec*proc
+interconnect =   0.36 sec*proc
 
-log =   0.04 sec*proc
+log =   0.05 sec*proc
 
