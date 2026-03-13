@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "interconnect/message_envelope.hpp"
@@ -20,18 +21,39 @@ struct BridgeSlaPolicy {
     std::int64_t transport_receive_timeout_ms{50};
     std::int64_t transport_send_timeout_ms{50};
     BackpressurePolicy backpressure_policy{BackpressurePolicy::kReject};
+    bool enable_timeout_sleep{true};
+    std::uint32_t receive_timeout_sleep_ms{10U};
 };
 
 struct PolicyRule {
+    std::uint32_t priority{0U};
+
     bool match_any_channel{true};
     ChannelType channel{ChannelType::kEvent};
+
+    bool match_any_source{true};
+    std::string source;
+
+    bool match_any_target{true};
+    std::string target;
+
+    bool match_any_qos{true};
+    DeliveryQoS qos{DeliveryQoS::kBestEffort};
+
     std::string topic;
     BridgeSlaPolicy policy;
 };
 
 struct BridgePolicyTable {
     BridgeSlaPolicy default_policy;
+
+    std::vector<PolicyRule> template_rules;
     std::vector<PolicyRule> rules;
+    std::vector<PolicyRule> runtime_overrides;
+
+    std::unordered_map<std::string, std::vector<std::size_t>> template_topic_rule_index;
+    std::unordered_map<std::string, std::vector<std::size_t>> topic_rule_index;
+    std::unordered_map<std::string, std::vector<std::size_t>> override_topic_rule_index;
 };
 
 }  // namespace interconnect

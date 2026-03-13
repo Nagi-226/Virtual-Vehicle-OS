@@ -48,6 +48,8 @@ const char* ToString(const ErrorCode code) noexcept {
             return "INTERCONNECT_INVALID_ENVELOPE";
         case ErrorCode::kInterconnectRouteMiss:
             return "INTERCONNECT_ROUTE_MISS";
+        case ErrorCode::kInterconnectRouteHandlerError:
+            return "INTERCONNECT_ROUTE_HANDLER_ERROR";
         default:
             return "UNKNOWN";
     }

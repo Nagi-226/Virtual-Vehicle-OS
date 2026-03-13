@@ -13,10 +13,16 @@ namespace interconnect {
 
 using MessageHandler = std::function<void(const MessageEnvelope& envelope)>;
 
+enum class RouteResult : std::uint8_t {
+    kOk = 0,
+    kNoHandler = 1,
+    kHandlerError = 2
+};
+
 class MessageRouter {
 public:
     bool Register(const std::string& topic, MessageHandler handler);
-    bool Route(const MessageEnvelope& envelope) const;
+    RouteResult Route(const MessageEnvelope& envelope) const;
 
 private:
     mutable std::mutex mutex_;

@@ -43,6 +43,7 @@ enum class ErrorCode : std::int32_t {
 
     kInterconnectInvalidEnvelope = MakeErrorCode(ErrorDomain::kInterconnect, 0x0001),
     kInterconnectRouteMiss = MakeErrorCode(ErrorDomain::kInterconnect, 0x0002),
+    kInterconnectRouteHandlerError = MakeErrorCode(ErrorDomain::kInterconnect, 0x0003),
 
     kUnknown = MakeErrorCode(ErrorDomain::kCommon, 0xFFFF)
 };

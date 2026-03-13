@@ -101,6 +101,7 @@ ErrorCode ThreadPool::Enqueue(const std::function<void()>& task) {
     }
 
     if (run_in_caller) {
+        submitted_count_.fetch_add(1U, std::memory_order_relaxed);
         ExecuteTask(task);
         return ErrorCode::kThreadTaskRejected;
     }

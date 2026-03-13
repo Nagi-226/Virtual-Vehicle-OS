@@ -15,13 +15,13 @@ bool MessageRouter::Register(const std::string& topic, MessageHandler handler) {
     return true;
 }
 
-bool MessageRouter::Route(const MessageEnvelope& envelope) const {
+RouteResult MessageRouter::Route(const MessageEnvelope& envelope) const {
     MessageHandler handler;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         const auto it = handlers_.find(envelope.topic);
         if (it == handlers_.end()) {
-            return false;
+            return RouteResult::kNoHandler;
         }
         handler = it->second;
     }
@@ -29,10 +29,10 @@ bool MessageRouter::Route(const MessageEnvelope& envelope) const {
     try {
         handler(envelope);
     } catch (...) {
-        return false;
+        return RouteResult::kHandlerError;
     }
 
-    return true;
+    return RouteResult::kOk;
 }
 
 }  // namespace interconnect
