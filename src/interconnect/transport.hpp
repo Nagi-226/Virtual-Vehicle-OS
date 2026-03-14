@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <unordered_map>
 
 #include "core/error_code.hpp"
 
@@ -13,11 +14,21 @@ struct TransportEndpointConfig {
     std::string name;
     long max_messages{32};
     long message_size{1024};
+    std::unordered_map<std::string, std::string> params;
+};
+
+struct TransportCapabilities {
+    bool supports_priority{true};
+    bool supports_discard_oldest{false};
+    bool supports_unlink{false};
 };
 
 class ITransport {
 public:
     virtual ~ITransport() = default;
+
+    virtual const char* Name() const noexcept = 0;
+    virtual TransportCapabilities Caps() const noexcept = 0;
 
     virtual vr::core::ErrorCode Create(const TransportEndpointConfig& config) noexcept = 0;
     virtual vr::core::ErrorCode SendWithTimeout(const std::string& message,

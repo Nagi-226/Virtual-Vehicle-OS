@@ -45,6 +45,7 @@ if(NOT WIN32)
         src/core/process_guardian.cpp
         src/ipc/posix_message_queue.cpp
         src/interconnect/posix_mq_transport.cpp
+        src/interconnect/tcp_transport.cpp
     )
 endif()
 
@@ -128,4 +129,3 @@ if(ENABLE_TESTS)
         set_tests_properties(posix_message_queue_test PROPERTIES LABELS "ipc" TIMEOUT 10)
     endif()
 endif()
-

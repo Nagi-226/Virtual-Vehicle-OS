@@ -531,10 +531,13 @@ vr::core::ErrorCode InterconnectBridge::PublishWithBackpressure(ITransport* cons
     if (policy.backpressure_policy == BackpressurePolicy::kDropOldest &&
         (send_ec == vr::core::ErrorCode::kTimeout || send_ec == vr::core::ErrorCode::kThreadQueueFull ||
          send_ec == vr::core::ErrorCode::kWouldBlock)) {
-        const vr::core::ErrorCode discard_ec = transport->DiscardOldest();
-        if (discard_ec == vr::core::ErrorCode::kOk) {
-            backpressure_drop_count_.fetch_add(1U, std::memory_order_relaxed);
-            send_ec = transport->SendWithTimeout(encoded, priority, policy.transport_send_timeout_ms);
+        const TransportCapabilities caps = transport->Caps();
+        if (caps.supports_discard_oldest) {
+            const vr::core::ErrorCode discard_ec = transport->DiscardOldest();
+            if (discard_ec == vr::core::ErrorCode::kOk) {
+                backpressure_drop_count_.fetch_add(1U, std::memory_order_relaxed);
+                send_ec = transport->SendWithTimeout(encoded, priority, policy.transport_send_timeout_ms);
+            }
         }
     }
 
@@ -648,7 +651,7 @@ const BridgeSlaPolicy& InterconnectBridge::ResolvePolicy(
 void InterconnectBridge::PopulateDefaultTemplateRules() {
     if (!config_.policy_table.template_rules.empty()) {
         return;
-    }
+        }
 
     PolicyRule control_rule;
     control_rule.priority = 10U;
@@ -698,7 +701,7 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
             const std::uint64_t now_ms = NowUnixMs();
             if (NextLogAllowedMs(&last_receive_error_log_ms_, now_ms, kLogThrottleIntervalMs) ==
                 now_ms) {
-                LOG_WARN("Bridge receive failed in " + loop_name);
+            LOG_WARN("Bridge receive failed in " + loop_name);
             }
             if (config_.policy_table.default_policy.enable_timeout_sleep) {
                 std::this_thread::sleep_for(std::chrono::milliseconds(
@@ -717,7 +720,7 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
             const std::uint64_t now_ms = NowUnixMs();
             if (NextLogAllowedMs(&last_decode_fail_log_ms_, now_ms, kLogThrottleIntervalMs) ==
                 now_ms) {
-                LOG_WARN("Bridge decode failed in " + loop_name);
+            LOG_WARN("Bridge decode failed in " + loop_name);
             }
             RefreshAggregatedMetrics();
             continue;
@@ -728,7 +731,7 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
             const std::uint64_t now_ms = NowUnixMs();
             if (NextLogAllowedMs(&last_invalid_envelope_log_ms_, now_ms, kLogThrottleIntervalMs) ==
                 now_ms) {
-                LOG_WARN("Bridge invalid envelope in " + loop_name);
+            LOG_WARN("Bridge invalid envelope in " + loop_name);
             }
             RefreshAggregatedMetrics();
             continue;
@@ -767,7 +770,7 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
                 qos_expired_drop_count_[envelope.qos] += 1U;
             }
             if (NextLogAllowedMs(&last_expired_log_ms_, now_ms, kLogThrottleIntervalMs) == now_ms) {
-                LOG_WARN("Bridge dropped expired message topic: " + envelope.topic);
+            LOG_WARN("Bridge dropped expired message topic: " + envelope.topic);
             }
             if (NextLogAllowedMs(&last_sla_violation_log_ms_, now_ms,
                                   sla_violation_sample_interval_ms_) == now_ms) {
@@ -780,10 +783,10 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
         const RouteResult route_result = router->Route(envelope);
         if (route_result != RouteResult::kOk) {
             if (route_result == RouteResult::kNoHandler) {
-                route_miss_count_.fetch_add(1U, std::memory_order_relaxed);
+            route_miss_count_.fetch_add(1U, std::memory_order_relaxed);
                 if (NextLogAllowedMs(&last_route_miss_log_ms_, now_ms, kLogThrottleIntervalMs) ==
                     now_ms) {
-                    LOG_WARN("Bridge route missed topic: " + envelope.topic);
+            LOG_WARN("Bridge route missed topic: " + envelope.topic);
                 }
             } else {
                 handler_error_count_.fetch_add(1U, std::memory_order_relaxed);

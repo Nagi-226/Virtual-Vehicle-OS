@@ -3,6 +3,18 @@
 namespace vr {
 namespace interconnect {
 
+const char* PosixMqTransport::Name() const noexcept {
+    return "posix_mq";
+}
+
+TransportCapabilities PosixMqTransport::Caps() const noexcept {
+    TransportCapabilities caps;
+    caps.supports_priority = true;
+    caps.supports_discard_oldest = true;
+    caps.supports_unlink = true;
+    return caps;
+}
+
 vr::core::ErrorCode PosixMqTransport::Create(const TransportEndpointConfig& config) noexcept {
     vr::ipc::QueueConfig queue_config;
     queue_config.name = config.name;
