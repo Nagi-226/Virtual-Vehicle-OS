@@ -1,0 +1,160 @@
+Virtual-Vehicle-OS 项目详解总览
+
+一、总体介绍
+本项目是一个车载端与机器人端之间的“嵌入式互通业务软件”基础框架，目标是提供稳定、可插拔、可观测的消息互通能力。核心定位是：
+- 车载域与机器人域的双向消息桥接
+- 统一消息模型 + 传输抽象 + 路由分发
+- SLA/TTL/背压控制与指标监测
+
+当前版本（v0.4）已具备：
+- 互通桥接（InterconnectBridge）
+- 统一消息编码/解码
+- 传输层抽象（ITransport）与 POSIX MQ 实现
+- 路由器（MessageRouter）
+- 指标聚合（SystemMetricsAggregator）
+- 背压策略接入（Drop Oldest）
+- 配置注入抽象（IConfigProvider）
+
+项目定位于“用户态进程可直接运行”的跨域互通框架，适合 Linux/Windows 环境的中间件层。FreeRTOS/STM32/ROS2 需要适配层支持。
+
+
+二、核心模块与功能
+
+1. interconnect（互通层）
+- interconnect_bridge：核心互通桥接类，负责双向收发、路由、SLA控制、指标统计。
+- message_envelope：统一消息封装，包含 source/target/topic/trace_id/ttl 等字段。
+- message_codec：负责将 MessageEnvelope 编解码成可传输字符串。
+- message_router：根据 topic 将消息分发给注册的 handler。
+- transport：传输层抽象（ITransport），当前实现 PosixMqTransport。
+- bridge_policy：SLA/Backpressure 策略配置结构。
+- system_metrics_aggregator：桥接与线程池指标聚合，支持快照与增量导出。
+
+2. core（基础设施）
+- thread_pool：线程池，支持拒绝策略与实时优先级配置，任务异常隔离。
+- retry_policy：可配置重试策略。
+- process_guardian：进程守护（Linux/Unix），用于异常退出时重启服务。
+
+3. ipc（进程间通信）
+- posix_message_queue：POSIX 消息队列封装，支持超时/非阻塞发送与接收。
+
+4. log（日志）
+- logger：统一日志接口，支持等级控制与上下文。
+
+
+三、业务逻辑实现方式（核心链路）
+
+1. 启动流程
+- InterconnectBridge::Start 加载配置 -> 创建双向 transport -> 启动线程池 -> 启动双向接收循环
+
+2. 发送路径
+- PublishFromVehicle / PublishFromRobot
+  - 校验 envelope
+  - 编码
+  - 发送（带背压策略）
+  - 计数指标
+
+3. 接收路径
+- VehicleInboundLoop / RobotInboundLoop
+  - ReceiveWithTimeout
+  - 解码 -> 校验 -> TTL/SLA 过期判断
+  - 路由分发（MessageRouter）
+  - 指标更新
+
+4. 背压策略
+- 支持 kReject / kDropOldest
+- 当发送失败且策略为 kDropOldest 时，丢弃最旧消息并重试一次发送
+
+5. 指标体系
+- bridge_metrics：tx/rx/encode_fail/decode_fail/expired/route_miss/backpressure 等
+- thread_pool_metrics：queue_size/executed/rejected/exception 等
+- 支持快照与增量导出，方便对接 Prometheus/车端诊断
+
+
+四、项目当前能力边界
+
+已支持：
+- 双向互通桥接
+- 统一消息模型
+- 传输可插拔接口
+- 背压与 SLA 控制
+- 运行时指标导出
+- 配置注入入口
+
+未直接支持（需适配）：
+- FreeRTOS / STM32
+- ROS2 生态原生通信
+- 分布式跨机可靠消息（仅进程内/IPC级别）
+
+
+五、可扩展方向（v0.5规划方向）
+
+1. 配置热更新（已开展，持续深化）
+- IConfigProvider 版本化与 Reload 已完成，继续补齐热更新一致性校验。
+- Bridge 侧支持热更新安全窗与回滚策略，新增变更审计与灰度开关。
+- 逐步形成“配置基线 + 增量变更”的发布流程，符合车企与机器人厂商的变更治理要求。
+
+2. 策略引擎化（逐步趋向策略集中化）
+- SLA/背压/重试按 topic/channel 策略化配置，支持静态+动态组合。
+- 引入策略优先级与冲突解析规则，保证跨域一致性。
+- 支持业务域策略模板（车载/机器人）与运行时策略覆盖。
+- 增加模板/覆盖规则的示例配置格式，便于车端与机器人端统一接入。
+- 增加策略缓存命中率统计（cache_hit/cache_miss），用于性能评估与容量调优。
+- 引入 topic+channel+qos 的 LRU 策略缓存替换，减少高频重复解析开销。
+
+3. 指标导出标准化（向企业级监控对齐）
+- Prometheus/JSON 标准导出，指标命名与标签风格对齐车企/机器人厂通用规范。（已补齐导出接口）
+- 增加全链路 trace_id 统计与 SLA 违规采样。（已补齐采样指标）
+- 预留设备侧轻量统计与车端诊断系统对接接口。
+
+4. 新 Transport（以平台适配为导向）
+- TcpTransport、共享内存、RTOS Queue 三类优先级实现。
+- 支持传输级别 QoS 映射（可靠/尽力、优先级队列）。
+- 增加端到端流控阈值配置，与背压策略统一管理。
+
+5. 故障注入与压测（工程化测试能力）
+- 超时、丢包、乱序、异常 handler 模拟。
+- 增加可脚本化的压测驱动器与基准报告模板。
+- 引入场景化测试集：弱网、突发流量、低内存、长时运行。
+
+6. 统一消息模型演进（跨平台/生态适配）
+- 逐步从自定义分隔协议转向结构化协议（Protobuf/CBOR）。
+- 增加 schema 版本管理与兼容策略，支持字段向前/向后兼容。
+- 提供轻量化编码路径，便于 FreeRTOS/STM32 端解析与资源受限场景适配。
+
+7. 安全与合规（面向车规与工业级要求）
+- 增加消息鉴权与签名扩展点，支持白名单与策略化验证。
+- 引入运行时配置校验与关键策略锁定，降低误配置风险。
+- 与日志/指标联动，形成可审计的事件追踪链路。
+
+
+六、平台适配路线（FreeRTOS / STM32 / ROS2）
+
+1. FreeRTOS/STM32 适配方向（优先）
+- 抽象 OS 依赖：线程/锁/时间/IPC 的统一适配层（替代 std::thread / pthread / POSIX MQ）。
+- 线程池替换为 RTOS 任务模型（Task + Queue），保留拒绝策略语义。
+- Transport 层增加 RTOS Queue/共享内存实现，支持零拷贝与低延迟。
+- 形成“轻量编解码 + 静态内存池 + 固定队列深度”的嵌入式配置模板。
+
+2. ROS2 适配方向（协同）
+- 实现 Ros2Transport 或 Ros2Adapter（topic <-> MessageEnvelope 映射）。
+- QoS 与 ROS2 QoS profile 对齐（best_effort / reliable）。
+- bridge_policy 增加 ROS2 topic 名称映射规则与 namespace 适配。
+- 支持 ROS2 参数动态注入与节点生命周期管理对接。
+
+3. 统一消息模型演进（平台一致性）
+- 逐步从自定义分隔协议转向结构化协议（Protobuf/CBOR），便于跨平台解析。
+- 增加 schema 版本管理与兼容策略。
+- 提供“嵌入式最小集协议”与“ROS2 兼容集协议”的双轨演进方案。
+
+4. 工程化适配规范（车企/机器人厂风格）
+- 编码规范与模块边界对齐“平台组件化 + 可裁剪”要求。
+- 统一日志等级、错误码、命名规则与配置字段命名风格。
+- 输出适配指南与验收基线，便于供应链或生态合作方集成。
+
+
+七、项目价值总结
+
+本项目已形成“车载-机器人互通”中间层的核心骨架，具备以下特征：
+- 可插拔：传输层和配置可替换
+- 可观测：指标与错误分支覆盖完整
+- 可演进：v0.5 可在此基础上引入策略引擎、热更新与跨平台扩展
