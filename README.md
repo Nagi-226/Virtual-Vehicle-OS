@@ -1,3 +1,4 @@
+
 Virtual-Vehicle-OS 项目详解总览
 
 一、总体介绍
@@ -6,14 +7,16 @@ Virtual-Vehicle-OS 项目详解总览
 - 统一消息模型 + 传输抽象 + 路由分发
 - SLA/TTL/背压控制与指标监测
 
-当前版本（v0.4）已具备：
+当前版本（v0.5）已具备：
 - 互通桥接（InterconnectBridge）
 - 统一消息编码/解码
-- 传输层抽象（ITransport）与 POSIX MQ 实现
+- 传输层抽象（ITransport）与 POSIX MQ / TcpTransport（Windows/Linux）
 - 路由器（MessageRouter）
 - 指标聚合（SystemMetricsAggregator）
-- 背压策略接入（Drop Oldest）
-- 配置注入抽象（IConfigProvider）
+- 背压/丢弃/重试策略接入（Drop Oldest / Drop New / Retry Budget）
+- 配置注入抽象（IConfigProvider）与热更新回滚入口
+- 指标导出标准化（Prometheus/JSON + reload 状态审计）
+- 故障注入/一致性测试用例（配置回滚、编码一致性、重试注入）
 
 项目定位于“用户态进程可直接运行”的跨域互通框架，适合 Linux/Windows 环境的中间件层。FreeRTOS/STM32/ROS2 需要适配层支持。
 
@@ -88,46 +91,99 @@ Virtual-Vehicle-OS 项目详解总览
 
 五、可扩展方向（v0.5规划方向）
 
-1. 配置热更新（已开展，持续深化）
-- IConfigProvider 版本化与 Reload 已完成，继续补齐热更新一致性校验。
-- Bridge 侧支持热更新安全窗与回滚策略，新增变更审计与灰度开关。
-- 逐步形成“配置基线 + 增量变更”的发布流程，符合车企与机器人厂商的变更治理要求。
+1. 配置热更新（已落地核心能力）
+- IConfigProvider 版本化与 Reload 已完成，并提供热更新回滚与审计指标。
+- Bridge 侧支持加载失败回滚到 last_known_good_config，记录 reload 状态码。
+- 已补齐回滚一致性校验规则（hash/签名），异常变更可触发回滚。
+- 下一步补齐配置灰度开关，形成可追溯的发布治理流程。
+- 追加任务：策略校验工具（lint + 打印冲突规则）。
+- 追加任务：fault injection 更完整场景（乱序/重复/handler异常）。
+- 追加任务：TcpTransport 端到端集成测试（双端本地 loopback）。
 
-2. 策略引擎化（逐步趋向策略集中化）
-- SLA/背压/重试按 topic/channel 策略化配置，支持静态+动态组合。
+2. 策略引擎化（已落地核心能力）
+- SLA/背压/丢弃/重试按 topic/channel 策略化配置，支持静态+动态组合。
 - 引入策略优先级与冲突解析规则，保证跨域一致性。
 - 支持业务域策略模板（车载/机器人）与运行时策略覆盖。
 - 增加模板/覆盖规则的示例配置格式，便于车端与机器人端统一接入。
 - 增加策略缓存命中率统计（cache_hit/cache_miss），用于性能评估与容量调优。
 - 引入 topic+channel+qos 的 LRU 策略缓存替换，减少高频重复解析开销。
+- 增加策略 lint 报告与冲突列表输出入口（GetPolicyLintReport/DumpPolicyConflicts）。
+- 强化跨层优先级冲突检测（override vs rules vs template）。
 
 3. 指标导出标准化（向企业级监控对齐）
 - Prometheus/JSON 标准导出，指标命名与标签风格对齐车企/机器人厂通用规范。（已补齐导出接口）
 - 增加全链路 trace_id 统计与 SLA 违规采样。（已补齐采样指标）
+- 增加 reload 成功/失败/回滚计数与状态码导出，满足运维审计场景。
+- Prometheus/JSON/轻量 JSON 均导出 policy lint issue/warning 与 reload status。
 - 预留设备侧轻量统计与车端诊断系统对接接口。
 
 4. 新 Transport（以平台适配为导向）
-- TcpTransport、共享内存、RTOS Queue 三类优先级实现。
-- 支持传输级别 QoS 映射（可靠/尽力、优先级队列）。
-- 增加端到端流控阈值配置，与背压策略统一管理。
+- TcpTransport 已实现并支持 Windows/Linux；共享内存、RTOS Queue 作为后续扩展。
+- 支持传输级别 QoS 映射（可靠/尽力、优先级队列），落地 priority 提升策略。
+- 增加端到端流控阈值配置，与背压策略统一管理（flow_limit_inflight）。
+- 补齐 TCP 连接级参数：tcp_nodelay/tcp_keepalive 可配置。
 
 5. 故障注入与压测（工程化测试能力）
-- 超时、丢包、乱序、异常 handler 模拟。
+- 增加故障注入测试：WouldBlock 重试、超时回归、丢弃策略触发。
+- 增加异常 handler 与 route miss 场景的覆盖测试。
+- 增加编码一致性测试与配置回滚测试。
+- 增加过期消息（TTL）回归测试。
+- 超时、丢包、乱序等场景仍可继续扩展。
 - 增加可脚本化的压测驱动器与基准报告模板。
+- 新增 interconnect_benchmark_driver 与标准化 benchmark_report_template.md。
 - 引入场景化测试集：弱网、突发流量、低内存、长时运行。
 
 6. 统一消息模型演进（跨平台/生态适配）
 - 逐步从自定义分隔协议转向结构化协议（Protobuf/CBOR）。
 - 增加 schema 版本管理与兼容策略，支持字段向前/向后兼容。
-- 提供轻量化编码路径，便于 FreeRTOS/STM32 端解析与资源受限场景适配。
+- 支持 schema_version 降级映射与未知字段忽略。
+- 提供轻量化编码路径（compact mode），便于 FreeRTOS/STM32 端解析与资源受限场景适配。
+- 规划阶段：v0.x 保持当前协议并补齐兼容校验，v1.x 引入可选 Protobuf/CBOR 通道。
 
 7. 安全与合规（面向车规与工业级要求）
-- 增加消息鉴权与签名扩展点，支持白名单与策略化验证。
+- 增加消息鉴权与签名扩展点（可选挂载），支持白名单与策略化验证。
 - 引入运行时配置校验与关键策略锁定，降低误配置风险。
 - 与日志/指标联动，形成可审计的事件追踪链路。
+- 支持策略变更审计事件输出（reload/status/trace 关联）。
 
 
 六、平台适配路线（FreeRTOS / STM32 / ROS2）
+
+专项：代码冗余与 BUG 排查机制（默认每版本落地后执行）
+- 统一执行冗余逻辑清理、潜在崩溃点与并发风险巡检。
+- 输出本轮修复清单与剩余待评估项，纳入版本审计记录。
+
+【剩余待评估项审计清单（每版本复用）】
+1) 代码冗余/可维护性
+- 规则/指标/策略逻辑是否存在多处重复实现。
+- 同一模块内是否存在“同义函数/重复判断”。
+- 同配置字段是否存在多处默认值修正。
+
+2) 并发与线程安全
+- 共享计数是否存在读写未对齐（锁/原子一致性）。
+- 是否存在锁内调用外部回调导致潜在死锁。
+- 线程退出路径是否可能遗漏 join/notify。
+
+3) 错误处理与边界条件
+- 超时/空指针/空字符串/非法配置是否覆盖。
+- send/recv 失败路径是否记录指标。
+- reload 失败/回滚是否保持状态一致。
+
+4) 资源泄漏与生命周期
+- socket/queue/线程是否存在未关闭路径。
+- Create/Open/Close/Unlink 的状态机是否对称。
+- 异常路径是否可能跳过 Close。
+
+5) 配置与策略一致性
+- default_policy 与 sla_policy 是否存在冲突配置。
+- override/rules/template 是否存在跨层优先级反转。
+- policy lint 是否输出最新配置结果。
+
+6) 指标导出一致性
+- Prometheus/JSON/轻量 JSON 是否字段一致。
+- reload/status/diagnostics 是否落地指标。
+- 指标命名是否符合企业级规范（可读/可检索）。
+
 
 1. FreeRTOS/STM32 适配方向（优先）
 - 抽象 OS 依赖：线程/锁/时间/IPC 的统一适配层（替代 std::thread / pthread / POSIX MQ）。
@@ -158,3 +214,6 @@ Virtual-Vehicle-OS 项目详解总览
 - 可插拔：传输层和配置可替换
 - 可观测：指标与错误分支覆盖完整
 - 可演进：v0.5 可在此基础上引入策略引擎、热更新与跨平台扩展
+
+结论：
+当前框架已经具备工程化可用的互通能力，适合作为车载与机器人之间中间件的标准基座；下一步在配置热更新、策略化与跨平台适配上继续扩展即可形成完整产品能力。
