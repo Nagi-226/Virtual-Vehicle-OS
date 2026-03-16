@@ -22,6 +22,12 @@ bool TestSnapshotAndDelta() {
     bm1.tx_count = 10;
     bm1.rx_count = 8;
     bm1.route_miss_count = 1;
+    bm1.policy_lint_issue_count = 2;
+    bm1.policy_lint_warning_count = 1;
+    bm1.reload_success_count = 3;
+    bm1.reload_fail_count = 1;
+    bm1.reload_rollback_count = 1;
+    bm1.last_reload_status_code = 42;
     agg.UpdateBridgeMetrics(bm1);
 
     vr::core::ThreadPoolMetrics tp1;
@@ -47,6 +53,20 @@ bool TestSnapshotAndDelta() {
     const auto d1 = agg.ExportDeltaSinceLastCall();
     const auto d2 = agg.ExportDeltaSinceLastCall();
 
+    const auto json = agg.ExportJson();
+    const auto lite = agg.ExportJsonLightweight();
+    const auto prom = agg.ExportPrometheus();
+
+    const bool has_lint = json.find("policy_lint_issue") != std::string::npos &&
+        json.find("policy_lint_warning") != std::string::npos;
+    const bool has_reload = json.find("reload_status") != std::string::npos;
+    const bool has_lite_lint = lite.find("lint_i") != std::string::npos &&
+        lite.find("lint_w") != std::string::npos;
+    const bool has_lite_code = lite.find("r_code") != std::string::npos;
+    const bool has_prom = prom.find("vv_policy_lint_issue_total") != std::string::npos &&
+        prom.find("vv_policy_lint_warning_total") != std::string::npos &&
+        prom.find("vv_reload_status_code") != std::string::npos;
+
     return ExpectTrue(s1.timestamp_ms > 0U, "snapshot timestamp should be valid") &&
            ExpectTrue(d1.bridge_metrics_delta.tx_count == bm2.tx_count,
                       "first delta should export full tx on initial call") &&
@@ -55,7 +75,12 @@ bool TestSnapshotAndDelta() {
            ExpectTrue(d2.bridge_metrics_delta.tx_count == 0U,
                       "second delta should be zero without updates") &&
            ExpectTrue(d2.thread_pool_exception_delta == 0U,
-                      "second delta exception should be zero");
+                      "second delta exception should be zero") &&
+           ExpectTrue(has_lint, "json should include policy lint counts") &&
+           ExpectTrue(has_reload, "json should include reload status") &&
+           ExpectTrue(has_lite_lint, "lightweight json should include lint counts") &&
+           ExpectTrue(has_lite_code, "lightweight json should include reload status") &&
+           ExpectTrue(has_prom, "prometheus should include lint and reload status");
 }
 
 }  // namespace

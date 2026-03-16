@@ -45,6 +45,29 @@ int main() {
     config.sla_policy.transport_receive_timeout_ms = 50;
     config.sla_policy.transport_send_timeout_ms = 50;
     config.sla_policy.backpressure_policy = vr::interconnect::BackpressurePolicy::kDropOldest;
+    config.sla_policy.drop_policy = vr::interconnect::DropPolicy::kDropOldest;
+    config.sla_policy.retry_budget.max_retries = 2;
+    config.sla_policy.retry_budget.initial_backoff_ms = 5;
+    config.sla_policy.retry_budget.max_backoff_ms = 20;
+
+    vr::interconnect::PolicyRule control_rule;
+    control_rule.priority = 10U;
+    control_rule.match_any_channel = false;
+    control_rule.channel = vr::interconnect::ChannelType::kControl;
+    control_rule.topic = "vehicle.command";
+    control_rule.policy.transport_send_timeout_ms = 30;
+    control_rule.policy.backpressure_policy = vr::interconnect::BackpressurePolicy::kDropOldest;
+    control_rule.policy.drop_policy = vr::interconnect::DropPolicy::kDropOldest;
+    control_rule.policy.retry_budget.max_retries = 1;
+    control_rule.policy.retry_budget.initial_backoff_ms = 5;
+    control_rule.policy.retry_budget.max_backoff_ms = 10;
+    config.policy_table.rules.push_back(control_rule);
+
+    vr::interconnect::PolicyRule conflict_rule = control_rule;
+    conflict_rule.priority = control_rule.priority;
+    conflict_rule.topic = "vehicle.command";
+    conflict_rule.policy.transport_send_timeout_ms = 40;
+    config.policy_table.rules.push_back(conflict_rule);
 
     vr::interconnect::InterconnectBridge bridge(std::make_unique<vr::interconnect::PosixMqTransport>(),
                                                 std::make_unique<vr::interconnect::PosixMqTransport>());
@@ -107,6 +130,16 @@ int main() {
 
     LOG_INFO("Bridge delta => tx_delta=" + std::to_string(delta.bridge_metrics_delta.tx_count) +
              ", rx_delta=" + std::to_string(delta.bridge_metrics_delta.rx_count));
+
+    LOG_INFO("Policy lint report:\n" + bridge.GetPolicyLintReport());
+    const auto conflicts = bridge.DumpPolicyConflicts();
+    if (conflicts.empty()) {
+        LOG_INFO("Policy conflict check: clean");
+    } else {
+        for (const auto& conflict : conflicts) {
+            LOG_WARN("Policy conflict => " + conflict);
+        }
+    }
 
     bridge.Stop();
 

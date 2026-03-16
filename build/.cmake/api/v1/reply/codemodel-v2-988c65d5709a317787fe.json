@@ -1,0 +1,168 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "VehicleRobotBaseFramework",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "commonsvc_log::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-commonsvc_log-Debug-cf7df8f86c42163acb23.json",
+					"name" : "commonsvc_log",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_backpressure_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_backpressure_test-Debug-997205e01e309ea5b3fc.json",
+					"name" : "interconnect_backpressure_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_codec_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_codec_test-Debug-b6b7d61723980f7b6b8c.json",
+					"name" : "interconnect_codec_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_config_provider_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_config_provider_test-Debug-bf4a6892b6c55be48c1c.json",
+					"name" : "interconnect_config_provider_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_metrics_delta_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_metrics_delta_test-Debug-94c547e863f911032c5e.json",
+					"name" : "interconnect_metrics_delta_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_policy_matrix_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_policy_matrix_test-Debug-c8773de38d972e2bd9f4.json",
+					"name" : "interconnect_policy_matrix_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_router_exception_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_router_exception_test-Debug-9f880b0434f10204aa18.json",
+					"name" : "interconnect_router_exception_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_ttl_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_ttl_test-Debug-ab265a254d0af0d77469.json",
+					"name" : "interconnect_ttl_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "logger_format_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-logger_format_test-Debug-693b4c959bc19b0eb1ba.json",
+					"name" : "logger_format_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "retry_policy_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-retry_policy_test-Debug-d8409a986101fbe3fccb.json",
+					"name" : "retry_policy_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "thread_pool_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-thread_pool_test-Debug-4095cba2ba131bde7f59.json",
+					"name" : "thread_pool_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vr_base_framework::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vr_base_framework-Debug-5b4fffbbae7178f0f7fc.json",
+					"name" : "vr_base_framework",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vr_error_code::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vr_error_code-Debug-8350c9a753c536751284.json",
+					"name" : "vr_error_code",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "E:/Github Project/Virtual-Vehicle-OS/build",
+		"source" : "E:/Github Project/Virtual-Vehicle-OS"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

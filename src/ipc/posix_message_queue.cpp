@@ -31,6 +31,10 @@ timespec MakeAbsTimeout(const std::int64_t timeout_ms) noexcept {
 }
 
 bool SetQueueNonBlocking(const int mqd, bool enable, long* original_flags) noexcept {
+    if (original_flags == nullptr) {
+        return false;
+    }
+
     mq_attr attr{};
     if (mq_getattr(static_cast<mqd_t>(mqd), &attr) != 0) {
         return false;

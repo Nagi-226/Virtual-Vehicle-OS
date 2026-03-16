@@ -1,0 +1,90 @@
+{
+	"kind" : "toolchains",
+	"toolchains" : 
+	[
+		{
+			"compiler" : 
+			{
+				"id" : "GNU",
+				"implicit" : 
+				{
+					"includeDirectories" : 
+					[
+						"E:/mingw64/include/c++/15.1.0",
+						"E:/mingw64/include/c++/15.1.0/x86_64-w64-mingw32",
+						"E:/mingw64/include/c++/15.1.0/backward",
+						"E:/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include",
+						"E:/mingw64/include",
+						"E:/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0/include-fixed"
+					],
+					"linkDirectories" : 
+					[
+						"E:/mingw64/lib/gcc/x86_64-w64-mingw32/15.1.0",
+						"E:/mingw64/lib/gcc",
+						"E:/mingw64/x86_64-w64-mingw32/lib",
+						"E:/mingw64/lib"
+					],
+					"linkFrameworkDirectories" : [],
+					"linkLibraries" : 
+					[
+						"stdc++",
+						"mingw32",
+						"gcc_s",
+						"gcc",
+						"mingwex",
+						"kernel32",
+						"pthread",
+						"advapi32",
+						"shell32",
+						"user32",
+						"kernel32",
+						"mingw32",
+						"gcc_s",
+						"gcc",
+						"mingwex",
+						"kernel32"
+					]
+				},
+				"path" : "E:/mingw64/bin/g++.exe",
+				"version" : "15.1.0"
+			},
+			"language" : "CXX",
+			"sourceFileExtensions" : 
+			[
+				"C",
+				"M",
+				"c++",
+				"cc",
+				"cpp",
+				"cxx",
+				"m",
+				"mm",
+				"mpp",
+				"CPP",
+				"ixx",
+				"cppm",
+				"ccm",
+				"cxxm",
+				"c++m"
+			]
+		},
+		{
+			"compiler" : 
+			{
+				"implicit" : {},
+				"path" : "E:/mingw64/bin/windres.exe"
+			},
+			"language" : "RC",
+			"sourceFileExtensions" : 
+			[
+				"rc",
+				"RC"
+			]
+		}
+	],
+	"version" : 
+	{
+		"major" : 1,
+		"minor" : 0
+	}
+}

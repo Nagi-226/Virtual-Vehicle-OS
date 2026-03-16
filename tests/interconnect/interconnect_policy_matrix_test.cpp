@@ -75,12 +75,17 @@ vr::interconnect::BridgeConfig MakePolicyConfig() {
     config.sla_policy.transport_receive_timeout_ms = 20;
     config.sla_policy.transport_send_timeout_ms = 20;
     config.sla_policy.backpressure_policy = vr::interconnect::BackpressurePolicy::kReject;
+    config.sla_policy.drop_policy = vr::interconnect::DropPolicy::kDropNone;
+    config.sla_policy.retry_budget.max_retries = 1;
+    config.sla_policy.retry_budget.initial_backoff_ms = 5;
+    config.sla_policy.retry_budget.max_backoff_ms = 10;
 
     config.policy_table.default_policy.max_end_to_end_latency_ms = 200U;
     config.policy_table.default_policy.transport_receive_timeout_ms = 30;
     config.policy_table.default_policy.transport_send_timeout_ms = 30;
     config.policy_table.default_policy.backpressure_policy =
         vr::interconnect::BackpressurePolicy::kReject;
+    config.policy_table.default_policy.drop_policy = vr::interconnect::DropPolicy::kDropNone;
 
     vr::interconnect::PolicyRule control_rule;
     control_rule.match_any_channel = false;
@@ -90,6 +95,10 @@ vr::interconnect::BridgeConfig MakePolicyConfig() {
     control_rule.policy.transport_receive_timeout_ms = 7;
     control_rule.policy.transport_send_timeout_ms = 7;
     control_rule.policy.backpressure_policy = vr::interconnect::BackpressurePolicy::kDropOldest;
+    control_rule.policy.drop_policy = vr::interconnect::DropPolicy::kDropOldest;
+    control_rule.policy.retry_budget.max_retries = 1;
+    control_rule.policy.retry_budget.initial_backoff_ms = 5;
+    control_rule.policy.retry_budget.max_backoff_ms = 10;
     config.policy_table.rules.push_back(control_rule);
 
     return config;
@@ -118,12 +127,16 @@ bool TestDropOldestPolicyApplied() {
 
     const auto ec = bridge.PublishFromVehicle(msg);
     const auto snapshot = bridge.CaptureMetricsSnapshot();
+    const auto lint_report = bridge.GetPolicyLintReport();
+    const auto conflicts = bridge.DumpPolicyConflicts();
     bridge.Stop();
 
     return ExpectTrue(ec == vr::core::ErrorCode::kOk, "drop-oldest policy should recover") &&
            ExpectTrue(tx_raw->discard_calls() >= 1U, "drop-oldest should discard") &&
            ExpectTrue(snapshot.bridge_metrics.backpressure_drop_count >= 1U,
-                      "backpressure metric should increase");
+                      "backpressure metric should increase") &&
+           ExpectTrue(!lint_report.empty(), "lint report should be available") &&
+           ExpectTrue(conflicts.empty(), "policy conflicts should be empty");
 }
 
 bool TestDefaultRejectPolicyApplied() {
@@ -149,13 +162,15 @@ bool TestDefaultRejectPolicyApplied() {
 
     const auto ec = bridge.PublishFromVehicle(msg);
     const auto snapshot = bridge.CaptureMetricsSnapshot();
+    const auto lint_report = bridge.GetPolicyLintReport();
     bridge.Stop();
 
     return ExpectTrue(ec == vr::core::ErrorCode::kWouldBlock,
                       "default reject policy should not retry") &&
            ExpectTrue(tx_raw->discard_calls() == 0U, "reject policy should not discard") &&
            ExpectTrue(snapshot.bridge_metrics.backpressure_drop_count == 0U,
-                      "backpressure metric should not increase");
+                      "backpressure metric should not increase") &&
+           ExpectTrue(!lint_report.empty(), "lint report should be available");
 }
 
 }  // namespace

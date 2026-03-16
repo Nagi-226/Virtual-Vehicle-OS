@@ -16,11 +16,25 @@ enum class BackpressurePolicy : std::uint8_t {
     kDropOldest = 1
 };
 
+enum class DropPolicy : std::uint8_t {
+    kDropNone = 0,
+    kDropNew = 1,
+    kDropOldest = 2
+};
+
+struct RetryBudget {
+    std::int32_t max_retries{0};
+    std::int64_t initial_backoff_ms{10};
+    std::int64_t max_backoff_ms{200};
+};
+
 struct BridgeSlaPolicy {
     std::uint32_t max_end_to_end_latency_ms{100};
     std::int64_t transport_receive_timeout_ms{50};
     std::int64_t transport_send_timeout_ms{50};
     BackpressurePolicy backpressure_policy{BackpressurePolicy::kReject};
+    DropPolicy drop_policy{DropPolicy::kDropNone};
+    RetryBudget retry_budget{};
     bool enable_timeout_sleep{true};
     std::uint32_t receive_timeout_sleep_ms{10U};
 };

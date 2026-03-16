@@ -49,7 +49,9 @@ bool TestConfigProviderStart() {
     cfg.thread_pool.worker_count = 1;
     cfg.thread_pool.queue_capacity = 4;
     cfg.policy_table.default_policy = cfg.sla_policy;
-    cfg.policy_table.default_policy = cfg.sla_policy;
+    cfg.sla_policy.retry_budget.max_retries = 1;
+    cfg.sla_policy.retry_budget.initial_backoff_ms = 5;
+    cfg.sla_policy.retry_budget.max_backoff_ms = 10;
 
     vr::interconnect::StaticConfigProvider provider(cfg, "static://unit-test");
 
@@ -73,6 +75,9 @@ bool TestConfigReloadVersionChange() {
     cfg.thread_pool.worker_count = 1;
     cfg.thread_pool.queue_capacity = 4;
     cfg.policy_table.default_policy = cfg.sla_policy;
+    cfg.sla_policy.retry_budget.max_retries = 1;
+    cfg.sla_policy.retry_budget.initial_backoff_ms = 5;
+    cfg.sla_policy.retry_budget.max_backoff_ms = 10;
 
     vr::interconnect::StaticConfigProvider provider(cfg, "static://reload");
 

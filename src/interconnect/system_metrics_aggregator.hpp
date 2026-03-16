@@ -126,7 +126,11 @@ public:
                      default_labels);
         emit_counter("vv_policy_cache_hit_total", bridge_metrics_.policy_cache_hit_count, default_labels);
         emit_counter("vv_policy_cache_miss_total", bridge_metrics_.policy_cache_miss_count, default_labels);
+        emit_counter("vv_policy_lint_issue_total", bridge_metrics_.policy_lint_issue_count, default_labels);
+        emit_counter("vv_policy_lint_warning_total", bridge_metrics_.policy_lint_warning_count, default_labels);
         emit_counter("vv_trace_id_present_total", bridge_metrics_.trace_id_present_count, default_labels);
+        oss << "vv_reload_status_code" << default_labels << " "
+            << bridge_metrics_.last_reload_status_code << " " << ts << "\n";
         emit_counter("vv_trace_id_missing_total", bridge_metrics_.trace_id_missing_count, default_labels);
         emit_counter("vv_trace_id_sample_total", bridge_metrics_.trace_id_sampled_count, default_labels);
         emit_counter("vv_sla_violation_sample_total", bridge_metrics_.sla_violation_sampled_count,
@@ -134,11 +138,14 @@ public:
 
         emit_counter("vv_reload_success_total", bridge_metrics_.reload_success_count, default_labels);
         emit_counter("vv_reload_fail_total", bridge_metrics_.reload_fail_count, default_labels);
+        emit_counter("vv_reload_rollback_total", bridge_metrics_.reload_rollback_count, default_labels);
 
         oss << "vv_loaded_config_version" << default_labels << " " << bridge_metrics_.loaded_config_version
             << " " << ts << "\n";
         oss << "vv_last_reload_timestamp_ms" << default_labels << " "
             << bridge_metrics_.last_reload_timestamp_ms << " " << ts << "\n";
+        oss << "vv_last_reload_status_code" << default_labels << " "
+            << bridge_metrics_.last_reload_status_code << " " << ts << "\n";
 
         return oss.str();
     }
@@ -168,10 +175,18 @@ public:
         oss << "\"policy_conflict_sampled\":" << bridge_metrics_.policy_conflict_sampled_count << ",";
         oss << "\"policy_cache_hit\":" << bridge_metrics_.policy_cache_hit_count << ",";
         oss << "\"policy_cache_miss\":" << bridge_metrics_.policy_cache_miss_count << ",";
+        oss << "\"policy_lint_issue\":" << bridge_metrics_.policy_lint_issue_count << ",";
+        oss << "\"policy_lint_warning\":" << bridge_metrics_.policy_lint_warning_count << ",";
         oss << "\"trace_id_present\":" << bridge_metrics_.trace_id_present_count << ",";
         oss << "\"trace_id_missing\":" << bridge_metrics_.trace_id_missing_count << ",";
         oss << "\"trace_id_sampled\":" << bridge_metrics_.trace_id_sampled_count << ",";
-        oss << "\"sla_violation_sampled\":" << bridge_metrics_.sla_violation_sampled_count;
+        oss << "\"sla_violation_sampled\":" << bridge_metrics_.sla_violation_sampled_count << ",";
+        oss << "\"reload_success\":" << bridge_metrics_.reload_success_count << ",";
+        oss << "\"reload_fail\":" << bridge_metrics_.reload_fail_count << ",";
+        oss << "\"reload_rollback\":" << bridge_metrics_.reload_rollback_count << ",";
+        oss << "\"policy_lint_issue\":" << bridge_metrics_.policy_lint_issue_count << ",";
+        oss << "\"policy_lint_warning\":" << bridge_metrics_.policy_lint_warning_count << ",";
+        oss << "\"reload_status\":" << bridge_metrics_.last_reload_status_code;
         oss << "},";
         oss << "\"endpoint\":\"bridge\",";
         oss << "\"config_version\":" << bridge_metrics_.loaded_config_version;
@@ -198,7 +213,13 @@ public:
         oss << "\"pol_miss\":" << bridge_metrics_.policy_cache_miss_count << ",";
         oss << "\"tid_p\":" << bridge_metrics_.trace_id_present_count << ",";
         oss << "\"tid_m\":" << bridge_metrics_.trace_id_missing_count << ",";
-        oss << "\"sla_s\":" << bridge_metrics_.sla_violation_sampled_count;
+        oss << "\"sla_s\":" << bridge_metrics_.sla_violation_sampled_count << ",";
+        oss << "\"r_ok\":" << bridge_metrics_.reload_success_count << ",";
+        oss << "\"r_fail\":" << bridge_metrics_.reload_fail_count << ",";
+        oss << "\"r_rb\":" << bridge_metrics_.reload_rollback_count << ",";
+        oss << "\"lint_i\":" << bridge_metrics_.policy_lint_issue_count << ",";
+        oss << "\"lint_w\":" << bridge_metrics_.policy_lint_warning_count << ",";
+        oss << "\"r_code\":" << bridge_metrics_.last_reload_status_code;
         oss << "}";
         oss << ",\"ep\":\"bridge\"";
         oss << ",\"ver\":" << bridge_metrics_.loaded_config_version;

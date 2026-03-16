@@ -1,0 +1,104 @@
+[
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_error_code.dir\\src\\core\\error_code.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\core\\error_code.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\core\\error_code.cpp",
+  "output": "CMakeFiles\\vr_error_code.dir\\src\\core\\error_code.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\commonsvc_log.dir\\src\\log\\logger.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\log\\logger.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\log\\logger.cpp",
+  "output": "CMakeFiles\\commonsvc_log.dir\\src\\log\\logger.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\core\\thread_pool.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\core\\thread_pool.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\core\\thread_pool.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\core\\thread_pool.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\core\\retry_policy.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\core\\retry_policy.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\core\\retry_policy.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\core\\retry_policy.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\message_codec.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\message_codec.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\message_codec.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\message_codec.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\message_router.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\message_router.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\message_router.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\message_router.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\interconnect_bridge.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\interconnect_bridge.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\interconnect_bridge.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\interconnect_bridge.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\thread_pool_test.dir\\tests\\thread_pool_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\thread_pool_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\thread_pool_test.cpp",
+  "output": "CMakeFiles\\thread_pool_test.dir\\tests\\thread_pool_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\retry_policy_test.dir\\tests\\core\\retry_policy_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\core\\retry_policy_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\core\\retry_policy_test.cpp",
+  "output": "CMakeFiles\\retry_policy_test.dir\\tests\\core\\retry_policy_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\logger_format_test.dir\\tests\\log\\logger_format_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\log\\logger_format_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\log\\logger_format_test.cpp",
+  "output": "CMakeFiles\\logger_format_test.dir\\tests\\log\\logger_format_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_codec_test.dir\\tests\\interconnect\\interconnect_codec_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_codec_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_codec_test.cpp",
+  "output": "CMakeFiles\\interconnect_codec_test.dir\\tests\\interconnect\\interconnect_codec_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_ttl_test.dir\\tests\\interconnect\\interconnect_ttl_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_ttl_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_ttl_test.cpp",
+  "output": "CMakeFiles\\interconnect_ttl_test.dir\\tests\\interconnect\\interconnect_ttl_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_router_exception_test.dir\\tests\\interconnect\\interconnect_router_exception_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_router_exception_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_router_exception_test.cpp",
+  "output": "CMakeFiles\\interconnect_router_exception_test.dir\\tests\\interconnect\\interconnect_router_exception_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_backpressure_test.dir\\tests\\interconnect\\interconnect_backpressure_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_backpressure_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_backpressure_test.cpp",
+  "output": "CMakeFiles\\interconnect_backpressure_test.dir\\tests\\interconnect\\interconnect_backpressure_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_metrics_delta_test.dir\\tests\\interconnect\\interconnect_metrics_delta_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_metrics_delta_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_metrics_delta_test.cpp",
+  "output": "CMakeFiles\\interconnect_metrics_delta_test.dir\\tests\\interconnect\\interconnect_metrics_delta_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_config_provider_test.dir\\tests\\interconnect\\interconnect_config_provider_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_config_provider_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_config_provider_test.cpp",
+  "output": "CMakeFiles\\interconnect_config_provider_test.dir\\tests\\interconnect\\interconnect_config_provider_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_policy_matrix_test.dir\\tests\\interconnect\\interconnect_policy_matrix_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_policy_matrix_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_policy_matrix_test.cpp",
+  "output": "CMakeFiles\\interconnect_policy_matrix_test.dir\\tests\\interconnect\\interconnect_policy_matrix_test.cpp.obj"
+}
+]

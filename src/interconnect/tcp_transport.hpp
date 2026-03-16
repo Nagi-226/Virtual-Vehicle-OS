@@ -2,6 +2,7 @@
 #define VR_INTERCONNECT_TCP_TRANSPORT_HPP
 
 #include <cstdint>
+#include <cstddef>
 #include <string>
 
 #include "interconnect/transport.hpp"
@@ -26,10 +27,16 @@ public:
 
 private:
     vr::core::ErrorCode Connect(const std::string& host, std::uint16_t port,
-                                std::int64_t timeout_ms) noexcept;
+                                std::int64_t timeout_ms,
+                                bool enable_nodelay,
+                                bool enable_keepalive) noexcept;
     void CloseSocket() noexcept;
 
+#ifdef _WIN32
+    std::uintptr_t socket_fd_{static_cast<std::uintptr_t>(~0ULL)};
+#else
     int socket_fd_{-1};
+#endif
 };
 
 }  // namespace interconnect

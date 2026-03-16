@@ -29,6 +29,8 @@ struct BridgeMetrics {
     std::uint64_t policy_conflict_sampled_count{0U};
     std::uint64_t policy_cache_hit_count{0U};
     std::uint64_t policy_cache_miss_count{0U};
+    std::uint64_t policy_lint_issue_count{0U};
+    std::uint64_t policy_lint_warning_count{0U};
 
     std::uint64_t trace_id_present_count{0U};
     std::uint64_t trace_id_missing_count{0U};
@@ -37,7 +39,9 @@ struct BridgeMetrics {
 
     std::uint64_t reload_success_count{0U};
     std::uint64_t reload_fail_count{0U};
+    std::uint64_t reload_rollback_count{0U};
     std::uint64_t last_reload_timestamp_ms{0U};
+    std::int32_t last_reload_status_code{0};
     std::uint64_t loaded_config_version{0U};
 
     std::unordered_map<std::string, std::uint64_t> topic_tx_count;

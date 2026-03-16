@@ -45,9 +45,12 @@ if(NOT WIN32)
         src/core/process_guardian.cpp
         src/ipc/posix_message_queue.cpp
         src/interconnect/posix_mq_transport.cpp
-        src/interconnect/tcp_transport.cpp
     )
 endif()
+
+list(APPEND VR_BASE_SOURCES
+    src/interconnect/tcp_transport.cpp
+)
 
 add_library(vr_base_framework ${VR_BASE_SOURCES})
 
@@ -67,6 +70,9 @@ if(NOT WIN32)
 
     add_executable(interconnect_learning_demo demo/interconnect_learning_demo.cpp)
     target_link_libraries(interconnect_learning_demo PRIVATE vr_base_framework)
+
+    add_executable(interconnect_benchmark_driver demo/interconnect_benchmark_driver.cpp)
+    target_link_libraries(interconnect_benchmark_driver PRIVATE vr_base_framework)
 endif()
 
 if(ENABLE_TESTS)
@@ -117,10 +123,25 @@ if(ENABLE_TESTS)
     add_test(NAME interconnect_config_provider_test COMMAND interconnect_config_provider_test)
     set_tests_properties(interconnect_config_provider_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
+    add_executable(interconnect_config_reload_test tests/interconnect/interconnect_config_reload_test.cpp)
+    target_link_libraries(interconnect_config_reload_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_config_reload_test COMMAND interconnect_config_reload_test)
+    set_tests_properties(interconnect_config_reload_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
     add_executable(interconnect_policy_matrix_test tests/interconnect/interconnect_policy_matrix_test.cpp)
     target_link_libraries(interconnect_policy_matrix_test PRIVATE vr_base_framework)
     add_test(NAME interconnect_policy_matrix_test COMMAND interconnect_policy_matrix_test)
     set_tests_properties(interconnect_policy_matrix_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    add_executable(interconnect_transport_consistency_test tests/interconnect/interconnect_transport_consistency_test.cpp)
+    target_link_libraries(interconnect_transport_consistency_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_transport_consistency_test COMMAND interconnect_transport_consistency_test)
+    set_tests_properties(interconnect_transport_consistency_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    add_executable(interconnect_fault_injection_test tests/interconnect/interconnect_fault_injection_test.cpp)
+    target_link_libraries(interconnect_fault_injection_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_fault_injection_test COMMAND interconnect_fault_injection_test)
+    set_tests_properties(interconnect_fault_injection_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     if(NOT WIN32)
         add_executable(posix_message_queue_test tests/ipc/posix_message_queue_test.cpp)

@@ -9,6 +9,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "core/error_code.hpp"
 #include "core/thread_pool.hpp"
@@ -62,6 +63,8 @@ public:
     std::string ExportJsonMetrics() const;
     std::string ExportJsonMetricsLightweight() const;
     std::string GetLoadedConfigSource() const;
+    std::string GetPolicyLintReport() const;
+    std::vector<std::string> DumpPolicyConflicts() const;
     void SetDiagnosticsReporter(std::shared_ptr<IDiagnosticsReporter> reporter);
     std::uint64_t GetLoadedConfigVersion() const noexcept;
     vr::core::ErrorCode ReloadConfigIfChanged(IConfigProvider* provider) noexcept;
@@ -82,10 +85,22 @@ private:
     bool ShouldRefreshMetrics(const std::uint64_t now_ms) noexcept;
     void RebuildPolicyIndex();
     void PopulateDefaultTemplateRules();
+    void ApplyTransportTuning(const BridgeConfig& config);
+    std::uint32_t ResolvePriorityForPublish(const MessageEnvelope& envelope,
+                                            const ITransport* transport) const noexcept;
+    bool AcquireFlowSlot(const ITransport* transport) noexcept;
+    void ReleaseFlowSlot(const ITransport* transport) noexcept;
     const BridgeSlaPolicy& ResolvePolicyInternal(const MessageEnvelope& envelope,
                                                  bool* out_override_applied,
                                                  bool* out_conflict_detected) const noexcept;
     bool RuleMatches(const PolicyRule& rule, const MessageEnvelope& envelope) const noexcept;
+    bool RuleMatches(const PolicyRule& left, const PolicyRule& right) const noexcept;
+    std::string FormatRuleKey(const PolicyRule& rule) const;
+    std::string FormatRuleSummary(const PolicyRule& rule) const;
+    std::vector<std::string> CollectPolicyConflicts() const;
+    std::pair<std::uint64_t, std::uint64_t> GetPolicyLintCounts() const;
+    std::string BuildPolicyLintReport() const;
+    std::string BuildPolicyLintSummary() const;
     const BridgeSlaPolicy* FindBestPolicyMatch(
         const std::vector<PolicyRule>& rules,
         const std::unordered_map<std::string, std::vector<std::size_t>>& index,
@@ -152,7 +167,9 @@ private:
     std::atomic<std::uint64_t> sla_violation_sampled_count_{0U};
     std::atomic<std::uint64_t> reload_success_count_{0U};
     std::atomic<std::uint64_t> reload_fail_count_{0U};
+    std::atomic<std::uint64_t> reload_rollback_count_{0U};
     std::atomic<std::uint64_t> last_reload_timestamp_ms_{0U};
+    std::atomic<std::int32_t> last_reload_status_code_{0};
 
     std::atomic<std::uint64_t> last_metrics_refresh_ms_{0U};
     std::atomic<std::uint64_t> last_receive_error_log_ms_{0U};
@@ -211,10 +228,28 @@ private:
 
     std::uint64_t loaded_config_version_{0U};
     std::string loaded_config_source_;
+    BridgeConfig last_known_good_config_{};
+    std::uint64_t last_known_good_version_{0U};
+    std::string last_known_good_source_;
+    std::uint64_t last_known_good_signature_{0U};
+    std::uint64_t last_loaded_signature_{0U};
     std::shared_ptr<IDiagnosticsReporter> diagnostics_reporter_{};
+    mutable std::mutex policy_lint_mutex_;
+    mutable bool policy_lint_cache_valid_{false};
+    mutable std::string policy_lint_report_;
+    mutable std::uint64_t policy_lint_issue_count_{0U};
+    mutable std::uint64_t policy_lint_warning_count_{0U};
     std::uint64_t diagnostics_report_interval_ms_{1000U};
     std::uint64_t last_diagnostics_report_ms_{0U};
     bool enable_diagnostics_reporting_{false};
+
+    std::uint32_t flow_limit_vehicle_{256U};
+    std::uint32_t flow_limit_robot_{256U};
+    std::uint32_t high_priority_threshold_vehicle_{1U};
+    std::uint32_t high_priority_threshold_robot_{1U};
+    std::atomic<std::uint32_t> inflight_vehicle_{0U};
+    std::atomic<std::uint32_t> inflight_robot_{0U};
+
     mutable SystemMetricsAggregator metrics_aggregator_;
 };
 

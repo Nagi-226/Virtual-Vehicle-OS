@@ -14,6 +14,8 @@ struct TransportEndpointConfig {
     std::string name;
     long max_messages{32};
     long message_size{1024};
+    std::uint32_t high_priority_threshold{1U};
+    std::uint32_t flow_limit_inflight{256U};
     std::unordered_map<std::string, std::string> params;
 };
 
