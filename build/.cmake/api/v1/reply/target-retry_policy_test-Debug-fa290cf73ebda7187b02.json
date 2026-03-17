@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "logger_format_test.exe"
+			"path" : "retry_policy_test.exe"
 		},
 		{
-			"path" : "logger_format_test.pdb"
+			"path" : "retry_policy_test.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -30,19 +30,19 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 85,
-				"parent" : 0
-			},
-			{
-				"command" : 1,
-				"file" : 0,
 				"line" : 86,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 54,
+				"line" : 87,
+				"parent" : 0
+			},
+			{
+				"command" : 1,
+				"file" : 0,
+				"line" : 57,
 				"parent" : 0
 			},
 			{
@@ -110,18 +110,18 @@
 	[
 		{
 			"backtrace" : 2,
+			"id" : "vr_base_framework::@6890427a1f51a3e7e1df"
+		},
+		{
+			"backtrace" : 2,
 			"id" : "vr_error_code::@6890427a1f51a3e7e1df"
 		},
 		{
 			"backtrace" : 2,
 			"id" : "commonsvc_log::@6890427a1f51a3e7e1df"
-		},
-		{
-			"backtrace" : 2,
-			"id" : "vr_base_framework::@6890427a1f51a3e7e1df"
 		}
 	],
-	"id" : "logger_format_test::@6890427a1f51a3e7e1df",
+	"id" : "retry_policy_test::@6890427a1f51a3e7e1df",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -156,8 +156,8 @@
 		],
 		"language" : "CXX"
 	},
-	"name" : "logger_format_test",
-	"nameOnDisk" : "logger_format_test.exe",
+	"name" : "retry_policy_test",
+	"nameOnDisk" : "retry_policy_test.exe",
 	"paths" : 
 	{
 		"build" : ".",
@@ -178,7 +178,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "tests/log/logger_format_test.cpp",
+			"path" : "tests/core/retry_policy_test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

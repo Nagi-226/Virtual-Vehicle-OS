@@ -10,7 +10,10 @@ E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_router_except
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_backpressure_test.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_metrics_delta_test.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_config_provider_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_config_reload_test.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_policy_matrix_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_transport_consistency_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_fault_injection_test.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/test.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/edit_cache.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/rebuild_cache.dir
