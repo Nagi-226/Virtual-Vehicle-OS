@@ -189,6 +189,22 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
     PopulateDefaultTemplateRules();
     RebuildPolicyIndex();
     ApplyTransportTuning(config_);
+
+    if (config_.enable_config_canary && config_.config_canary_percent < 100U) {
+        const std::uint32_t gate = static_cast<std::uint32_t>(NowUnixMs() % 100U);
+        if (gate >= config_.config_canary_percent) {
+            config_ = last_known_good_config_;
+            loaded_config_source_ = last_known_good_source_;
+            loaded_config_version_ = last_known_good_version_;
+            last_loaded_signature_ = last_known_good_signature_;
+            reload_rollback_count_.fetch_add(1U, std::memory_order_relaxed);
+            reload_fail_count_.fetch_add(1U, std::memory_order_relaxed);
+            last_reload_status_code_.store(static_cast<std::int32_t>(vr::core::ErrorCode::kWouldBlock),
+                                           std::memory_order_relaxed);
+            RefreshAggregatedMetrics();
+            return vr::core::ErrorCode::kWouldBlock;
+        }
+    }
     ApplyTransportTuning(config_);
     ApplyTransportTuning(config_);
 
@@ -304,6 +320,11 @@ std::string InterconnectBridge::GetLoadedConfigSource() const {
 
 void InterconnectBridge::SetDiagnosticsReporter(std::shared_ptr<IDiagnosticsReporter> reporter) {
     diagnostics_reporter_ = std::move(reporter);
+}
+
+void InterconnectBridge::SetMessageAuthenticator(
+    std::shared_ptr<IMessageAuthenticator> authenticator) {
+    authenticator_ = std::move(authenticator);
 }
 
 std::uint64_t InterconnectBridge::GetLoadedConfigVersion() const noexcept {
@@ -964,8 +985,18 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
         return vr::core::ErrorCode::kInterconnectInvalidEnvelope;
     }
 
+    if (authenticator_ && !authenticator_->Validate(envelope)) {
+        invalid_envelope_count_.fetch_add(1U, std::memory_order_relaxed);
+        tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
+        RefreshAggregatedMetrics();
+        return vr::core::ErrorCode::kInterconnectInvalidEnvelope;
+    }
+
     std::string encoded;
-    const vr::core::ErrorCode encode_ec = MessageCodec::Encode(envelope, &encoded);
+    const bool use_compact = config_.policy_table.default_policy.lock_policy;
+    const vr::core::ErrorCode encode_ec = use_compact
+        ? MessageCodec::EncodeCompact(envelope, &encoded)
+        : MessageCodec::Encode(envelope, &encoded);
     if (encode_ec != vr::core::ErrorCode::kOk) {
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         encode_fail_count_.fetch_add(1U, std::memory_order_relaxed);

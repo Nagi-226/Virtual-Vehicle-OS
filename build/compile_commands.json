@@ -124,5 +124,11 @@
   "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_fault_injection_test.dir\\tests\\interconnect\\interconnect_fault_injection_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_fault_injection_test.cpp\"",
   "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_fault_injection_test.cpp",
   "output": "CMakeFiles\\interconnect_fault_injection_test.dir\\tests\\interconnect\\interconnect_fault_injection_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_tcp_loopback_test.dir\\tests\\interconnect\\interconnect_tcp_loopback_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_tcp_loopback_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_tcp_loopback_test.cpp",
+  "output": "CMakeFiles\\interconnect_tcp_loopback_test.dir\\tests\\interconnect\\interconnect_tcp_loopback_test.cpp.obj"
 }
 ]

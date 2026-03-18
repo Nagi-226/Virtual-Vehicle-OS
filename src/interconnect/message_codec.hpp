@@ -12,6 +12,8 @@ namespace interconnect {
 class MessageCodec {
 public:
     static vr::core::ErrorCode Encode(const MessageEnvelope& envelope, std::string* out) noexcept;
+    static vr::core::ErrorCode EncodeCompact(const MessageEnvelope& envelope,
+                                             std::string* out) noexcept;
     static vr::core::ErrorCode Decode(const std::string& text, MessageEnvelope* out) noexcept;
 };
 

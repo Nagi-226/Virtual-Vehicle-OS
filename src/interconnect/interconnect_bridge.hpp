@@ -17,6 +17,7 @@
 #include "interconnect/bridge_policy.hpp"
 #include "interconnect/config_provider.hpp"
 #include "interconnect/diagnostics_reporter.hpp"
+#include "interconnect/message_authenticator.hpp"
 #include "interconnect/message_envelope.hpp"
 #include "interconnect/message_router.hpp"
 #include "interconnect/system_metrics_aggregator.hpp"
@@ -37,6 +38,8 @@ struct BridgeConfig {
     std::uint64_t sla_violation_sample_interval_ms{5000U};
     std::uint64_t diagnostics_report_interval_ms{1000U};
     bool enable_diagnostics_reporting{false};
+    bool enable_config_canary{false};
+    std::uint32_t config_canary_percent{100U};
 };
 
 class InterconnectBridge {
@@ -66,6 +69,7 @@ public:
     std::string GetPolicyLintReport() const;
     std::vector<std::string> DumpPolicyConflicts() const;
     void SetDiagnosticsReporter(std::shared_ptr<IDiagnosticsReporter> reporter);
+    void SetMessageAuthenticator(std::shared_ptr<IMessageAuthenticator> authenticator);
     std::uint64_t GetLoadedConfigVersion() const noexcept;
     vr::core::ErrorCode ReloadConfigIfChanged(IConfigProvider* provider) noexcept;
 
@@ -234,6 +238,7 @@ private:
     std::uint64_t last_known_good_signature_{0U};
     std::uint64_t last_loaded_signature_{0U};
     std::shared_ptr<IDiagnosticsReporter> diagnostics_reporter_{};
+    std::shared_ptr<IMessageAuthenticator> authenticator_{};
     mutable std::mutex policy_lint_mutex_;
     mutable bool policy_lint_cache_valid_{false};
     mutable std::string policy_lint_report_;

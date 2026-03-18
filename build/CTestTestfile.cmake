@@ -30,3 +30,5 @@ add_test(interconnect_transport_consistency_test "E:/Github Project/Virtual-Vehi
 set_tests_properties(interconnect_transport_consistency_test PROPERTIES  LABELS "interconnect" TIMEOUT "10" _BACKTRACE_TRIPLES "E:/Github Project/Virtual-Vehicle-OS/CMakeLists.txt;138;add_test;E:/Github Project/Virtual-Vehicle-OS/CMakeLists.txt;0;")
 add_test(interconnect_fault_injection_test "E:/Github Project/Virtual-Vehicle-OS/build/interconnect_fault_injection_test.exe")
 set_tests_properties(interconnect_fault_injection_test PROPERTIES  LABELS "interconnect" TIMEOUT "10" _BACKTRACE_TRIPLES "E:/Github Project/Virtual-Vehicle-OS/CMakeLists.txt;143;add_test;E:/Github Project/Virtual-Vehicle-OS/CMakeLists.txt;0;")
+add_test(interconnect_tcp_loopback_test "E:/Github Project/Virtual-Vehicle-OS/build/interconnect_tcp_loopback_test.exe")
+set_tests_properties(interconnect_tcp_loopback_test PROPERTIES  LABELS "interconnect" TIMEOUT "10" _BACKTRACE_TRIPLES "E:/Github Project/Virtual-Vehicle-OS/CMakeLists.txt;148;add_test;E:/Github Project/Virtual-Vehicle-OS/CMakeLists.txt;0;")

@@ -10,6 +10,8 @@ namespace {
 
 constexpr char kFieldSeparator = '|';
 constexpr std::size_t kExpectedFieldCount = 11U;
+constexpr std::size_t kExpectedCompactFieldCount = 8U;
+constexpr std::uint32_t kSchemaVersionCompatBaseline = 1U;
 
 std::string EscapeField(const std::string& input) {
     std::string out;
@@ -152,6 +154,40 @@ vr::core::ErrorCode MessageCodec::Encode(const MessageEnvelope& envelope, std::s
     return vr::core::ErrorCode::kOk;
 }
 
+vr::core::ErrorCode MessageCodec::EncodeCompact(const MessageEnvelope& envelope,
+                                                std::string* out) noexcept {
+    if (out == nullptr) {
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
+    std::ostringstream oss;
+    oss << envelope.schema_version << kFieldSeparator << ChannelToString(envelope.channel)
+        << kFieldSeparator << QoSToString(envelope.qos) << kFieldSeparator << envelope.sequence
+        << kFieldSeparator << envelope.timestamp_ms << kFieldSeparator << envelope.ttl_ms
+        << kFieldSeparator << EscapeField(envelope.topic) << kFieldSeparator
+        << EscapeField(envelope.payload);
+
+    *out = oss.str();
+    return vr::core::ErrorCode::kOk;
+}
+
+vr::core::ErrorCode MessageCodec::EncodeCompact(const MessageEnvelope& envelope,
+                                                std::string* out) noexcept {
+    if (out == nullptr) {
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
+    std::ostringstream oss;
+    oss << envelope.schema_version << kFieldSeparator << ChannelToString(envelope.channel)
+        << kFieldSeparator << QoSToString(envelope.qos) << kFieldSeparator << envelope.sequence
+        << kFieldSeparator << envelope.timestamp_ms << kFieldSeparator << envelope.ttl_ms
+        << kFieldSeparator << EscapeField(envelope.topic) << kFieldSeparator
+        << EscapeField(envelope.payload);
+
+    *out = oss.str();
+    return vr::core::ErrorCode::kOk;
+}
+
 vr::core::ErrorCode MessageCodec::Decode(const std::string& text, MessageEnvelope* out) noexcept {
     if (out == nullptr || text.empty()) {
         return vr::core::ErrorCode::kInvalidParam;
@@ -159,7 +195,7 @@ vr::core::ErrorCode MessageCodec::Decode(const std::string& text, MessageEnvelop
 
     std::vector<std::string> fields;
     SplitEscaped(text, &fields);
-    if (fields.size() != kExpectedFieldCount) {
+    if (fields.size() != kExpectedFieldCount && fields.size() != kExpectedCompactFieldCount) {
         return vr::core::ErrorCode::kInvalidParam;
     }
 
@@ -173,12 +209,27 @@ vr::core::ErrorCode MessageCodec::Decode(const std::string& text, MessageEnvelop
         return vr::core::ErrorCode::kInvalidParam;
     }
 
+    if (parsed.schema_version < kSchemaVersionCompatBaseline) {
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
+    if (parsed.schema_version < kSchemaVersionCompatBaseline) {
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
     if (!ChannelFromString(fields[1], &parsed.channel)) {
         return vr::core::ErrorCode::kInvalidParam;
     }
 
     if (!QoSFromString(fields[2], &parsed.qos)) {
         return vr::core::ErrorCode::kInvalidParam;
+    }
+
+    if (fields.size() == kExpectedCompactFieldCount) {
+        parsed.topic = UnescapeField(fields[6]);
+        parsed.payload = UnescapeField(fields[7]);
+        *out = parsed;
+        return vr::core::ErrorCode::kOk;
     }
 
     parsed.source = UnescapeField(fields[6]);

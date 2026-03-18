@@ -37,6 +37,7 @@ struct BridgeSlaPolicy {
     RetryBudget retry_budget{};
     bool enable_timeout_sleep{true};
     std::uint32_t receive_timeout_sleep_ms{10U};
+    bool lock_policy{false};
 };
 
 struct PolicyRule {

@@ -228,12 +228,51 @@ bool TestExpiredDrop() {
     msg.ttl_ms = 1U;
 
     std::this_thread::sleep_for(std::chrono::milliseconds(2));
-    (void)bridge.PublishFromVehicle(msg);
+    const auto ec = bridge.PublishFromVehicle(msg);
     const auto metrics = bridge.CaptureMetricsSnapshot();
     bridge.Stop();
 
-    return ExpectTrue(metrics.bridge_metrics.expired_drop_count >= 1U,
+    return ExpectTrue(ec == vr::core::ErrorCode::kTimeout ||
+                      ec == vr::core::ErrorCode::kExpired,
+                      "expired should drop") &&
+           ExpectTrue(metrics.bridge_metrics.expired_drop_count >= 1U,
                       "expired drop should be counted");
+}
+
+bool TestOutOfOrderAndDuplicate() {
+    auto tx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+    auto rx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+
+    vr::interconnect::InterconnectBridge bridge(std::move(tx), std::move(rx));
+    auto config = MakeRetryConfig();
+
+    if (!ExpectTrue(bridge.Start(config) == vr::core::ErrorCode::kOk, "bridge start failed")) {
+        return false;
+    }
+
+    vr::interconnect::MessageEnvelope msg_a;
+    msg_a.source = "vehicle";
+    msg_a.target = "robot";
+    msg_a.topic = "fault.order";
+    msg_a.channel = vr::interconnect::ChannelType::kEvent;
+    msg_a.payload = "payload_a";
+    msg_a.sequence = 2U;
+    msg_a.timestamp_ms = 1U;
+
+    vr::interconnect::MessageEnvelope msg_b = msg_a;
+    msg_b.payload = "payload_b";
+    msg_b.sequence = 1U;
+
+    const auto ec1 = bridge.PublishFromVehicle(msg_a);
+    const auto ec2 = bridge.PublishFromVehicle(msg_b);
+    const auto ec3 = bridge.PublishFromVehicle(msg_b);
+    const auto metrics = bridge.CaptureMetricsSnapshot();
+    bridge.Stop();
+
+    return ExpectTrue(ec1 == vr::core::ErrorCode::kOk, "out-of-order should succeed") &&
+           ExpectTrue(ec2 == vr::core::ErrorCode::kOk, "out-of-order should succeed") &&
+           ExpectTrue(ec3 == vr::core::ErrorCode::kOk, "duplicate should succeed") &&
+           ExpectTrue(metrics.bridge_metrics.tx_count >= 3U, "tx count should record duplicates");
 }
 
 }  // namespace
@@ -256,6 +295,10 @@ int main() {
         return 1;
     }
     if (!TestExpiredDrop()) {
+        std::cerr << "interconnect fault injection test failed." << std::endl;
+        return 1;
+    }
+    if (!TestOutOfOrderAndDuplicate()) {
         std::cerr << "interconnect fault injection test failed." << std::endl;
         return 1;
     }

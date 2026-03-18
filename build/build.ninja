@@ -613,6 +613,40 @@ build interconnect_fault_injection_test.exe: CXX_EXECUTABLE_LINKER__interconnect
   TARGET_IMPLIB = libinterconnect_fault_injection_test.dll.a
   TARGET_PDB = interconnect_fault_injection_test.exe.dbg
 
+# =============================================================================
+# Object build statements for EXECUTABLE target interconnect_tcp_loopback_test
+
+
+#############################################
+# Order-only phony target for interconnect_tcp_loopback_test
+
+build cmake_object_order_depends_target_interconnect_tcp_loopback_test: phony || cmake_object_order_depends_target_commonsvc_log cmake_object_order_depends_target_vr_base_framework cmake_object_order_depends_target_vr_error_code
+
+build CMakeFiles/interconnect_tcp_loopback_test.dir/tests/interconnect/interconnect_tcp_loopback_test.cpp.obj: CXX_COMPILER__interconnect_tcp_loopback_test_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/tests/interconnect/interconnect_tcp_loopback_test.cpp || cmake_object_order_depends_target_interconnect_tcp_loopback_test
+  DEP_FILE = CMakeFiles\interconnect_tcp_loopback_test.dir\tests\interconnect\interconnect_tcp_loopback_test.cpp.obj.d
+  FLAGS = -g -std=c++17 -Wall -Wextra -Wpedantic -Werror
+  INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
+  OBJECT_DIR = CMakeFiles\interconnect_tcp_loopback_test.dir
+  OBJECT_FILE_DIR = CMakeFiles\interconnect_tcp_loopback_test.dir\tests\interconnect
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target interconnect_tcp_loopback_test
+
+
+#############################################
+# Link the executable interconnect_tcp_loopback_test.exe
+
+build interconnect_tcp_loopback_test.exe: CXX_EXECUTABLE_LINKER__interconnect_tcp_loopback_test_Debug CMakeFiles/interconnect_tcp_loopback_test.dir/tests/interconnect/interconnect_tcp_loopback_test.cpp.obj | libvr_base_framework.a libcommonsvc_log.a libvr_error_code.a || libcommonsvc_log.a libvr_base_framework.a libvr_error_code.a
+  FLAGS = -g
+  LINK_LIBRARIES = libvr_base_framework.a  libcommonsvc_log.a  libvr_error_code.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  OBJECT_DIR = CMakeFiles\interconnect_tcp_loopback_test.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_FILE = interconnect_tcp_loopback_test.exe
+  TARGET_IMPLIB = libinterconnect_tcp_loopback_test.dll.a
+  TARGET_PDB = interconnect_tcp_loopback_test.exe.dbg
+
 
 #############################################
 # Utility command for test
@@ -670,6 +704,8 @@ build interconnect_policy_matrix_test: phony interconnect_policy_matrix_test.exe
 
 build interconnect_router_exception_test: phony interconnect_router_exception_test.exe
 
+build interconnect_tcp_loopback_test: phony interconnect_tcp_loopback_test.exe
+
 build interconnect_transport_consistency_test: phony interconnect_transport_consistency_test.exe
 
 build interconnect_ttl_test: phony interconnect_ttl_test.exe
@@ -692,7 +728,7 @@ build vr_error_code: phony libvr_error_code.a
 #############################################
 # Folder: E:/Github Project/Virtual-Vehicle-OS/build
 
-build all: phony libvr_error_code.a libcommonsvc_log.a libvr_base_framework.a thread_pool_test.exe retry_policy_test.exe logger_format_test.exe interconnect_codec_test.exe interconnect_ttl_test.exe interconnect_router_exception_test.exe interconnect_backpressure_test.exe interconnect_metrics_delta_test.exe interconnect_config_provider_test.exe interconnect_config_reload_test.exe interconnect_policy_matrix_test.exe interconnect_transport_consistency_test.exe interconnect_fault_injection_test.exe
+build all: phony libvr_error_code.a libcommonsvc_log.a libvr_base_framework.a thread_pool_test.exe retry_policy_test.exe logger_format_test.exe interconnect_codec_test.exe interconnect_ttl_test.exe interconnect_router_exception_test.exe interconnect_backpressure_test.exe interconnect_metrics_delta_test.exe interconnect_config_provider_test.exe interconnect_config_reload_test.exe interconnect_policy_matrix_test.exe interconnect_transport_consistency_test.exe interconnect_fault_injection_test.exe interconnect_tcp_loopback_test.exe
 
 # =============================================================================
 # Built-in targets
