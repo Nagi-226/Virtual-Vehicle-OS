@@ -186,6 +186,7 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
                                           ? 1000U
                                           : config_.diagnostics_report_interval_ms;
     enable_diagnostics_reporting_ = config_.enable_diagnostics_reporting;
+    protocol_mode_ = config_.protocol_mode;
     PopulateDefaultTemplateRules();
     RebuildPolicyIndex();
     ApplyTransportTuning(config_);
@@ -318,6 +319,10 @@ std::string InterconnectBridge::GetLoadedConfigSource() const {
     return loaded_config_source_;
 }
 
+std::string InterconnectBridge::GetLastReloadAuditSummary() const {
+    return last_reload_audit_summary_;
+}
+
 void InterconnectBridge::SetDiagnosticsReporter(std::shared_ptr<IDiagnosticsReporter> reporter) {
     diagnostics_reporter_ = std::move(reporter);
 }
@@ -343,6 +348,26 @@ std::string InterconnectBridge::GetPolicyLintReport() const {
 
 std::vector<std::string> InterconnectBridge::DumpPolicyConflicts() const {
     return CollectPolicyConflicts();
+}
+
+std::string InterconnectBridge::DumpRuntimeState() const {
+    diag_dump_state_count_.fetch_add(1U, std::memory_order_relaxed);
+
+    std::ostringstream oss;
+    oss << "runtime_state:{";
+    oss << "loaded_config_version=" << loaded_config_version_ << ",";
+    oss << "loaded_config_source=" << loaded_config_source_ << ",";
+    oss << "policy_conflicts=" << CollectPolicyConflicts().size() << ",";
+    oss << "policy_cache_size=" << policy_cache_items_.size() << ",";
+    oss << "inflight_vehicle=" << inflight_vehicle_.load(std::memory_order_relaxed) << ",";
+    oss << "inflight_robot=" << inflight_robot_.load(std::memory_order_relaxed) << ",";
+    oss << "failover_v2r=" << (failover_from_vehicle_to_robot_enabled_ ? 1 : 0) << ",";
+    oss << "failover_r2v=" << (failover_from_robot_to_vehicle_enabled_ ? 1 : 0) << ",";
+    oss << "failover_hit=" << failover_hit_count_.load(std::memory_order_relaxed) << ",";
+    oss << "health_primary=" << transport_primary_healthy_.load(std::memory_order_relaxed) << ",";
+    oss << "health_secondary=" << transport_secondary_healthy_.load(std::memory_order_relaxed);
+    oss << "}";
+    return oss.str();
 }
 
 bool InterconnectBridge::RuleMatches(const PolicyRule& left,
@@ -836,6 +861,8 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
         reload_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         last_reload_status_code_.store(static_cast<std::int32_t>(reload_ec),
                                        std::memory_order_relaxed);
+        reload_rollback_reason_code_.store(1, std::memory_order_relaxed);
+        last_reload_audit_summary_ = "reload_audit:{reload_stage=provider_reload,status=fail}";
         return reload_ec;
     }
 
@@ -843,6 +870,8 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
     if (new_version == loaded_config_version_) {
         last_reload_status_code_.store(static_cast<std::int32_t>(vr::core::ErrorCode::kOk),
                                        std::memory_order_relaxed);
+        reload_rollback_reason_code_.store(0, std::memory_order_relaxed);
+        last_reload_audit_summary_ = "reload_audit:{status=noop}";
         return vr::core::ErrorCode::kOk;
     }
 
@@ -853,6 +882,8 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
         reload_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         last_reload_status_code_.store(static_cast<std::int32_t>(load_ec),
                                        std::memory_order_relaxed);
+        reload_rollback_reason_code_.store(2, std::memory_order_relaxed);
+        last_reload_audit_summary_ = "reload_audit:{reload_stage=provider_load,status=fail}";
         return load_ec;
     }
 
@@ -865,6 +896,11 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
     const std::string previous_source = loaded_config_source_;
     const std::uint64_t previous_version = loaded_config_version_;
     const std::uint64_t previous_signature = last_loaded_signature_;
+
+    std::ostringstream audit;
+    audit << "reload_audit:{src:" << previous_source << "->" << source
+          << ",ver:" << previous_version << "->" << new_version
+          << ",sig:" << previous_signature << "->" << next_signature << "}";
 
     config_ = next_config;
     trace_sample_rate_percent_ = std::min(config_.trace_sample_rate_percent, 100U);
@@ -902,6 +938,8 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
             : vr::core::ErrorCode::kQueueCreateFailed;
         last_reload_status_code_.store(static_cast<std::int32_t>(status),
                                        std::memory_order_relaxed);
+        reload_rollback_reason_code_.store(signature_ok ? 3 : 4, std::memory_order_relaxed);
+        last_reload_audit_summary_ = audit.str() + ",status=rollback";
         RefreshAggregatedMetrics(true);
         return status;
     }
@@ -917,6 +955,8 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
     last_reload_timestamp_ms_.store(NowUnixMs(), std::memory_order_relaxed);
     last_reload_status_code_.store(static_cast<std::int32_t>(vr::core::ErrorCode::kOk),
                                    std::memory_order_relaxed);
+    reload_rollback_reason_code_.store(0, std::memory_order_relaxed);
+    last_reload_audit_summary_ = audit.str() + ",status=ok";
     RefreshAggregatedMetrics(true);
     return vr::core::ErrorCode::kOk;
 }
@@ -993,10 +1033,20 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
     }
 
     std::string encoded;
-    const bool use_compact = config_.policy_table.default_policy.lock_policy;
-    const vr::core::ErrorCode encode_ec = use_compact
-        ? MessageCodec::EncodeCompact(envelope, &encoded)
-        : MessageCodec::Encode(envelope, &encoded);
+    const bool use_compact =
+        protocol_mode_ == MessageProtocolMode::kCompact ||
+        config_.policy_table.default_policy.lock_policy;
+
+    vr::core::ErrorCode encode_ec = vr::core::ErrorCode::kOk;
+    if (protocol_mode_ == MessageProtocolMode::kProtobufReserved) {
+        encode_ec = MessageCodec::EncodeProtobufSkeleton(envelope, &encoded);
+    } else if (protocol_mode_ == MessageProtocolMode::kCborReserved) {
+        encode_ec = MessageCodec::EncodeCborSkeleton(envelope, &encoded);
+    } else {
+        encode_ec = use_compact
+            ? MessageCodec::EncodeCompact(envelope, &encoded)
+            : MessageCodec::Encode(envelope, &encoded);
+    }
     if (encode_ec != vr::core::ErrorCode::kOk) {
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         encode_fail_count_.fetch_add(1U, std::memory_order_relaxed);
@@ -1020,12 +1070,39 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
     ReleaseFlowSlot(transport);
 
     if (send_ec != vr::core::ErrorCode::kOk) {
+        ITransport* failover_transport = nullptr;
+        if (transport == vehicle_to_robot_transport_.get() &&
+            failover_from_vehicle_to_robot_enabled_) {
+            failover_transport = robot_to_vehicle_transport_.get();
+        } else if (transport == robot_to_vehicle_transport_.get() &&
+                   failover_from_robot_to_vehicle_enabled_) {
+            failover_transport = vehicle_to_robot_transport_.get();
+        }
+
+        if (failover_transport != nullptr) {
+            const vr::core::ErrorCode failover_ec =
+                PublishWithBackpressure(failover_transport, encoded, priority, policy);
+            if (failover_ec == vr::core::ErrorCode::kOk) {
+                failover_hit_count_.fetch_add(1U, std::memory_order_relaxed);
+                diag_failover_event_count_.fetch_add(1U, std::memory_order_relaxed);
+                transport_primary_healthy_.store(0U, std::memory_order_relaxed);
+                transport_secondary_healthy_.store(1U, std::memory_order_relaxed);
+                tx_count_.fetch_add(1U, std::memory_order_relaxed);
+                RefreshAggregatedMetrics();
+                return vr::core::ErrorCode::kOk;
+            }
+        }
+
+        transport_primary_healthy_.store(0U, std::memory_order_relaxed);
+        transport_secondary_healthy_.store(0U, std::memory_order_relaxed);
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         transport_error_count_.fetch_add(1U, std::memory_order_relaxed);
         RefreshAggregatedMetrics();
         return send_ec;
     }
 
+    transport_primary_healthy_.store(1U, std::memory_order_relaxed);
+    transport_secondary_healthy_.store(1U, std::memory_order_relaxed);
     tx_count_.fetch_add(1U, std::memory_order_relaxed);
     {
         std::lock_guard<std::mutex> lock(metric_map_mutex_);
@@ -1124,6 +1201,8 @@ void InterconnectBridge::ApplyTransportTuning(const BridgeConfig& config) {
     flow_limit_robot_ = config.robot_to_vehicle_endpoint.flow_limit_inflight;
     high_priority_threshold_vehicle_ = config.vehicle_to_robot_endpoint.high_priority_threshold;
     high_priority_threshold_robot_ = config.robot_to_vehicle_endpoint.high_priority_threshold;
+    failover_from_vehicle_to_robot_enabled_ = !config.additional_endpoints.empty();
+    failover_from_robot_to_vehicle_enabled_ = !config.additional_endpoints.empty();
     inflight_vehicle_.store(0U, std::memory_order_relaxed);
     inflight_robot_.store(0U, std::memory_order_relaxed);
 }
@@ -1292,7 +1371,8 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
                 qos_expired_drop_count_[envelope.qos] += 1U;
             }
             if (NextLogAllowedMs(&last_expired_log_ms_, now_ms, kLogThrottleIntervalMs) == now_ms) {
-            LOG_WARN("Bridge dropped expired message topic: " + envelope.topic);
+                LOG_WARN("Bridge dropped expired message trace_id=" + envelope.trace_id +
+                         " topic=" + envelope.topic);
             }
             if (NextLogAllowedMs(&last_sla_violation_log_ms_, now_ms,
                                   sla_violation_sample_interval_ms_) == now_ms) {
@@ -1305,17 +1385,21 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
         const RouteResult route_result = router->Route(envelope);
         if (route_result != RouteResult::kOk) {
             if (route_result == RouteResult::kNoHandler) {
-            route_miss_count_.fetch_add(1U, std::memory_order_relaxed);
+                route_miss_count_.fetch_add(1U, std::memory_order_relaxed);
+                diag_route_event_count_.fetch_add(1U, std::memory_order_relaxed);
                 if (NextLogAllowedMs(&last_route_miss_log_ms_, now_ms, kLogThrottleIntervalMs) ==
                     now_ms) {
-            LOG_WARN("Bridge route missed topic: " + envelope.topic);
+                    LOG_WARN("Bridge route missed trace_id=" + envelope.trace_id +
+                             " topic=" + envelope.topic);
                 }
             } else {
                 handler_error_count_.fetch_add(1U, std::memory_order_relaxed);
+                diag_route_event_count_.fetch_add(1U, std::memory_order_relaxed);
                 if (NextLogAllowedMs(&last_handler_error_log_ms_, now_ms, kLogThrottleIntervalMs) ==
                     now_ms) {
                     LOG_ERROR_CODE(vr::core::ErrorCode::kInterconnectRouteHandlerError,
-                                   "Bridge handler exception topic: " + envelope.topic);
+                                   "Bridge handler exception trace_id=" + envelope.trace_id +
+                                   " topic=" + envelope.topic);
                 }
             }
             RefreshAggregatedMetrics();
@@ -1392,7 +1476,30 @@ void InterconnectBridge::RefreshAggregatedMetrics(const bool force) noexcept {
         last_reload_timestamp_ms_.load(std::memory_order_relaxed);
     bridge_metrics.last_reload_status_code =
         last_reload_status_code_.load(std::memory_order_relaxed);
+    bridge_metrics.reload_rollback_reason_code =
+        reload_rollback_reason_code_.load(std::memory_order_relaxed);
     bridge_metrics.loaded_config_version = loaded_config_version_;
+
+    bridge_metrics.protocol_mode_code = static_cast<std::uint32_t>(protocol_mode_);
+    const auto caps = MessageCodec::ProbeCapabilities();
+    bridge_metrics.protocol_cap_legacy = caps.legacy_supported ? 1U : 0U;
+    bridge_metrics.protocol_cap_compact = caps.compact_supported ? 1U : 0U;
+    bridge_metrics.protocol_cap_protobuf = caps.protobuf_supported ? 1U : 0U;
+    bridge_metrics.protocol_cap_cbor = caps.cbor_supported ? 1U : 0U;
+    bridge_metrics.configured_transport_pool_size =
+        static_cast<std::uint64_t>(2U + config_.additional_endpoints.size());
+    bridge_metrics.failover_hit_count = failover_hit_count_.load(std::memory_order_relaxed);
+    bridge_metrics.transport_primary_healthy =
+        transport_primary_healthy_.load(std::memory_order_relaxed);
+    bridge_metrics.transport_secondary_healthy =
+        transport_secondary_healthy_.load(std::memory_order_relaxed);
+
+    bridge_metrics.diag_dump_state_count =
+        diag_dump_state_count_.load(std::memory_order_relaxed);
+    bridge_metrics.diag_route_event_count =
+        diag_route_event_count_.load(std::memory_order_relaxed);
+    bridge_metrics.diag_failover_event_count =
+        diag_failover_event_count_.load(std::memory_order_relaxed);
 
     {
         std::lock_guard<std::mutex> lock(metric_map_mutex_);

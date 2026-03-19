@@ -26,9 +26,17 @@
 namespace vr {
 namespace interconnect {
 
+enum class MessageProtocolMode : std::uint8_t {
+    kLegacyPipe = 0,
+    kCompact = 1,
+    kProtobufReserved = 2,
+    kCborReserved = 3,
+};
+
 struct BridgeConfig {
     TransportEndpointConfig vehicle_to_robot_endpoint;
     TransportEndpointConfig robot_to_vehicle_endpoint;
+    std::vector<TransportEndpointConfig> additional_endpoints;
     vr::core::ThreadConfig thread_pool;
     BridgeSlaPolicy sla_policy;
     BridgePolicyTable policy_table;
@@ -40,6 +48,7 @@ struct BridgeConfig {
     bool enable_diagnostics_reporting{false};
     bool enable_config_canary{false};
     std::uint32_t config_canary_percent{100U};
+    MessageProtocolMode protocol_mode{MessageProtocolMode::kLegacyPipe};
 };
 
 class InterconnectBridge {
@@ -68,8 +77,10 @@ public:
     std::string GetLoadedConfigSource() const;
     std::string GetPolicyLintReport() const;
     std::vector<std::string> DumpPolicyConflicts() const;
+    std::string DumpRuntimeState() const;
     void SetDiagnosticsReporter(std::shared_ptr<IDiagnosticsReporter> reporter);
     void SetMessageAuthenticator(std::shared_ptr<IMessageAuthenticator> authenticator);
+    std::string GetLastReloadAuditSummary() const;
     std::uint64_t GetLoadedConfigVersion() const noexcept;
     vr::core::ErrorCode ReloadConfigIfChanged(IConfigProvider* provider) noexcept;
 
@@ -174,6 +185,7 @@ private:
     std::atomic<std::uint64_t> reload_rollback_count_{0U};
     std::atomic<std::uint64_t> last_reload_timestamp_ms_{0U};
     std::atomic<std::int32_t> last_reload_status_code_{0};
+    std::atomic<std::int32_t> reload_rollback_reason_code_{0};
 
     std::atomic<std::uint64_t> last_metrics_refresh_ms_{0U};
     std::atomic<std::uint64_t> last_receive_error_log_ms_{0U};
@@ -237,6 +249,7 @@ private:
     std::string last_known_good_source_;
     std::uint64_t last_known_good_signature_{0U};
     std::uint64_t last_loaded_signature_{0U};
+    std::string last_reload_audit_summary_{};
     std::shared_ptr<IDiagnosticsReporter> diagnostics_reporter_{};
     std::shared_ptr<IMessageAuthenticator> authenticator_{};
     mutable std::mutex policy_lint_mutex_;
@@ -252,8 +265,17 @@ private:
     std::uint32_t flow_limit_robot_{256U};
     std::uint32_t high_priority_threshold_vehicle_{1U};
     std::uint32_t high_priority_threshold_robot_{1U};
+    bool failover_from_vehicle_to_robot_enabled_{false};
+    bool failover_from_robot_to_vehicle_enabled_{false};
+    MessageProtocolMode protocol_mode_{MessageProtocolMode::kLegacyPipe};
     std::atomic<std::uint32_t> inflight_vehicle_{0U};
     std::atomic<std::uint32_t> inflight_robot_{0U};
+    std::atomic<std::uint64_t> failover_hit_count_{0U};
+    std::atomic<std::uint64_t> diag_dump_state_count_{0U};
+    std::atomic<std::uint64_t> diag_route_event_count_{0U};
+    std::atomic<std::uint64_t> diag_failover_event_count_{0U};
+    std::atomic<std::uint64_t> transport_primary_healthy_{1U};
+    std::atomic<std::uint64_t> transport_secondary_healthy_{1U};
 
     mutable SystemMetricsAggregator metrics_aggregator_;
 };

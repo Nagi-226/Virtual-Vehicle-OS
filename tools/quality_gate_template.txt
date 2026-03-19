@@ -1,0 +1,24 @@
+[v0.6 Quality Gate Template]
+version=
+commit=
+date=
+
+[Benchmark Gate]
+throughput_min_msg_per_sec=
+latency_p95_max_ms=
+error_rate_max_percent=
+
+[Audit Gate]
+redundancy_scan=pass/fail
+concurrency_scan=pass/fail
+resource_leak_scan=pass/fail
+compatibility_scan=pass/fail
+
+[Regression Suites]
+interconnect_fault_injection_test=pass/fail
+interconnect_tcp_loopback_test=pass/fail
+interconnect_metrics_delta_test=pass/fail
+
+[Decision]
+release_gate=pass/fail
+notes=

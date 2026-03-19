@@ -42,7 +42,23 @@ struct BridgeMetrics {
     std::uint64_t reload_rollback_count{0U};
     std::uint64_t last_reload_timestamp_ms{0U};
     std::int32_t last_reload_status_code{0};
+    std::int32_t reload_rollback_reason_code{0};
     std::uint64_t loaded_config_version{0U};
+
+    std::uint32_t protocol_mode_code{0U};
+    std::uint64_t protocol_cap_legacy{1U};
+    std::uint64_t protocol_cap_compact{1U};
+    std::uint64_t protocol_cap_protobuf{0U};
+    std::uint64_t protocol_cap_cbor{0U};
+
+    std::uint64_t configured_transport_pool_size{2U};
+    std::uint64_t failover_hit_count{0U};
+    std::uint64_t transport_primary_healthy{1U};
+    std::uint64_t transport_secondary_healthy{1U};
+
+    std::uint64_t diag_dump_state_count{0U};
+    std::uint64_t diag_route_event_count{0U};
+    std::uint64_t diag_failover_event_count{0U};
 
     std::unordered_map<std::string, std::uint64_t> topic_tx_count;
     std::unordered_map<std::string, std::uint64_t> topic_rx_count;

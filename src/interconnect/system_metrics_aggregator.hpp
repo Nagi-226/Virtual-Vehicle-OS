@@ -146,6 +146,26 @@ public:
             << bridge_metrics_.last_reload_timestamp_ms << " " << ts << "\n";
         oss << "vv_last_reload_status_code" << default_labels << " "
             << bridge_metrics_.last_reload_status_code << " " << ts << "\n";
+        oss << "vv_reload_rollback_reason_code" << default_labels << " "
+            << bridge_metrics_.reload_rollback_reason_code << " " << ts << "\n";
+
+        oss << "vv_protocol_mode_code" << default_labels << " "
+            << bridge_metrics_.protocol_mode_code << " " << ts << "\n";
+        emit_counter("vv_protocol_cap_legacy", bridge_metrics_.protocol_cap_legacy, default_labels);
+        emit_counter("vv_protocol_cap_compact", bridge_metrics_.protocol_cap_compact, default_labels);
+        emit_counter("vv_protocol_cap_protobuf", bridge_metrics_.protocol_cap_protobuf, default_labels);
+        emit_counter("vv_protocol_cap_cbor", bridge_metrics_.protocol_cap_cbor, default_labels);
+        emit_counter("vv_transport_pool_size", bridge_metrics_.configured_transport_pool_size, default_labels);
+        emit_counter("vv_failover_hit_total", bridge_metrics_.failover_hit_count, default_labels);
+        emit_counter("vv_transport_primary_healthy", bridge_metrics_.transport_primary_healthy,
+                     default_labels);
+        emit_counter("vv_transport_secondary_healthy", bridge_metrics_.transport_secondary_healthy,
+                     default_labels);
+
+        emit_counter("vv_diag_dump_state_total", bridge_metrics_.diag_dump_state_count, default_labels);
+        emit_counter("vv_diag_route_event_total", bridge_metrics_.diag_route_event_count, default_labels);
+        emit_counter("vv_diag_failover_event_total", bridge_metrics_.diag_failover_event_count,
+                     default_labels);
 
         return oss.str();
     }
@@ -184,9 +204,20 @@ public:
         oss << "\"reload_success\":" << bridge_metrics_.reload_success_count << ",";
         oss << "\"reload_fail\":" << bridge_metrics_.reload_fail_count << ",";
         oss << "\"reload_rollback\":" << bridge_metrics_.reload_rollback_count << ",";
-        oss << "\"policy_lint_issue\":" << bridge_metrics_.policy_lint_issue_count << ",";
-        oss << "\"policy_lint_warning\":" << bridge_metrics_.policy_lint_warning_count << ",";
-        oss << "\"reload_status\":" << bridge_metrics_.last_reload_status_code;
+        oss << "\"reload_status\":" << bridge_metrics_.last_reload_status_code << ",";
+        oss << "\"reload_reason\":" << bridge_metrics_.reload_rollback_reason_code << ",";
+        oss << "\"protocol_mode\":" << bridge_metrics_.protocol_mode_code << ",";
+        oss << "\"protocol_cap_legacy\":" << bridge_metrics_.protocol_cap_legacy << ",";
+        oss << "\"protocol_cap_compact\":" << bridge_metrics_.protocol_cap_compact << ",";
+        oss << "\"protocol_cap_protobuf\":" << bridge_metrics_.protocol_cap_protobuf << ",";
+        oss << "\"protocol_cap_cbor\":" << bridge_metrics_.protocol_cap_cbor << ",";
+        oss << "\"transport_pool\":" << bridge_metrics_.configured_transport_pool_size << ",";
+        oss << "\"failover_hit\":" << bridge_metrics_.failover_hit_count << ",";
+        oss << "\"health_primary\":" << bridge_metrics_.transport_primary_healthy << ",";
+        oss << "\"health_secondary\":" << bridge_metrics_.transport_secondary_healthy << ",";
+        oss << "\"diag_dump\":" << bridge_metrics_.diag_dump_state_count << ",";
+        oss << "\"diag_route\":" << bridge_metrics_.diag_route_event_count << ",";
+        oss << "\"diag_failover\":" << bridge_metrics_.diag_failover_event_count;
         oss << "},";
         oss << "\"endpoint\":\"bridge\",";
         oss << "\"config_version\":" << bridge_metrics_.loaded_config_version;
@@ -219,7 +250,20 @@ public:
         oss << "\"r_rb\":" << bridge_metrics_.reload_rollback_count << ",";
         oss << "\"lint_i\":" << bridge_metrics_.policy_lint_issue_count << ",";
         oss << "\"lint_w\":" << bridge_metrics_.policy_lint_warning_count << ",";
-        oss << "\"r_code\":" << bridge_metrics_.last_reload_status_code;
+        oss << "\"r_code\":" << bridge_metrics_.last_reload_status_code << ",";
+        oss << "\"r_reason\":" << bridge_metrics_.reload_rollback_reason_code << ",";
+        oss << "\"pm\":" << bridge_metrics_.protocol_mode_code << ",";
+        oss << "\"pc_l\":" << bridge_metrics_.protocol_cap_legacy << ",";
+        oss << "\"pc_c\":" << bridge_metrics_.protocol_cap_compact << ",";
+        oss << "\"pc_p\":" << bridge_metrics_.protocol_cap_protobuf << ",";
+        oss << "\"pc_b\":" << bridge_metrics_.protocol_cap_cbor << ",";
+        oss << "\"tp\":" << bridge_metrics_.configured_transport_pool_size << ",";
+        oss << "\"fo_h\":" << bridge_metrics_.failover_hit_count << ",";
+        oss << "\"hp\":" << bridge_metrics_.transport_primary_healthy << ",";
+        oss << "\"hs\":" << bridge_metrics_.transport_secondary_healthy << ",";
+        oss << "\"d_dump\":" << bridge_metrics_.diag_dump_state_count << ",";
+        oss << "\"d_route\":" << bridge_metrics_.diag_route_event_count << ",";
+        oss << "\"d_fail\":" << bridge_metrics_.diag_failover_event_count;
         oss << "}";
         oss << ",\"ep\":\"bridge\"";
         oss << ",\"ver\":" << bridge_metrics_.loaded_config_version;

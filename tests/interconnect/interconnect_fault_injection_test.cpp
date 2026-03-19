@@ -1,6 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <thread>
 
@@ -275,6 +276,47 @@ bool TestOutOfOrderAndDuplicate() {
            ExpectTrue(metrics.bridge_metrics.tx_count >= 3U, "tx count should record duplicates");
 }
 
+bool TestFailoverHealthAndDiagCounters() {
+    auto primary = std::make_unique<FaultInjectTransport>(
+        FaultInjectTransport::SendFault::kWouldBlockOnce);
+    auto secondary = std::make_unique<FaultInjectTransport>(
+        FaultInjectTransport::SendFault::kNone);
+
+    vr::interconnect::InterconnectBridge bridge(std::move(primary), std::move(secondary));
+    auto config = MakeRetryConfig();
+
+    vr::interconnect::TransportEndpointConfig extra;
+    extra.name = "backup_transport";
+    config.additional_endpoints.push_back(extra);
+
+    if (!ExpectTrue(bridge.Start(config) == vr::core::ErrorCode::kOk, "bridge start failed")) {
+        return false;
+    }
+
+    vr::interconnect::MessageEnvelope msg;
+    msg.source = "vehicle";
+    msg.target = "robot";
+    msg.topic = "fault.failover";
+    msg.channel = vr::interconnect::ChannelType::kEvent;
+    msg.payload = "payload";
+    msg.timestamp_ms = 1U;
+
+    const auto ec = bridge.PublishFromVehicle(msg);
+    (void)bridge.DumpRuntimeState();
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
+    const auto metrics = bridge.CaptureMetricsSnapshot();
+    bridge.Stop();
+
+    return ExpectTrue(ec == vr::core::ErrorCode::kOk, "failover publish should succeed") &&
+           ExpectTrue(metrics.bridge_metrics.failover_hit_count >= 1U,
+                      "failover hit count should increase") &&
+           ExpectTrue(metrics.bridge_metrics.transport_secondary_healthy >= 1U,
+                      "secondary should be healthy") &&
+           ExpectTrue(metrics.bridge_metrics.diag_dump_state_count >= 1U,
+                      "dump diagnostic count should increase");
+}
+
 }  // namespace
 
 int main() {
@@ -299,6 +341,10 @@ int main() {
         return 1;
     }
     if (!TestOutOfOrderAndDuplicate()) {
+        std::cerr << "interconnect fault injection test failed." << std::endl;
+        return 1;
+    }
+    if (!TestFailoverHealthAndDiagCounters()) {
         std::cerr << "interconnect fault injection test failed." << std::endl;
         return 1;
     }

@@ -54,10 +54,37 @@ bool TestCodecRoundTrip() {
            ExpectTrue(decoded.payload == msg.payload, "payload mismatch");
 }
 
+bool TestCodecCapabilitiesAndSkeletons() {
+    vr::interconnect::MessageEnvelope msg;
+    msg.schema_version = 1;
+    msg.channel = vr::interconnect::ChannelType::kTelemetry;
+    msg.qos = vr::interconnect::DeliveryQoS::kBestEffort;
+    msg.sequence = 7;
+    msg.timestamp_ms = 77;
+    msg.ttl_ms = 88;
+    msg.topic = "probe.topic";
+    msg.payload = "probe_payload";
+
+    std::string pb;
+    std::string cbor;
+    const auto pb_ec = vr::interconnect::MessageCodec::EncodeProtobufSkeleton(msg, &pb);
+    const auto cbor_ec = vr::interconnect::MessageCodec::EncodeCborSkeleton(msg, &cbor);
+    const auto caps = vr::interconnect::MessageCodec::ProbeCapabilities();
+
+    return ExpectTrue(pb_ec == vr::core::ErrorCode::kOk, "protobuf skeleton encode") &&
+           ExpectTrue(cbor_ec == vr::core::ErrorCode::kOk, "cbor skeleton encode") &&
+           ExpectTrue(pb.find("pb_skel:") == 0, "protobuf skeleton prefix") &&
+           ExpectTrue(cbor.find("cbor_skel:") == 0, "cbor skeleton prefix") &&
+           ExpectTrue(caps.legacy_supported, "legacy capability") &&
+           ExpectTrue(caps.compact_supported, "compact capability") &&
+           ExpectTrue(caps.protobuf_supported, "protobuf capability") &&
+           ExpectTrue(caps.cbor_supported, "cbor capability");
+}
+
 }  // namespace
 
 int main() {
-    const bool ok = TestCodecRoundTrip();
+    const bool ok = TestCodecRoundTrip() && TestCodecCapabilitiesAndSkeletons();
     if (!ok) {
         std::cerr << "interconnect codec test failed." << std::endl;
         return 1;
