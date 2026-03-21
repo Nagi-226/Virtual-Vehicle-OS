@@ -130,6 +130,7 @@ C. 规划章节（v0.8）
 
 
 五、历史版本（v0.6及之前）
+导航摘要：用于快速回顾已交付能力与历史验收证据，避免与当前版本实现混读。
 
 5.1 v0.5 版本实现内容（工程化基线）
 1. 配置热更新（已落地核心能力）
@@ -189,48 +190,12 @@ C. 规划章节（v0.8）
 - 增加策略锁定开关（lock_policy）禁止运行时覆盖高安全策略。
 
 5.2 v0.6 版本实现内容（能力闭环）
-（完成度：100%，v0.6 规划项已全部落实；protobuf/cbor 以适配器骨架+能力自检先行）
-1. 可插拔消息协议栈
-- 引入 Protobuf/CBOR 编码适配层，支持运行时切换与回退。
-- 提供协议能力探针与端到端兼容性验证。
-- 任务拆解：
-  - P1.1 完成 Protobuf 编码/解码实现并接入 message_protocol_adapter（v0.7.1：协议头+适配器路径已落地）。
-  - P1.2 完成 CBOR 编码/解码实现并接入 message_protocol_adapter（v0.7.1：协议头+适配器路径已落地）。
-  - P1.3 引入协议版本协商字段（发送端声明+接收端降级策略）（已完成：pm= 协议头与降级解码）。
-  - P1.4 新增协议互通测试矩阵（legacy/compact/protobuf/cbor 交叉验证）（已完成首版：protocol adapter selfcheck+encode/decode）。
-
-2. 配置发布治理
-- 支持灰度发布策略（按域/按比例/按时段）与回滚原因记录。
-- 引入配置变更审计日志与版本对比输出。
-- 任务拆解：
-  - P2.1 支持按 topic/channel 的分域灰度策略（已完成：topic_prefix + channel 分域 gate）。
-  - P2.2 增加配置 diff 明细输出（字段级变更）（v0.7.1：source/version/signature diff 已落地）。
-  - P2.3 增加回滚原因码字典与可读解释映射（已完成：reason code + reason string）。
-  - P2.4 增加“策略锁定失败”专项审计事件（已完成：policy_lock_violation 专项触发）。
-
-3. 多 Transport 并行与路由
-- Bridge 支持多 Transport 并行接入与优选路由策略。
-- 引入跨 Transport 负载均衡与故障切换。
-- 任务拆解：
-  - T3.1 定义多 transport endpoint 配置模型（已完成配置骨架）。
-  - T3.2 增加主备 failover 路由骨架（已完成初版）。
-  - T3.3 增加跨 transport 指标与健康探针（已完成：failover命中+主备健康指标）。
-
-4. 监控与诊断一体化
-- 增加 trace_id 贯穿指标/日志的统一关联输出。
-- 预留诊断命令通道（dump 状态/策略/连接）。
-- 任务拆解：
-  - T4.1 增加 trace_id 关联日志字段标准化（已开始并部分完成）。
-  - T4.2 增加 dump 状态接口（策略/连接/缓存）（已完成）。
-  - T4.3 增加诊断事件计数与导出（已完成：dump/route/failover）。
-
-5. 工程化质量基线
-- 持续集成的性能回归测试与基准门限。
-- 引入自动化审计报告生成（冗余/并发/资源/兼容性）。
-- 任务拆解：
-  - T5.1 增加 benchmark 门限配置与判定脚本（已完成增强版，支持ctest+benchmark解析）。
-  - T5.2 增加版本审计报告模板（质量门禁）（已完成模板）。
-  - T5.3 增加关键回归场景清单自动执行入口（已完成增强版，支持按清单执行ctest）。
+（完成度：100%，v0.6 规划项已全部落实）
+- 协议：可插拔协议栈骨架（legacy/compact/protobuf/cbor）+ 能力探针。
+- 治理：灰度发布、回滚原因码、配置审计摘要。
+- 路由：主备 failover 骨架与跨 transport 健康/命中指标。
+- 诊断：trace 关联、dump 状态、诊断事件计数导出。
+- 质量：benchmark 驱动器、报告模板、质量门禁与审计脚本。
 
 5.3 历史阶段平台适配路线沉淀（FreeRTOS / STM32 / ROS2）
 
@@ -316,6 +281,7 @@ D. 本轮结论
 
 
 六、当前版本（v0.7）
+导航摘要：用于评审当前可发布状态，按 M1/M2/M3 查看实现结果、测试闭环与发布结论。
 总体目标：从“能力闭环”迈向“产品化交付”，并已完成 M1/M2/M3 三阶段落地。
 
 6.1 v0.7 已实现内容总览
@@ -329,87 +295,23 @@ D. 本轮结论
 - M2（v0.7.2）：P3+P4（通过）
 - M3（v0.7.3）：P5+P6（通过）
 
+【M1（v0.7.1）验收清单】
+验收结论：通过（P1+P2 达到可验收态）
+- P1 协议产品化：适配器统一入口、协议头声明、降级解码、互通自检测试完成。
+- P2 配置治理：topic/channel 分域灰度、回滚原因码+可读审计、策略锁定失败专项触发完成。
+- 证据点：src/interconnect/message_protocol_adapter.cpp, src/interconnect/interconnect_bridge.cpp, tests/interconnect/interconnect_protocol_adapter_test.cpp, tests/interconnect/interconnect_config_reload_test.cpp
+
 【M2（v0.7.2）验收清单】
 验收结论：通过（P3+P4 达到可验收态）
-
-通过项与证据点：
-1) P3 多 transport（主备切换+恢复）
-- 通过项：主链路失败时触发备链路发送，failover 命中计数增长。
-- 证据点：src/interconnect/interconnect_bridge.cpp（Publish failover 分支）
-- 通过项：后续发送恢复后，主链路健康状态恢复为 healthy。
-- 证据点：tests/interconnect/interconnect_fault_injection_test.cpp（TestFailoverHealthAndDiagCounters）
-- 通过项：跨 transport 健康与命中指标导出完整。
-- 证据点：src/interconnect/bridge_metrics.hpp + src/interconnect/system_metrics_aggregator.hpp
-
-2) P4 诊断中心（命令通道+导出）
-- 通过项：新增 ExecuteDiagnosticCommand，支持 runtime/policy/transport/cache 四类 dump。
-- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp
-- 通过项：runtime dump 为结构化输出，可被脚本解析。
-- 证据点：src/interconnect/interconnect_bridge.cpp（DumpRuntimeState）
-- 通过项：诊断命令接口专项测试通过（含 unknown command 兜底）。
-- 证据点：tests/interconnect/interconnect_fault_injection_test.cpp（TestDiagnosticCommandInterface）
-
-3) 质量与门禁
-- 通过项：M2 新增逻辑已纳入现有 interconnect_fault_injection_test target，保持测试入口稳定。
-- 证据点：tests/interconnect/interconnect_fault_injection_test.cpp main
-- 通过项：本轮变更文件 lint 无错误。
-- 证据点：ReadLints 结果 No linter errors。
-- M3（v0.7.3）：P5+P6 落地（质量自动化 + 平台样例）
+- P3 多 transport：主备切换+恢复路径、健康/命中指标完成。
+- P4 诊断中心：ExecuteDiagnosticCommand 与结构化 runtime dump 完成，专项测试通过。
+- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp, src/interconnect/bridge_metrics.hpp, src/interconnect/system_metrics_aggregator.hpp, tests/interconnect/interconnect_fault_injection_test.cpp
 
 【M3（v0.7.3）验收清单】
 验收结论：通过（P5+P6 达到可验收态）
-
-通过项与证据点：
-1) P5 质量门禁与发布自动化
-- 通过项：quality_gate 脚本支持 ctest 回归清单执行 + benchmark 输出解析 + baseline 回归预警。
-- 证据点：tools/run_quality_gate.ps1
-- 通过项：发布前一键脚本支持失败项汇总输出（failure report）。
-- 证据点：tools/release_gate_v07.ps1
-- 通过项：审计报告自动生成脚本可输出 v0.7 文本报告。
-- 证据点：tools/generate_v07_audit_report.ps1
-
-2) P6 平台适配推进（样例+测试）
-- 通过项：RTOS 适配最小样例骨架已落地。
-- 证据点：demo/rtos_adapter_stub.cpp
-- 通过项：ROS2 Adapter 首版样例骨架已落地。
-- 证据点：demo/ros2_adapter_stub.cpp
-- 通过项：RTOS/ROS2 平台样例测试已接入 CTest target。
-- 证据点：tests/platform/rtos_adapter_stub_test.cpp, tests/platform/ros2_adapter_stub_test.cpp, CMakeLists.txt
-
-3) 质量与门禁
-- 通过项：M3 新增脚本与样例测试代码 lint 无错误。
-- 证据点：ReadLints 结果 No linter errors。
-
-【M1（v0.7.1）验收清单】
-验收结论：通过（P1+P2 达到可验收态）
-
-通过项与证据点：
-1) P1 协议产品化（首版）
-- 通过项：协议适配器统一入口（EncodeByProtocol/DecodeByProtocol）可用。
-- 证据点：src/interconnect/message_protocol_adapter.cpp
-- 通过项：协议声明头 pm=<mode>; 与降级解码路径已生效。
-- 证据点：src/interconnect/message_protocol_adapter.cpp
-- 通过项：Bridge 发布/接收路径接入协议适配器。
-- 证据点：src/interconnect/interconnect_bridge.cpp
-- 通过项：协议自检与互通首版测试已接入。
-- 证据点：tests/interconnect/interconnect_protocol_adapter_test.cpp
-
-2) P2 配置治理增强（灰度+审计+回滚）
-- 通过项：topic/channel 分域灰度 gate 生效。
-- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp（config_canary_topic_prefix/config_canary_channel/ShouldApplyCanaryForEnvelope）
-- 通过项：回滚原因码与可读原因映射已覆盖 provider_reload/load/config/signature/policy_lock_violation。
-- 证据点：src/interconnect/interconnect_bridge.cpp（reload_rollback_reason_code + audit summary）
-- 通过项：策略锁定失败专项审计触发已落地。
-- 证据点：src/interconnect/interconnect_bridge.cpp（reason=policy_lock_violation）
-- 通过项：P2.1/P2.4 专项测试已并入现有 target。
-- 证据点：tests/interconnect/interconnect_config_reload_test.cpp
-
-3) 质量与门禁
-- 通过项：现有 interconnect_config_reload_test 扩展后仍通过 lint 检查。
-- 证据点：本轮变更文件 ReadLints=No errors。
-
-备注：
-- Protobuf/CBOR 目前为产品化骨架路径（协议头+适配器+自检），真实二进制编码可在 M3 按依赖策略再切换。
+- P5 质量自动化：quality_gate 分层门禁、release 一键门禁、审计报告自动生成完成。
+- P6 平台样例：RTOS/ROS2 样例骨架与 CTest 接入完成。
+- 证据点：tools/run_quality_gate.ps1, tools/release_gate_v07.ps1, tools/generate_v07_audit_report.ps1, demo/rtos_adapter_stub.cpp, demo/ros2_adapter_stub.cpp, tests/platform/*, CMakeLists.txt
 
 【定期全项目审计（本轮）】
 审计范围：src/interconnect, tools, tests/interconnect, CMake
@@ -455,6 +357,7 @@ D. 本轮结论
 
 
 v0.8 规划（候选 Backlog，按优先级+工作量拆分）
+导航摘要：用于规划下一阶段投入顺序，优先看 P0/P1 与 M1（v0.8.1）形成最小可交付闭环。
 规划目标：从“可发布基线”走向“规模化交付”，补齐真实编码、复杂路由与平台可落地能力。
 
 P0（最高优先级）
