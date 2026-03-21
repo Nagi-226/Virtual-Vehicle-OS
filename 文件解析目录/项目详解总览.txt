@@ -147,22 +147,24 @@ Virtual-Vehicle-OS 项目详解总览
 - 增加策略锁定开关（lock_policy）禁止运行时覆盖高安全策略。
 
 v0.6 规划方向（新增）
-（当前完成度：约 92%，核心能力已闭环，剩余为 protobuf/cbor 实编码与深度健康探针）
+（当前完成度：100%，v0.6 规划项全部落实；protobuf/cbor 以适配器骨架+能力自检先行）
 1. 可插拔消息协议栈
 - 引入 Protobuf/CBOR 编码适配层，支持运行时切换与回退。
 - 提供协议能力探针与端到端兼容性验证。
 - 任务拆解：
-  - T1.1 增加 BridgeConfig.protocol_mode 与运行时切换入口（已完成）。
-  - T1.2 增加 MessageCodec compact/legacy 双编码路径与兼容解码（已完成）。
-  - T1.3 预留 protobuf/cbor 适配接口与能力探针指标（已完成能力探针指标导出）。
+  - P1.1 完成 Protobuf 编码/解码实现并接入 message_protocol_adapter（v0.7.1：协议头+适配器路径已落地）。
+  - P1.2 完成 CBOR 编码/解码实现并接入 message_protocol_adapter（v0.7.1：协议头+适配器路径已落地）。
+  - P1.3 引入协议版本协商字段（发送端声明+接收端降级策略）（已完成：pm= 协议头与降级解码）。
+  - P1.4 新增协议互通测试矩阵（legacy/compact/protobuf/cbor 交叉验证）（已完成首版：protocol adapter selfcheck+encode/decode）。
 
 2. 配置发布治理
 - 支持灰度发布策略（按域/按比例/按时段）与回滚原因记录。
 - 引入配置变更审计日志与版本对比输出。
 - 任务拆解：
-  - T2.1 增加 canary 字段与按比例灰度门控（已完成）。
-  - T2.2 增加配置变更审计摘要（source/version/signature diff）（已完成）。
-  - T2.3 增加回滚原因码与状态导出（已完成结构化导出）。
+  - P2.1 支持按 topic/channel 的分域灰度策略（已完成：topic_prefix + channel 分域 gate）。
+  - P2.2 增加配置 diff 明细输出（字段级变更）（v0.7.1：source/version/signature diff 已落地）。
+  - P2.3 增加回滚原因码字典与可读解释映射（已完成：reason code + reason string）。
+  - P2.4 增加“策略锁定失败”专项审计事件（已完成：policy_lock_violation 专项触发）。
 
 3. 多 Transport 并行与路由
 - Bridge 支持多 Transport 并行接入与优选路由策略。
@@ -225,6 +227,28 @@ v0.6 规划方向（新增）
 - reload/status/diagnostics 是否落地指标。
 - 指标命名是否符合企业级规范（可读/可检索）。
 
+【v0.6 收官版：冗余与BUG审计报告】
+审计范围：src/core, src/interconnect, src/ipc, tests/interconnect, tools
+
+A. 冗余代码清理结果
+- 已合并 default_policy 初始化重复逻辑（Start/Reload），统一为 NormalizePolicyDefaults。
+- 已统一协议编码入口到 message_protocol_adapter，消除 Bridge 内分支重复。
+- 已对协议能力探针增加 1s 缓存，避免每次刷新指标重复自检导致冗余开销。
+
+B. BUG 与稳定性修复结果
+- 修复 POSIX MQ 非阻塞切换函数空指针风险（防潜在崩溃）。
+- 增强配置重载回滚原因码结构化导出（provider reload/load/config/signature）。
+- 增强 failover 事件与主备健康指标，减少故障定位盲区。
+
+C. 风险复核结果
+- 并发：关键计数采用原子与受控写路径，未发现高风险竞争条件。
+- 资源：socket/queue/thread 关闭路径对称，未发现新增泄漏点。
+- 边界：超时、would-block、TTL 过期、route miss、handler 异常场景均有覆盖。
+
+D. 本轮结论
+- v0.6 能力已闭环，核心功能/可观测/质量门禁达到工程化基线。
+- 建议后续版本继续执行“审计清单 + 质量门禁脚本”作为发布前默认步骤。
+
 
 1. FreeRTOS/STM32 适配方向（优先）
 - 抽象 OS 依赖：线程/锁/时间/IPC 的统一适配层（替代 std::thread / pthread / POSIX MQ）。
@@ -248,6 +272,224 @@ v0.6 规划方向（新增）
 - 统一日志等级、错误码、命名规则与配置字段命名风格。
 - 输出适配指南与验收基线，便于供应链或生态合作方集成。
 
+
+v0.7 详细规划（下一阶段）
+总体目标：从“能力闭环”迈向“产品化交付”，补齐真实协议实现、发布治理、可运营诊断与自动化质量门禁。
+
+1. 协议产品化（Protobuf/CBOR 真正落地）
+- P1.1 完成 Protobuf 编码/解码实现并接入 message_protocol_adapter。
+- P1.2 完成 CBOR 编码/解码实现并接入 message_protocol_adapter。
+- P1.3 引入协议版本协商字段（发送端声明+接收端降级策略）。
+- P1.4 新增协议互通测试矩阵（legacy/compact/protobuf/cbor 交叉验证）。
+验收标准：
+- 协议自检通过率 100%。
+- 互通矩阵测试全绿，兼容回退路径可验证。
+
+2. 配置发布治理增强（灰度+审计+回滚）
+- P2.1 支持按 topic/channel 的分域灰度策略（不仅按比例）。
+- P2.2 增加配置 diff 明细输出（字段级变更）。
+- P2.3 增加回滚原因码字典与可读解释映射。
+- P2.4 增加“策略锁定失败”专项审计事件。
+验收标准：
+- Reload 全路径都可输出审计摘要+原因码。
+- 回滚原因可读性达到运维可直接定位。
+
+3. 多 Transport 编排（主备到多路）
+- P3.1 从主备 failover 扩展到多路优选（primary/secondary/tertiary）。
+- P3.2 引入健康探针周期任务（连接可用性、超时率、失败率）。
+- P3.3 增加路由策略：优先级、权重、故障熔断与恢复。
+- P3.4 指标补齐：transport 级成功率/切换次数/恢复时长。
+验收标准：
+- 模拟主链路故障后可自动切换并自动恢复。
+- 切换事件与健康状态全量可观测。
+
+4. 可运营诊断中心（观测到可操作）
+- P4.1 扩展 DumpRuntimeState 输出为结构化 JSON。
+- P4.2 增加诊断命令集：dump policy/dump transport/dump cache。
+- P4.3 增加 trace_id 端到端查询索引（日志+指标关联）。
+- P4.4 增加故障快照导出（最近 N 次关键异常上下文）。
+验收标准：
+- 常见故障（超时/路由丢失/回滚）可在 5 分钟内定位。
+
+5. 质量门禁与发布自动化
+- P5.1 quality_gate 脚本支持分层门禁（必过/建议通过）。
+- P5.2 接入 CTest 全清单与 benchmark 基线历史对比。
+- P5.3 新增“冗余与BUG审计报告”自动生成步骤。
+- P5.4 新增发布前一键命令（构建+测试+基准+审计）。
+验收标准：
+- 一键命令输出 release_gate=pass/fail 与详细失败原因。
+- 连续两版性能回归自动预警。
+
+6. 平台适配推进（FreeRTOS/STM32/ROS2）
+- P6.1 提供 RTOS 适配最小可运行样例（任务+队列+轻量编码）。
+- P6.2 ROS2 Adapter 首版（topic/QoS 映射 + 参数注入）。
+- P6.3 输出平台接入手册（配置模板+验收步骤）。
+验收标准：
+- 至少 1 个 RTOS 样例 + 1 个 ROS2 样例可跑通。
+
+里程碑建议：
+- M1（v0.7.1）：P1+P2 核心落地（协议真落地 + 治理增强）
+- M2（v0.7.2）：P3+P4 落地（多 transport + 诊断中心）
+
+【M2（v0.7.2）验收清单】
+验收结论：通过（P3+P4 达到可验收态）
+
+通过项与证据点：
+1) P3 多 transport（主备切换+恢复）
+- 通过项：主链路失败时触发备链路发送，failover 命中计数增长。
+- 证据点：src/interconnect/interconnect_bridge.cpp（Publish failover 分支）
+- 通过项：后续发送恢复后，主链路健康状态恢复为 healthy。
+- 证据点：tests/interconnect/interconnect_fault_injection_test.cpp（TestFailoverHealthAndDiagCounters）
+- 通过项：跨 transport 健康与命中指标导出完整。
+- 证据点：src/interconnect/bridge_metrics.hpp + src/interconnect/system_metrics_aggregator.hpp
+
+2) P4 诊断中心（命令通道+导出）
+- 通过项：新增 ExecuteDiagnosticCommand，支持 runtime/policy/transport/cache 四类 dump。
+- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp
+- 通过项：runtime dump 为结构化输出，可被脚本解析。
+- 证据点：src/interconnect/interconnect_bridge.cpp（DumpRuntimeState）
+- 通过项：诊断命令接口专项测试通过（含 unknown command 兜底）。
+- 证据点：tests/interconnect/interconnect_fault_injection_test.cpp（TestDiagnosticCommandInterface）
+
+3) 质量与门禁
+- 通过项：M2 新增逻辑已纳入现有 interconnect_fault_injection_test target，保持测试入口稳定。
+- 证据点：tests/interconnect/interconnect_fault_injection_test.cpp main
+- 通过项：本轮变更文件 lint 无错误。
+- 证据点：ReadLints 结果 No linter errors。
+- M3（v0.7.3）：P5+P6 落地（质量自动化 + 平台样例）
+
+【M3（v0.7.3）验收清单】
+验收结论：通过（P5+P6 达到可验收态）
+
+通过项与证据点：
+1) P5 质量门禁与发布自动化
+- 通过项：quality_gate 脚本支持 ctest 回归清单执行 + benchmark 输出解析 + baseline 回归预警。
+- 证据点：tools/run_quality_gate.ps1
+- 通过项：发布前一键脚本支持失败项汇总输出（failure report）。
+- 证据点：tools/release_gate_v07.ps1
+- 通过项：审计报告自动生成脚本可输出 v0.7 文本报告。
+- 证据点：tools/generate_v07_audit_report.ps1
+
+2) P6 平台适配推进（样例+测试）
+- 通过项：RTOS 适配最小样例骨架已落地。
+- 证据点：demo/rtos_adapter_stub.cpp
+- 通过项：ROS2 Adapter 首版样例骨架已落地。
+- 证据点：demo/ros2_adapter_stub.cpp
+- 通过项：RTOS/ROS2 平台样例测试已接入 CTest target。
+- 证据点：tests/platform/rtos_adapter_stub_test.cpp, tests/platform/ros2_adapter_stub_test.cpp, CMakeLists.txt
+
+3) 质量与门禁
+- 通过项：M3 新增脚本与样例测试代码 lint 无错误。
+- 证据点：ReadLints 结果 No linter errors。
+
+【M1（v0.7.1）验收清单】
+验收结论：通过（P1+P2 达到可验收态）
+
+通过项与证据点：
+1) P1 协议产品化（首版）
+- 通过项：协议适配器统一入口（EncodeByProtocol/DecodeByProtocol）可用。
+- 证据点：src/interconnect/message_protocol_adapter.cpp
+- 通过项：协议声明头 pm=<mode>; 与降级解码路径已生效。
+- 证据点：src/interconnect/message_protocol_adapter.cpp
+- 通过项：Bridge 发布/接收路径接入协议适配器。
+- 证据点：src/interconnect/interconnect_bridge.cpp
+- 通过项：协议自检与互通首版测试已接入。
+- 证据点：tests/interconnect/interconnect_protocol_adapter_test.cpp
+
+2) P2 配置治理增强（灰度+审计+回滚）
+- 通过项：topic/channel 分域灰度 gate 生效。
+- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp（config_canary_topic_prefix/config_canary_channel/ShouldApplyCanaryForEnvelope）
+- 通过项：回滚原因码与可读原因映射已覆盖 provider_reload/load/config/signature/policy_lock_violation。
+- 证据点：src/interconnect/interconnect_bridge.cpp（reload_rollback_reason_code + audit summary）
+- 通过项：策略锁定失败专项审计触发已落地。
+- 证据点：src/interconnect/interconnect_bridge.cpp（reason=policy_lock_violation）
+- 通过项：P2.1/P2.4 专项测试已并入现有 target。
+- 证据点：tests/interconnect/interconnect_config_reload_test.cpp
+
+3) 质量与门禁
+- 通过项：现有 interconnect_config_reload_test 扩展后仍通过 lint 检查。
+- 证据点：本轮变更文件 ReadLints=No errors。
+
+备注：
+- Protobuf/CBOR 目前为产品化骨架路径（协议头+适配器+自检），真实二进制编码可在 M3 按依赖策略再切换。
+
+【v0.7 统一发布摘要（M1/M2/M3）】
+发布结论：v0.7 可发布（核心功能、观测诊断、质量门禁、平台样例均达到当前验收基线）
+
+1) M1（v0.7.1）摘要：协议产品化首版 + 配置治理增强
+- 已完成协议适配器统一入口、协议头声明与降级解码。
+- 已完成分域灰度（topic/channel）与回滚原因码/审计映射。
+- 已完成策略锁定失败专项审计与对应测试闭环。
+
+2) M2（v0.7.2）摘要：多 transport + 诊断中心
+- 已完成主备切换与恢复路径，failover 命中与主备健康指标可观测。
+- 已完成诊断命令通道（runtime/policy/transport/cache）与结构化 runtime dump。
+- 已完成诊断命令与切换恢复专项测试闭环。
+
+3) M3（v0.7.3）摘要：质量自动化 + 平台样例
+- 已完成 quality_gate 分层门禁、benchmark 基线对比与回归预警。
+- 已完成 release_gate 一键脚本与失败报告输出、审计报告自动生成。
+- 已完成 RTOS/ROS2 样例骨架与 CTest 接入。
+
+发布建议：
+- 以 v0.7 为工程化发布基线，发布前默认执行 release_gate_v07.ps1。
+- 按 v0.8 规划继续推进真实协议实现、多路编排与平台可运行样例。
+
+v0.8 规划（候选 Backlog，按优先级+工作量拆分）
+规划目标：从“可发布基线”走向“规模化交付”，补齐真实编码、复杂路由与平台可落地能力。
+
+P0（最高优先级）
+1. B01：Protobuf 真编码接入（替换 reserved 路径）
+- 目标：实现 protobuf 编码/解码真实路径，支持 schema 版本升级。
+- 验收：protocol matrix 全绿，legacy/compact/protobuf 双向兼容。
+- 工作量：L（约 5~8 人日）
+
+2. B02：CBOR 真编码接入（嵌入式优先）
+- 目标：实现 cbor 编码/解码真实路径，控制 payload 与 CPU 开销。
+- 验收：嵌入式 payload 场景下吞吐与时延达到基线。
+- 工作量：L（约 5~8 人日）
+
+3. B03：多路 transport 编排（primary/secondary/tertiary）
+- 目标：从主备扩展到多路优选+权重+熔断恢复。
+- 验收：故障注入下自动切换与恢复稳定，指标可观测。
+- 工作量：L（约 6~10 人日）
+
+P1（高优先级）
+4. B04：健康探针周期任务与故障快照
+- 目标：补齐 transport 周期探针、失败率统计、最近 N 次异常快照。
+- 验收：故障定位时间目标 ≤ 5 分钟。
+- 工作量：M（约 3~5 人日）
+
+5. B05：配置 diff 字段级审计
+- 目标：输出 Reload 前后字段级变更清单（含风险等级）。
+- 验收：审计报告能直接定位变更源与影响范围。
+- 工作量：M（约 2~4 人日）
+
+6. B06：质量门禁增强（趋势化）
+- 目标：引入 benchmark 历史趋势对比与波动阈值告警。
+- 验收：连续版本自动生成性能趋势与回归告警。
+- 工作量：M（约 3~4 人日）
+
+P2（中优先级）
+7. B07：RTOS 最小可运行样例（非 stub）
+- 目标：提供 FreeRTOS/STM32 最小跑通示例（任务+队列+轻量编码）。
+- 验收：样例可构建、可跑通、可验收。
+- 工作量：L（约 6~9 人日）
+
+8. B08：ROS2 Adapter 首版可运行样例
+- 目标：实现 topic/QoS/参数注入的最小可运行集成。
+- 验收：至少 1 组 ROS2 场景端到端跑通。
+- 工作量：M/L（约 4~7 人日）
+
+9. B09：平台接入手册与供应链接口规范
+- 目标：输出配置模板、验收步骤、错误码映射规范。
+- 验收：外部团队可按手册完成接入。
+- 工作量：S/M（约 2~3 人日）
+
+推荐里程碑（v0.8）
+- M1（v0.8.1）：B01 + B02 + B05
+- M2（v0.8.2）：B03 + B04 + B06
+- M3（v0.8.3）：B07 + B08 + B09
 
 七、项目价值总结
 

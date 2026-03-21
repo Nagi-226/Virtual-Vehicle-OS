@@ -148,6 +148,8 @@ public:
             << bridge_metrics_.last_reload_status_code << " " << ts << "\n";
         oss << "vv_reload_rollback_reason_code" << default_labels << " "
             << bridge_metrics_.reload_rollback_reason_code << " " << ts << "\n";
+        oss << "vv_reload_policy_lock_violation_total" << default_labels << " "
+            << (bridge_metrics_.reload_rollback_reason_code == 5 ? 1 : 0) << " " << ts << "\n";
 
         oss << "vv_protocol_mode_code" << default_labels << " "
             << bridge_metrics_.protocol_mode_code << " " << ts << "\n";
@@ -204,6 +206,8 @@ public:
         oss << "\"reload_success\":" << bridge_metrics_.reload_success_count << ",";
         oss << "\"reload_fail\":" << bridge_metrics_.reload_fail_count << ",";
         oss << "\"reload_rollback\":" << bridge_metrics_.reload_rollback_count << ",";
+        oss << "\"policy_lint_issue\":" << bridge_metrics_.policy_lint_issue_count << ",";
+        oss << "\"policy_lint_warning\":" << bridge_metrics_.policy_lint_warning_count << ",";
         oss << "\"reload_status\":" << bridge_metrics_.last_reload_status_code << ",";
         oss << "\"reload_reason\":" << bridge_metrics_.reload_rollback_reason_code << ",";
         oss << "\"protocol_mode\":" << bridge_metrics_.protocol_mode_code << ",";

@@ -48,6 +48,8 @@ struct BridgeConfig {
     bool enable_diagnostics_reporting{false};
     bool enable_config_canary{false};
     std::uint32_t config_canary_percent{100U};
+    std::string config_canary_topic_prefix;
+    std::int32_t config_canary_channel{-1};
     MessageProtocolMode protocol_mode{MessageProtocolMode::kLegacyPipe};
 };
 
@@ -78,6 +80,7 @@ public:
     std::string GetPolicyLintReport() const;
     std::vector<std::string> DumpPolicyConflicts() const;
     std::string DumpRuntimeState() const;
+    std::string ExecuteDiagnosticCommand(const std::string& command) const;
     void SetDiagnosticsReporter(std::shared_ptr<IDiagnosticsReporter> reporter);
     void SetMessageAuthenticator(std::shared_ptr<IMessageAuthenticator> authenticator);
     std::string GetLastReloadAuditSummary() const;
@@ -116,6 +119,7 @@ private:
     std::pair<std::uint64_t, std::uint64_t> GetPolicyLintCounts() const;
     std::string BuildPolicyLintReport() const;
     std::string BuildPolicyLintSummary() const;
+    bool ShouldApplyCanaryForEnvelope(const MessageEnvelope& envelope) const;
     const BridgeSlaPolicy* FindBestPolicyMatch(
         const std::vector<PolicyRule>& rules,
         const std::unordered_map<std::string, std::vector<std::size_t>>& index,

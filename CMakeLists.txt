@@ -36,6 +36,7 @@ set(VR_BASE_SOURCES
     src/core/thread_pool.cpp
     src/core/retry_policy.cpp
     src/interconnect/message_codec.cpp
+    src/interconnect/message_protocol_adapter.cpp
     src/interconnect/message_router.cpp
     src/interconnect/interconnect_bridge.cpp
 )
@@ -147,6 +148,21 @@ if(ENABLE_TESTS)
     target_link_libraries(interconnect_tcp_loopback_test PRIVATE vr_base_framework)
     add_test(NAME interconnect_tcp_loopback_test COMMAND interconnect_tcp_loopback_test)
     set_tests_properties(interconnect_tcp_loopback_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    add_executable(interconnect_protocol_adapter_test tests/interconnect/interconnect_protocol_adapter_test.cpp)
+    target_link_libraries(interconnect_protocol_adapter_test PRIVATE vr_base_framework)
+    add_test(NAME interconnect_protocol_adapter_test COMMAND interconnect_protocol_adapter_test)
+    set_tests_properties(interconnect_protocol_adapter_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
+    add_executable(rtos_adapter_stub_test tests/platform/rtos_adapter_stub_test.cpp)
+    target_link_libraries(rtos_adapter_stub_test PRIVATE vr_base_framework)
+    add_test(NAME rtos_adapter_stub_test COMMAND rtos_adapter_stub_test)
+    set_tests_properties(rtos_adapter_stub_test PROPERTIES LABELS "platform" TIMEOUT 10)
+
+    add_executable(ros2_adapter_stub_test tests/platform/ros2_adapter_stub_test.cpp)
+    target_link_libraries(ros2_adapter_stub_test PRIVATE vr_base_framework)
+    add_test(NAME ros2_adapter_stub_test COMMAND ros2_adapter_stub_test)
+    set_tests_properties(ros2_adapter_stub_test PROPERTIES LABELS "platform" TIMEOUT 10)
 
     if(NOT WIN32)
         add_executable(posix_message_queue_test tests/ipc/posix_message_queue_test.cpp)

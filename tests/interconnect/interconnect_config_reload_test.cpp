@@ -87,10 +87,85 @@ bool TestReloadRollbackOnInvalidConfig() {
            ExpectTrue(source == "static://base", "rollback keeps previous source");
 }
 
+bool TestReloadRollbackOnPolicyLockViolation() {
+    auto transport_tx = std::make_unique<NoopTransport>();
+    auto transport_rx = std::make_unique<NoopTransport>();
+    vr::interconnect::InterconnectBridge bridge(std::move(transport_tx), std::move(transport_rx));
+
+    auto base_config = MakeValidConfig();
+    base_config.policy_table.default_policy.lock_policy = true;
+    base_config.policy_table.default_policy.max_end_to_end_latency_ms = 120;
+    vr::interconnect::StaticConfigProvider provider(base_config, "static://lock_base");
+
+    if (!ExpectTrue(bridge.Start(&provider) == vr::core::ErrorCode::kOk, "bridge start failed")) {
+        return false;
+    }
+
+    vr::interconnect::BridgeConfig violating = base_config;
+    violating.policy_table.default_policy.max_end_to_end_latency_ms = 200;
+    provider.UpdateConfigForTest(violating, "static://lock_violation");
+
+    const auto reload_ec = bridge.ReloadConfigIfChanged(&provider);
+    const auto metrics = bridge.CaptureMetricsSnapshot();
+    const auto audit = bridge.GetLastReloadAuditSummary();
+    bridge.Stop();
+
+    return ExpectTrue(reload_ec == vr::core::ErrorCode::kInvalidParam,
+                      "policy lock violation should fail reload") &&
+           ExpectTrue(metrics.bridge_metrics.reload_rollback_reason_code == 5,
+                      "rollback reason should be policy lock violation") &&
+           ExpectTrue(audit.find("policy_lock_violation") != std::string::npos,
+                      "audit should include policy lock violation");
+}
+
+bool TestCanarySegmentGateByTopicChannel() {
+    auto transport_tx = std::make_unique<NoopTransport>();
+    auto transport_rx = std::make_unique<NoopTransport>();
+    vr::interconnect::InterconnectBridge bridge(std::move(transport_tx), std::move(transport_rx));
+
+    auto config = MakeValidConfig();
+    config.enable_config_canary = true;
+    config.config_canary_percent = 0U;
+    config.config_canary_topic_prefix = "canary.";
+    config.config_canary_channel = static_cast<std::int32_t>(vr::interconnect::ChannelType::kTelemetry);
+
+    if (!ExpectTrue(bridge.Start(config) == vr::core::ErrorCode::kOk, "bridge start failed")) {
+        return false;
+    }
+
+    vr::interconnect::MessageEnvelope hit_msg;
+    hit_msg.source = "vehicle";
+    hit_msg.target = "robot";
+    hit_msg.topic = "canary.topic.hit";
+    hit_msg.channel = vr::interconnect::ChannelType::kTelemetry;
+    hit_msg.payload = "payload";
+    hit_msg.timestamp_ms = 1U;
+
+    vr::interconnect::MessageEnvelope bypass_msg = hit_msg;
+    bypass_msg.topic = "normal.topic.bypass";
+
+    const auto hit_ec = bridge.PublishFromVehicle(hit_msg);
+    const auto bypass_ec = bridge.PublishFromVehicle(bypass_msg);
+    bridge.Stop();
+
+    return ExpectTrue(hit_ec == vr::core::ErrorCode::kWouldBlock,
+                      "canary hit message should be gated") &&
+           ExpectTrue(bypass_ec == vr::core::ErrorCode::kOk,
+                      "non canary segment should bypass gate");
+}
+
 }  // namespace
 
 int main() {
     if (!TestReloadRollbackOnInvalidConfig()) {
+        std::cerr << "interconnect config reload test failed." << std::endl;
+        return 1;
+    }
+    if (!TestReloadRollbackOnPolicyLockViolation()) {
+        std::cerr << "interconnect config reload test failed." << std::endl;
+        return 1;
+    }
+    if (!TestCanarySegmentGateByTopicChannel()) {
         std::cerr << "interconnect config reload test failed." << std::endl;
         return 1;
     }

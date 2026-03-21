@@ -301,20 +301,61 @@ bool TestFailoverHealthAndDiagCounters() {
     msg.payload = "payload";
     msg.timestamp_ms = 1U;
 
-    const auto ec = bridge.PublishFromVehicle(msg);
-    (void)bridge.DumpRuntimeState();
+    const auto first_ec = bridge.PublishFromVehicle(msg);
+    const auto metrics_after_failover = bridge.CaptureMetricsSnapshot();
 
+    const auto second_ec = bridge.PublishFromVehicle(msg);
+    const auto metrics_after_recovery = bridge.CaptureMetricsSnapshot();
+
+    (void)bridge.DumpRuntimeState();
     std::this_thread::sleep_for(std::chrono::milliseconds(20));
     const auto metrics = bridge.CaptureMetricsSnapshot();
     bridge.Stop();
 
-    return ExpectTrue(ec == vr::core::ErrorCode::kOk, "failover publish should succeed") &&
-           ExpectTrue(metrics.bridge_metrics.failover_hit_count >= 1U,
+    return ExpectTrue(first_ec == vr::core::ErrorCode::kOk, "failover publish should succeed") &&
+           ExpectTrue(metrics_after_failover.bridge_metrics.failover_hit_count >= 1U,
                       "failover hit count should increase") &&
+           ExpectTrue(metrics_after_failover.bridge_metrics.transport_primary_healthy == 0U,
+                      "primary should be unhealthy right after failover") &&
+           ExpectTrue(second_ec == vr::core::ErrorCode::kOk, "primary recovery publish should succeed") &&
+           ExpectTrue(metrics_after_recovery.bridge_metrics.transport_primary_healthy >= 1U,
+                      "primary should recover healthy on next success") &&
            ExpectTrue(metrics.bridge_metrics.transport_secondary_healthy >= 1U,
                       "secondary should be healthy") &&
            ExpectTrue(metrics.bridge_metrics.diag_dump_state_count >= 1U,
                       "dump diagnostic count should increase");
+}
+
+bool TestDiagnosticCommandInterface() {
+    auto tx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+    auto rx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+
+    vr::interconnect::InterconnectBridge bridge(std::move(tx), std::move(rx));
+    auto config = MakeRetryConfig();
+    if (!ExpectTrue(bridge.Start(config) == vr::core::ErrorCode::kOk, "bridge start failed")) {
+        return false;
+    }
+
+    const std::string runtime_dump = bridge.ExecuteDiagnosticCommand("dump runtime");
+    const std::string policy_dump = bridge.ExecuteDiagnosticCommand("dump policy");
+    const std::string transport_dump = bridge.ExecuteDiagnosticCommand("dump transport");
+    const std::string cache_dump = bridge.ExecuteDiagnosticCommand("dump cache");
+    const std::string unknown = bridge.ExecuteDiagnosticCommand("dump unknown");
+    const auto metrics = bridge.CaptureMetricsSnapshot();
+
+    bridge.Stop();
+
+    return ExpectTrue(runtime_dump.find("loaded_config_version") != std::string::npos,
+                      "runtime dump should contain config version") &&
+           ExpectTrue(!policy_dump.empty(), "policy dump should not be empty") &&
+           ExpectTrue(transport_dump.find("transport") != std::string::npos,
+                      "transport dump should be available") &&
+           ExpectTrue(cache_dump.find("policy_cache_size") != std::string::npos,
+                      "cache dump should contain cache size") &&
+           ExpectTrue(unknown.find("unknown_command") != std::string::npos,
+                      "unknown command should return diagnostic error") &&
+           ExpectTrue(metrics.bridge_metrics.diag_dump_state_count >= 1U,
+                      "diag dump metric should increase");
 }
 
 }  // namespace
@@ -345,6 +386,10 @@ int main() {
         return 1;
     }
     if (!TestFailoverHealthAndDiagCounters()) {
+        std::cerr << "interconnect fault injection test failed." << std::endl;
+        return 1;
+    }
+    if (!TestDiagnosticCommandInterface()) {
         std::cerr << "interconnect fault injection test failed." << std::endl;
         return 1;
     }

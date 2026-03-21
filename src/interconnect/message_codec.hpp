@@ -9,25 +9,12 @@
 namespace vr {
 namespace interconnect {
 
-struct CodecCapabilities {
-    bool legacy_supported{true};
-    bool compact_supported{true};
-    bool protobuf_supported{false};
-    bool cbor_supported{false};
-};
-
 class MessageCodec {
 public:
     static vr::core::ErrorCode Encode(const MessageEnvelope& envelope, std::string* out) noexcept;
     static vr::core::ErrorCode EncodeCompact(const MessageEnvelope& envelope,
                                              std::string* out) noexcept;
     static vr::core::ErrorCode Decode(const std::string& text, MessageEnvelope* out) noexcept;
-
-    static vr::core::ErrorCode EncodeProtobufSkeleton(const MessageEnvelope& envelope,
-                                                      std::string* out) noexcept;
-    static vr::core::ErrorCode EncodeCborSkeleton(const MessageEnvelope& envelope,
-                                                  std::string* out) noexcept;
-    static CodecCapabilities ProbeCapabilities() noexcept;
 };
 
 }  // namespace interconnect

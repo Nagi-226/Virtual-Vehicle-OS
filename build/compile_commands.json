@@ -31,6 +31,12 @@
 },
 {
   "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\message_protocol_adapter.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\message_protocol_adapter.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\message_protocol_adapter.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\message_protocol_adapter.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
   "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\message_router.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\message_router.cpp\"",
   "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\message_router.cpp",
   "output": "CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\message_router.cpp.obj"
@@ -130,5 +136,23 @@
   "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_tcp_loopback_test.dir\\tests\\interconnect\\interconnect_tcp_loopback_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_tcp_loopback_test.cpp\"",
   "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_tcp_loopback_test.cpp",
   "output": "CMakeFiles\\interconnect_tcp_loopback_test.dir\\tests\\interconnect\\interconnect_tcp_loopback_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_protocol_adapter_test.dir\\tests\\interconnect\\interconnect_protocol_adapter_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_protocol_adapter_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_protocol_adapter_test.cpp",
+  "output": "CMakeFiles\\interconnect_protocol_adapter_test.dir\\tests\\interconnect\\interconnect_protocol_adapter_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\rtos_adapter_stub_test.dir\\tests\\platform\\rtos_adapter_stub_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\platform\\rtos_adapter_stub_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\platform\\rtos_adapter_stub_test.cpp",
+  "output": "CMakeFiles\\rtos_adapter_stub_test.dir\\tests\\platform\\rtos_adapter_stub_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\ros2_adapter_stub_test.dir\\tests\\platform\\ros2_adapter_stub_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\platform\\ros2_adapter_stub_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\platform\\ros2_adapter_stub_test.cpp",
+  "output": "CMakeFiles\\ros2_adapter_stub_test.dir\\tests\\platform\\ros2_adapter_stub_test.cpp.obj"
 }
 ]

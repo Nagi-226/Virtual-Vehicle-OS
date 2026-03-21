@@ -15,6 +15,9 @@ E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_policy_matrix
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_transport_consistency_test.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_fault_injection_test.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_tcp_loopback_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/interconnect_protocol_adapter_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/rtos_adapter_stub_test.dir
+E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/ros2_adapter_stub_test.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/test.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/edit_cache.dir
 E:/Github Project/Virtual-Vehicle-OS/build/CMakeFiles/rebuild_cache.dir

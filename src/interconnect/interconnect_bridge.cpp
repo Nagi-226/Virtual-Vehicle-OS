@@ -4,11 +4,13 @@
 #include <chrono>
 #include <cstdint>
 #include <functional>
+#include <mutex>
 #include <string>
 #include <thread>
 
 #include "core/retry_policy.hpp"
 #include "interconnect/message_codec.hpp"
+#include "interconnect/message_protocol_adapter.hpp"
 #include "log/logger.hpp"
 
 namespace vr {
@@ -73,6 +75,31 @@ void NormalizePolicyDefaults(BridgeConfig* config) {
         config->policy_table.default_policy.backpressure_policy == BackpressurePolicy::kDropOldest) {
         config->policy_table.default_policy.drop_policy = DropPolicy::kDropOldest;
     }
+}
+
+struct ProtocolCapabilitySnapshot {
+    std::uint64_t legacy{1U};
+    std::uint64_t compact{1U};
+    std::uint64_t protobuf{0U};
+    std::uint64_t cbor{0U};
+    std::uint64_t last_check_ms{0U};
+};
+
+ProtocolCapabilitySnapshot GetProtocolCapabilitySnapshot(const std::uint64_t now_ms) {
+    static std::mutex cap_mutex;
+    static ProtocolCapabilitySnapshot cached;
+
+    std::lock_guard<std::mutex> lock(cap_mutex);
+    if (cached.last_check_ms != 0U && now_ms - cached.last_check_ms < 1000U) {
+        return cached;
+    }
+
+    cached.legacy = SelfCheckProtocolCapability(MessageProtocolMode::kLegacyPipe) ? 1U : 0U;
+    cached.compact = SelfCheckProtocolCapability(MessageProtocolMode::kCompact) ? 1U : 0U;
+    cached.protobuf = SelfCheckProtocolCapability(MessageProtocolMode::kProtobufReserved) ? 1U : 0U;
+    cached.cbor = SelfCheckProtocolCapability(MessageProtocolMode::kCborReserved) ? 1U : 0U;
+    cached.last_check_ms = now_ms;
+    return cached;
 }
 
 std::uint64_t ComputePolicySignature(const BridgePolicyTable& table) {
@@ -354,20 +381,47 @@ std::string InterconnectBridge::DumpRuntimeState() const {
     diag_dump_state_count_.fetch_add(1U, std::memory_order_relaxed);
 
     std::ostringstream oss;
-    oss << "runtime_state:{";
-    oss << "loaded_config_version=" << loaded_config_version_ << ",";
-    oss << "loaded_config_source=" << loaded_config_source_ << ",";
-    oss << "policy_conflicts=" << CollectPolicyConflicts().size() << ",";
-    oss << "policy_cache_size=" << policy_cache_items_.size() << ",";
-    oss << "inflight_vehicle=" << inflight_vehicle_.load(std::memory_order_relaxed) << ",";
-    oss << "inflight_robot=" << inflight_robot_.load(std::memory_order_relaxed) << ",";
-    oss << "failover_v2r=" << (failover_from_vehicle_to_robot_enabled_ ? 1 : 0) << ",";
-    oss << "failover_r2v=" << (failover_from_robot_to_vehicle_enabled_ ? 1 : 0) << ",";
-    oss << "failover_hit=" << failover_hit_count_.load(std::memory_order_relaxed) << ",";
-    oss << "health_primary=" << transport_primary_healthy_.load(std::memory_order_relaxed) << ",";
-    oss << "health_secondary=" << transport_secondary_healthy_.load(std::memory_order_relaxed);
+    oss << "{";
+    oss << "\"loaded_config_version\":" << loaded_config_version_ << ",";
+    oss << "\"loaded_config_source\":\"" << loaded_config_source_ << "\",";
+    oss << "\"policy_conflicts\":" << CollectPolicyConflicts().size() << ",";
+    oss << "\"policy_cache_size\":" << policy_cache_items_.size() << ",";
+    oss << "\"inflight_vehicle\":" << inflight_vehicle_.load(std::memory_order_relaxed) << ",";
+    oss << "\"inflight_robot\":" << inflight_robot_.load(std::memory_order_relaxed) << ",";
+    oss << "\"failover_v2r\":" << (failover_from_vehicle_to_robot_enabled_ ? 1 : 0) << ",";
+    oss << "\"failover_r2v\":" << (failover_from_robot_to_vehicle_enabled_ ? 1 : 0) << ",";
+    oss << "\"failover_hit\":" << failover_hit_count_.load(std::memory_order_relaxed) << ",";
+    oss << "\"health_primary\":" << transport_primary_healthy_.load(std::memory_order_relaxed)
+        << ",";
+    oss << "\"health_secondary\":" << transport_secondary_healthy_.load(std::memory_order_relaxed);
     oss << "}";
     return oss.str();
+}
+
+std::string InterconnectBridge::ExecuteDiagnosticCommand(const std::string& command) const {
+    if (command == "dump runtime") {
+        return DumpRuntimeState();
+    }
+    if (command == "dump policy") {
+        return GetPolicyLintReport();
+    }
+    if (command == "dump transport") {
+        std::ostringstream oss;
+        oss << "transport:{primary_healthy="
+            << transport_primary_healthy_.load(std::memory_order_relaxed)
+            << ",secondary_healthy="
+            << transport_secondary_healthy_.load(std::memory_order_relaxed)
+            << ",failover_hits="
+            << failover_hit_count_.load(std::memory_order_relaxed) << "}";
+        return oss.str();
+    }
+    if (command == "dump cache") {
+        std::ostringstream oss;
+        oss << "cache:{policy_cache_size=" << policy_cache_items_.size() << "}";
+        return oss.str();
+    }
+
+    return "diag:{error=unknown_command}";
 }
 
 bool InterconnectBridge::RuleMatches(const PolicyRule& left,
@@ -856,13 +910,37 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
         return vr::core::ErrorCode::kInvalidParam;
     }
 
+    constexpr const char* kReloadReasonProviderReloadFail = "provider_reload_fail";
+    constexpr const char* kReloadReasonProviderLoadFail = "provider_load_fail";
+    constexpr const char* kReloadReasonConfigInvalid = "config_invalid";
+    constexpr const char* kReloadReasonSignatureMismatch = "signature_mismatch";
+
+    auto should_preserve_locked_policy = [&](const BridgeConfig& next_cfg) {
+        if (!config_.policy_table.default_policy.lock_policy) {
+            return true;
+        }
+
+        const BridgeSlaPolicy& current = config_.policy_table.default_policy;
+        const BridgeSlaPolicy& candidate = next_cfg.policy_table.default_policy;
+        const bool same_latency = current.max_end_to_end_latency_ms == candidate.max_end_to_end_latency_ms;
+        const bool same_recv = current.transport_receive_timeout_ms == candidate.transport_receive_timeout_ms;
+        const bool same_send = current.transport_send_timeout_ms == candidate.transport_send_timeout_ms;
+        const bool same_backpressure = current.backpressure_policy == candidate.backpressure_policy;
+        const bool same_drop = current.drop_policy == candidate.drop_policy;
+        const bool same_retry = current.retry_budget.max_retries == candidate.retry_budget.max_retries &&
+            current.retry_budget.initial_backoff_ms == candidate.retry_budget.initial_backoff_ms &&
+            current.retry_budget.max_backoff_ms == candidate.retry_budget.max_backoff_ms;
+        return same_latency && same_recv && same_send && same_backpressure && same_drop && same_retry;
+    };
+
     const vr::core::ErrorCode reload_ec = provider->Reload();
     if (reload_ec != vr::core::ErrorCode::kOk) {
         reload_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         last_reload_status_code_.store(static_cast<std::int32_t>(reload_ec),
                                        std::memory_order_relaxed);
         reload_rollback_reason_code_.store(1, std::memory_order_relaxed);
-        last_reload_audit_summary_ = "reload_audit:{reload_stage=provider_reload,status=fail}";
+        last_reload_audit_summary_ = std::string("reload_audit:{reload_stage=provider_reload,status=fail,reason=") +
+            kReloadReasonProviderReloadFail + "}";
         return reload_ec;
     }
 
@@ -883,7 +961,8 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
         last_reload_status_code_.store(static_cast<std::int32_t>(load_ec),
                                        std::memory_order_relaxed);
         reload_rollback_reason_code_.store(2, std::memory_order_relaxed);
-        last_reload_audit_summary_ = "reload_audit:{reload_stage=provider_load,status=fail}";
+        last_reload_audit_summary_ = std::string("reload_audit:{reload_stage=provider_load,status=fail,reason=") +
+            kReloadReasonProviderLoadFail + "}";
         return load_ec;
     }
 
@@ -891,6 +970,17 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
     NormalizePolicyDefaults(&next_config);
 
     const std::uint64_t next_signature = ComputePolicySignature(next_config.policy_table);
+
+    if (!should_preserve_locked_policy(next_config)) {
+        reload_fail_count_.fetch_add(1U, std::memory_order_relaxed);
+        reload_rollback_count_.fetch_add(1U, std::memory_order_relaxed);
+        last_reload_status_code_.store(static_cast<std::int32_t>(vr::core::ErrorCode::kInvalidParam),
+                                       std::memory_order_relaxed);
+        reload_rollback_reason_code_.store(5, std::memory_order_relaxed);
+        last_reload_audit_summary_ = "reload_audit:{status=rollback,reason=policy_lock_violation}";
+        RefreshAggregatedMetrics(true);
+        return vr::core::ErrorCode::kInvalidParam;
+    }
 
     const BridgeConfig previous_config = config_;
     const std::string previous_source = loaded_config_source_;
@@ -1010,6 +1100,27 @@ vr::core::ErrorCode InterconnectBridge::PublishWithBackpressure(ITransport* cons
 }
 
 // 发送消息
+bool InterconnectBridge::ShouldApplyCanaryForEnvelope(const MessageEnvelope& envelope) const {
+    if (!config_.enable_config_canary) {
+        return true;
+    }
+
+    if (!config_.config_canary_topic_prefix.empty()) {
+        if (envelope.topic.rfind(config_.config_canary_topic_prefix, 0) != 0) {
+            return true;
+        }
+    }
+
+    if (config_.config_canary_channel >= 0) {
+        if (static_cast<std::int32_t>(envelope.channel) != config_.config_canary_channel) {
+            return true;
+        }
+    }
+
+    const std::uint32_t gate = static_cast<std::uint32_t>(NowUnixMs() % 100U);
+    return gate < config_.config_canary_percent;
+}
+
 vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
                                                 const MessageEnvelope& envelope) noexcept {
     if (!running_.load(std::memory_order_acquire) || transport == nullptr) {
@@ -1032,21 +1143,19 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
         return vr::core::ErrorCode::kInterconnectInvalidEnvelope;
     }
 
-    std::string encoded;
-    const bool use_compact =
-        protocol_mode_ == MessageProtocolMode::kCompact ||
-        config_.policy_table.default_policy.lock_policy;
-
-    vr::core::ErrorCode encode_ec = vr::core::ErrorCode::kOk;
-    if (protocol_mode_ == MessageProtocolMode::kProtobufReserved) {
-        encode_ec = MessageCodec::EncodeProtobufSkeleton(envelope, &encoded);
-    } else if (protocol_mode_ == MessageProtocolMode::kCborReserved) {
-        encode_ec = MessageCodec::EncodeCborSkeleton(envelope, &encoded);
-    } else {
-        encode_ec = use_compact
-            ? MessageCodec::EncodeCompact(envelope, &encoded)
-            : MessageCodec::Encode(envelope, &encoded);
+    if (!ShouldApplyCanaryForEnvelope(envelope)) {
+        tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
+        last_reload_audit_summary_ = "reload_audit:{status=canary_skip,reason=segment_gate}";
+        RefreshAggregatedMetrics();
+        return vr::core::ErrorCode::kWouldBlock;
     }
+
+    std::string encoded;
+    MessageProtocolMode mode = protocol_mode_;
+    if (config_.policy_table.default_policy.lock_policy) {
+        mode = MessageProtocolMode::kCompact;
+    }
+    const vr::core::ErrorCode encode_ec = EncodeByProtocol(mode, envelope, &encoded);
     if (encode_ec != vr::core::ErrorCode::kOk) {
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         encode_fail_count_.fetch_add(1U, std::memory_order_relaxed);
@@ -1315,7 +1424,7 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
         rx_count_.fetch_add(1U, std::memory_order_relaxed);
 
         MessageEnvelope envelope;
-        const vr::core::ErrorCode decode_ec = MessageCodec::Decode(text, &envelope);
+        const vr::core::ErrorCode decode_ec = DecodeByProtocol(protocol_mode_, text, &envelope);
         if (decode_ec != vr::core::ErrorCode::kOk) {
             decode_fail_count_.fetch_add(1U, std::memory_order_relaxed);
             const std::uint64_t now_ms = NowUnixMs();
@@ -1481,11 +1590,11 @@ void InterconnectBridge::RefreshAggregatedMetrics(const bool force) noexcept {
     bridge_metrics.loaded_config_version = loaded_config_version_;
 
     bridge_metrics.protocol_mode_code = static_cast<std::uint32_t>(protocol_mode_);
-    const auto caps = MessageCodec::ProbeCapabilities();
-    bridge_metrics.protocol_cap_legacy = caps.legacy_supported ? 1U : 0U;
-    bridge_metrics.protocol_cap_compact = caps.compact_supported ? 1U : 0U;
-    bridge_metrics.protocol_cap_protobuf = caps.protobuf_supported ? 1U : 0U;
-    bridge_metrics.protocol_cap_cbor = caps.cbor_supported ? 1U : 0U;
+    const auto cap = GetProtocolCapabilitySnapshot(now_ms);
+    bridge_metrics.protocol_cap_legacy = cap.legacy;
+    bridge_metrics.protocol_cap_compact = cap.compact;
+    bridge_metrics.protocol_cap_protobuf = cap.protobuf;
+    bridge_metrics.protocol_cap_cbor = cap.cbor;
     bridge_metrics.configured_transport_pool_size =
         static_cast<std::uint64_t>(2U + config_.additional_endpoints.size());
     bridge_metrics.failover_hit_count = failover_hit_count_.load(std::memory_order_relaxed);
