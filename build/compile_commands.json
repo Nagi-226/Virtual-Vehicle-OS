@@ -55,6 +55,30 @@
 },
 {
   "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\policy_manager.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\policy_manager.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\policy_manager.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\policy_manager.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\protocol_manager.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\protocol_manager.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\protocol_manager.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\protocol_manager.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\diagnostics_manager.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\diagnostics_manager.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\diagnostics_manager.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\diagnostics_manager.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\transport_orchestrator.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\transport_orchestrator.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\src\\interconnect\\transport_orchestrator.cpp",
+  "output": "CMakeFiles\\vr_base_framework.dir\\src\\interconnect\\transport_orchestrator.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
   "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\thread_pool_test.dir\\tests\\thread_pool_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\thread_pool_test.cpp\"",
   "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\thread_pool_test.cpp",
   "output": "CMakeFiles\\thread_pool_test.dir\\tests\\thread_pool_test.cpp.obj"

@@ -30,6 +30,7 @@ struct MessageEnvelope {
     std::string target;
     std::string topic;
     std::string trace_id;
+    std::string idempotency_key;
     std::string payload;
 };
 

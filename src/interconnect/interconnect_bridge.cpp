@@ -3,6 +3,8 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <deque>
+#include <fstream>
 #include <functional>
 #include <mutex>
 #include <string>
@@ -52,30 +54,6 @@ std::uint64_t HashString(const std::string& value) {
     return std::hash<std::string>{}(value);
 }
 
-void NormalizePolicyDefaults(BridgeConfig* config) {
-    if (config == nullptr) {
-        return;
-    }
-
-    if (config->policy_table.rules.empty() &&
-        config->policy_table.default_policy.max_end_to_end_latency_ms == 100U &&
-        config->policy_table.default_policy.transport_receive_timeout_ms == 50 &&
-        config->policy_table.default_policy.transport_send_timeout_ms == 50 &&
-        config->policy_table.default_policy.backpressure_policy == BackpressurePolicy::kReject) {
-        config->policy_table.default_policy = config->sla_policy;
-    }
-
-    if (config->policy_table.default_policy.retry_budget.max_retries <= 0) {
-        config->policy_table.default_policy.retry_budget = config->sla_policy.retry_budget;
-    }
-    if (config->policy_table.default_policy.drop_policy == DropPolicy::kDropNone) {
-        config->policy_table.default_policy.drop_policy = config->sla_policy.drop_policy;
-    }
-    if (config->policy_table.default_policy.drop_policy == DropPolicy::kDropNone &&
-        config->policy_table.default_policy.backpressure_policy == BackpressurePolicy::kDropOldest) {
-        config->policy_table.default_policy.drop_policy = DropPolicy::kDropOldest;
-    }
-}
 
 struct ProtocolCapabilitySnapshot {
     std::uint64_t legacy{1U};
@@ -194,7 +172,7 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
     }
 
     config_ = config;
-    NormalizePolicyDefaults(&config_);
+    policy_manager_.NormalizePolicyDefaults(&config_);
     if (last_known_good_version_ == 0U) {
         last_known_good_config_ = config_;
         last_known_good_version_ = loaded_config_version_;
@@ -216,7 +194,6 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
     protocol_mode_ = config_.protocol_mode;
     PopulateDefaultTemplateRules();
     RebuildPolicyIndex();
-    ApplyTransportTuning(config_);
 
     if (config_.enable_config_canary && config_.config_canary_percent < 100U) {
         const std::uint32_t gate = static_cast<std::uint32_t>(NowUnixMs() % 100U);
@@ -233,7 +210,6 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
             return vr::core::ErrorCode::kWouldBlock;
         }
     }
-    ApplyTransportTuning(config_);
     ApplyTransportTuning(config_);
 
     vr::core::ErrorCode ec = vehicle_to_robot_transport_->Create(config_.vehicle_to_robot_endpoint);
@@ -377,6 +353,15 @@ std::vector<std::string> InterconnectBridge::DumpPolicyConflicts() const {
     return CollectPolicyConflicts();
 }
 
+std::string InterconnectBridge::ExportPolicyEffectiveView() const {
+    return policy_manager_.ExportEffectiveView(
+        config_,
+        policy_cache_items_.size(),
+        policy_cache_hit_count_.load(std::memory_order_relaxed),
+        policy_cache_miss_count_.load(std::memory_order_relaxed),
+        policy_conflict_count_.load(std::memory_order_relaxed));
+}
+
 std::string InterconnectBridge::DumpRuntimeState() const {
     diag_dump_state_count_.fetch_add(1U, std::memory_order_relaxed);
 
@@ -404,6 +389,9 @@ std::string InterconnectBridge::ExecuteDiagnosticCommand(const std::string& comm
     }
     if (command == "dump policy") {
         return GetPolicyLintReport();
+    }
+    if (command == "policy effective") {
+        return ExportPolicyEffectiveView();
     }
     if (command == "dump transport") {
         std::ostringstream oss;
@@ -903,7 +891,9 @@ const BridgeSlaPolicy& InterconnectBridge::ResolvePolicyInternal(
     return config_.policy_table.default_policy;
 }
 
-// 重新加载配置
+// 重新加载配置（关键稳定路径）
+// 流程：provider reload -> load config -> 归一化 -> 签名与合法性校验 -> 成功提交或回滚。
+// 设计约束：任何中间失败都必须保持“上一个已知良好配置”可用，并输出可审计原因。
 vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
     IConfigProvider* const provider) noexcept {
     if (provider == nullptr) {
@@ -967,7 +957,7 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
     }
 
     BridgeConfig next_config = cfg;
-    NormalizePolicyDefaults(&next_config);
+    policy_manager_.NormalizePolicyDefaults(&next_config);
 
     const std::uint64_t next_signature = ComputePolicySignature(next_config.policy_table);
 
@@ -1121,6 +1111,115 @@ bool InterconnectBridge::ShouldApplyCanaryForEnvelope(const MessageEnvelope& env
     return gate < config_.config_canary_percent;
 }
 
+// 判断当前消息是否启用幂等去重：仅对配置白名单 topic 生效。
+bool InterconnectBridge::ShouldApplyIdempotency(const MessageEnvelope& envelope) const {
+    if (config_.idempotency_topics.empty()) {
+        return false;
+    }
+
+    for (const auto& topic : config_.idempotency_topics) {
+        if (envelope.topic == topic) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// 在滑动窗口内判定重复消息：优先使用显式 idempotency_key，缺省退化到 topic+source+sequence。
+bool InterconnectBridge::IsDuplicateWithinWindow(const MessageEnvelope& envelope) {
+    const std::string key = envelope.idempotency_key.empty()
+        ? (envelope.topic + "|" + envelope.source + "|" + std::to_string(envelope.sequence))
+        : envelope.idempotency_key;
+
+    std::lock_guard<std::mutex> lock(idempotency_mutex_);
+    auto& bucket = idempotency_recent_keys_[envelope.topic];
+    for (const auto& existing : bucket) {
+        if (existing == key) {
+            return true;
+        }
+    }
+
+    bucket.push_back(key);
+    const std::size_t limit = std::max<std::size_t>(1U, config_.idempotency_window_size);
+    while (bucket.size() > limit) {
+        bucket.pop_front();
+    }
+    return false;
+}
+
+// 记录诊断快照（JSON lines）：用于故障后追溯，按配置保留最近 N 条避免文件无限增长。
+void InterconnectBridge::RecordDiagnosticSnapshot(const std::string& event,
+                                                  const MessageEnvelope* envelope) const {
+    if (config_.diagnostics_snapshot_path.empty()) {
+        return;
+    }
+
+    const std::size_t limit = std::max<std::size_t>(1U, config_.diagnostics_snapshot_limit);
+    std::deque<std::string> lines;
+
+    {
+        std::ifstream in(config_.diagnostics_snapshot_path);
+        if (in.is_open()) {
+            std::string line;
+            while (std::getline(in, line)) {
+                if (!line.empty()) {
+                    lines.push_back(line);
+                    while (lines.size() > limit - 1U) {
+                        lines.pop_front();
+                    }
+                }
+            }
+        }
+    }
+
+    std::ostringstream snapshot;
+    snapshot << "{\"ts\":" << NowUnixMs() << ",\"event\":\"" << event << "\"";
+    if (envelope != nullptr) {
+        snapshot << ",\"topic\":\"" << envelope->topic << "\"";
+        snapshot << ",\"source\":\"" << envelope->source << "\"";
+        snapshot << ",\"trace_id\":\"" << envelope->trace_id << "\"";
+        snapshot << ",\"sequence\":" << envelope->sequence;
+    }
+    snapshot << "}";
+    lines.push_back(snapshot.str());
+
+    std::ofstream out(config_.diagnostics_snapshot_path, std::ios::trunc);
+    if (!out.is_open()) {
+        return;
+    }
+
+    for (const auto& entry : lines) {
+        out << entry << "\n";
+    }
+    diagnostic_snapshot_write_count_.fetch_add(1U, std::memory_order_relaxed);
+}
+
+// 按消息维度选择协议：支持 topic 灰度与自动回退，优先保证稳定性（回退 compact）。
+MessageProtocolMode InterconnectBridge::ResolveProtocolModeForEnvelope(
+    const MessageEnvelope& envelope) const {
+    if (config_.policy_table.default_policy.lock_policy) {
+        return MessageProtocolMode::kCompact;
+    }
+
+    if (config_.protocol_canary_topic_prefix.empty()) {
+        return protocol_mode_;
+    }
+
+    if (envelope.topic.rfind(config_.protocol_canary_topic_prefix, 0) != 0) {
+        return MessageProtocolMode::kCompact;
+    }
+
+    const std::uint32_t gate = static_cast<std::uint32_t>(NowUnixMs() % 100U);
+    if (gate < config_.protocol_canary_percent) {
+        return protocol_mode_;
+    }
+
+    return MessageProtocolMode::kCompact;
+}
+
+// 发布主路径（消息发送关键链路）
+// 顺序：运行态校验 -> envelope 合法性/鉴权 -> canary/幂等判定 -> 协议编码 -> 策略发送 -> failover。
+// 任何失败都需要更新对应指标，并尽可能保留可诊断上下文。
 vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
                                                 const MessageEnvelope& envelope) noexcept {
     if (!running_.load(std::memory_order_acquire) || transport == nullptr) {
@@ -1146,16 +1245,30 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
     if (!ShouldApplyCanaryForEnvelope(envelope)) {
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         last_reload_audit_summary_ = "reload_audit:{status=canary_skip,reason=segment_gate}";
+        diagnostics_manager_.RecordSnapshot(config_.diagnostics_snapshot_path,
+                                           config_.diagnostics_snapshot_limit,
+                                           "canary_skip",
+                                           &envelope);
+        diagnostic_snapshot_write_count_.fetch_add(1U, std::memory_order_relaxed);
+        RefreshAggregatedMetrics();
+        return vr::core::ErrorCode::kWouldBlock;
+    }
+
+    if (ShouldApplyIdempotency(envelope) && IsDuplicateWithinWindow(envelope)) {
+        tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
+        idempotency_drop_count_.fetch_add(1U, std::memory_order_relaxed);
+        diagnostics_manager_.RecordSnapshot(config_.diagnostics_snapshot_path,
+                                           config_.diagnostics_snapshot_limit,
+                                           "idempotency_drop",
+                                           &envelope);
+        diagnostic_snapshot_write_count_.fetch_add(1U, std::memory_order_relaxed);
         RefreshAggregatedMetrics();
         return vr::core::ErrorCode::kWouldBlock;
     }
 
     std::string encoded;
-    MessageProtocolMode mode = protocol_mode_;
-    if (config_.policy_table.default_policy.lock_policy) {
-        mode = MessageProtocolMode::kCompact;
-    }
-    const vr::core::ErrorCode encode_ec = EncodeByProtocol(mode, envelope, &encoded);
+    const MessageProtocolMode mode = protocol_manager_.ResolveMode(config_, envelope);
+    const vr::core::ErrorCode encode_ec = protocol_manager_.Encode(mode, envelope, &encoded);
     if (encode_ec != vr::core::ErrorCode::kOk) {
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         encode_fail_count_.fetch_add(1U, std::memory_order_relaxed);
@@ -1179,14 +1292,14 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
     ReleaseFlowSlot(transport);
 
     if (send_ec != vr::core::ErrorCode::kOk) {
-        ITransport* failover_transport = nullptr;
-        if (transport == vehicle_to_robot_transport_.get() &&
-            failover_from_vehicle_to_robot_enabled_) {
-            failover_transport = robot_to_vehicle_transport_.get();
-        } else if (transport == robot_to_vehicle_transport_.get() &&
-                   failover_from_robot_to_vehicle_enabled_) {
-            failover_transport = vehicle_to_robot_transport_.get();
-        }
+        // failover 判定：仅在主链路发送失败且对应方向启用 failover 时尝试备用链路。
+        // 注意：备用链路成功后需同步更新健康状态与 failover 事件计数。
+        ITransport* failover_transport = transport_orchestrator_.ResolveFailover(
+            transport,
+            vehicle_to_robot_transport_.get(),
+            robot_to_vehicle_transport_.get(),
+            failover_from_vehicle_to_robot_enabled_,
+            failover_from_robot_to_vehicle_enabled_);
 
         if (failover_transport != nullptr) {
             const vr::core::ErrorCode failover_ec =
@@ -1535,7 +1648,9 @@ bool InterconnectBridge::ShouldRefreshMetrics(const std::uint64_t now_ms) noexce
     return (now_ms - last) >= kMetricsRefreshIntervalMs;
 }
 
-// 刷新聚合指标
+// 刷新聚合指标（时机控制关键点）
+// 1) force=true：用于关键路径（如配置提交/回滚、快照导出前）强制刷新，保证观测一致性；
+// 2) force=false：按节流周期刷新，避免高频路径下指标聚合造成额外开销。
 void InterconnectBridge::RefreshAggregatedMetrics(const bool force) noexcept {
     const std::uint64_t now_ms = NowUnixMs();
     if (!force && !ShouldRefreshMetrics(now_ms)) {

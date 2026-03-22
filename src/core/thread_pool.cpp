@@ -15,6 +15,8 @@ ThreadPool::~ThreadPool() {
     Stop();
 }
 
+// 启动线程池：校验配置 -> 初始化运行状态与指标 -> 创建工作线程。
+// 设计意图：启动路径失败必须“可回滚”，避免半启动状态导致后续行为不确定。
 ErrorCode ThreadPool::Start(const ThreadConfig& config) {
     if (config.worker_count == 0U || config.queue_capacity == 0U) {
         return ErrorCode::kInvalidParam;
@@ -75,6 +77,8 @@ void ThreadPool::Stop() noexcept {
     }
 }
 
+// 入队任务：当队列满时根据拒绝策略处理（拒绝/调用者执行）。
+// 对初级同学提示：CallerRuns 会牺牲提交线程响应性，但可减少任务直接丢失。
 ErrorCode ThreadPool::Enqueue(const std::function<void()>& task) {
     if (!task) {
         return ErrorCode::kInvalidParam;

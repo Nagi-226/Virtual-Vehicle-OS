@@ -8,6 +8,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# 执行一组测试清单：required 失败会阻断发布，advisory 失败仅告警。
 function Run-TestList {
     param(
         [string]$Label,
@@ -17,6 +18,13 @@ function Run-TestList {
     )
 
     $failed = @()
+
+Write-Host "[quality-gate] export consistency self-check..."
+$metricsTest = "interconnect_metrics_delta_test"
+ctest --test-dir $BuildDir -R "^$metricsTest$" --output-on-failure
+if ($LASTEXITCODE -ne 0) {
+    $failed += $metricsTest
+}
     foreach ($name in $Tests) {
         Write-Host "[quality-gate][$Label] running $name"
         ctest --test-dir $BuildDir -R "^$name$" --output-on-failure

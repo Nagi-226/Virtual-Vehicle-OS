@@ -17,7 +17,7 @@ public:
     }
     vr::core::ErrorCode SendWithTimeout(const std::string& message, std::uint32_t priority,
                                         std::int64_t timeout_ms) noexcept override {
-        (void)message;
+        last_message_ = message;
         (void)priority;
         (void)timeout_ms;
         return vr::core::ErrorCode::kOk;

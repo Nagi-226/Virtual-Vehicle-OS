@@ -4,6 +4,7 @@
 #include <atomic>
 #include <chrono>
 #include <cstdint>
+#include <deque>
 #include <list>
 #include <memory>
 #include <mutex>
@@ -16,12 +17,16 @@
 #include "interconnect/bridge_metrics.hpp"
 #include "interconnect/bridge_policy.hpp"
 #include "interconnect/config_provider.hpp"
+#include "interconnect/diagnostics_manager.hpp"
 #include "interconnect/diagnostics_reporter.hpp"
 #include "interconnect/message_authenticator.hpp"
 #include "interconnect/message_envelope.hpp"
 #include "interconnect/message_router.hpp"
+#include "interconnect/policy_manager.hpp"
+#include "interconnect/protocol_manager.hpp"
 #include "interconnect/system_metrics_aggregator.hpp"
 #include "interconnect/transport.hpp"
+#include "interconnect/transport_orchestrator.hpp"
 
 namespace vr {
 namespace interconnect {
@@ -50,6 +55,12 @@ struct BridgeConfig {
     std::uint32_t config_canary_percent{100U};
     std::string config_canary_topic_prefix;
     std::int32_t config_canary_channel{-1};
+    std::string protocol_canary_topic_prefix;
+    std::uint32_t protocol_canary_percent{100U};
+    std::vector<std::string> idempotency_topics;
+    std::uint32_t idempotency_window_size{128U};
+    std::string diagnostics_snapshot_path{"build/diagnostics_snapshots.jsonl"};
+    std::uint32_t diagnostics_snapshot_limit{100U};
     MessageProtocolMode protocol_mode{MessageProtocolMode::kLegacyPipe};
 };
 
@@ -79,6 +90,7 @@ public:
     std::string GetLoadedConfigSource() const;
     std::string GetPolicyLintReport() const;
     std::vector<std::string> DumpPolicyConflicts() const;
+    std::string ExportPolicyEffectiveView() const;
     std::string DumpRuntimeState() const;
     std::string ExecuteDiagnosticCommand(const std::string& command) const;
     void SetDiagnosticsReporter(std::shared_ptr<IDiagnosticsReporter> reporter);
@@ -120,6 +132,10 @@ private:
     std::string BuildPolicyLintReport() const;
     std::string BuildPolicyLintSummary() const;
     bool ShouldApplyCanaryForEnvelope(const MessageEnvelope& envelope) const;
+    MessageProtocolMode ResolveProtocolModeForEnvelope(const MessageEnvelope& envelope) const;
+    bool ShouldApplyIdempotency(const MessageEnvelope& envelope) const;
+    bool IsDuplicateWithinWindow(const MessageEnvelope& envelope);
+    void RecordDiagnosticSnapshot(const std::string& event, const MessageEnvelope* envelope) const;
     const BridgeSlaPolicy* FindBestPolicyMatch(
         const std::vector<PolicyRule>& rules,
         const std::unordered_map<std::string, std::vector<std::size_t>>& index,
@@ -139,6 +155,11 @@ private:
 
     std::unique_ptr<ITransport> vehicle_to_robot_transport_;
     std::unique_ptr<ITransport> robot_to_vehicle_transport_;
+
+    PolicyManager policy_manager_{};
+    ProtocolManager protocol_manager_{};
+    DiagnosticsManager diagnostics_manager_{};
+    TransportOrchestrator transport_orchestrator_{};
 
     BridgeConfig config_{};
     MessageRouter vehicle_router_;
@@ -246,6 +267,9 @@ private:
                                PolicyCacheKeyHasher>
         policy_cache_index_;
 
+    mutable std::mutex idempotency_mutex_;
+    std::unordered_map<std::string, std::deque<std::string>> idempotency_recent_keys_;
+
     std::uint64_t loaded_config_version_{0U};
     std::string loaded_config_source_;
     BridgeConfig last_known_good_config_{};
@@ -275,6 +299,8 @@ private:
     std::atomic<std::uint32_t> inflight_vehicle_{0U};
     std::atomic<std::uint32_t> inflight_robot_{0U};
     std::atomic<std::uint64_t> failover_hit_count_{0U};
+    std::atomic<std::uint64_t> idempotency_drop_count_{0U};
+    std::atomic<std::uint64_t> diagnostic_snapshot_write_count_{0U};
     std::atomic<std::uint64_t> diag_dump_state_count_{0U};
     std::atomic<std::uint64_t> diag_route_event_count_{0U};
     std::atomic<std::uint64_t> diag_failover_event_count_{0U};

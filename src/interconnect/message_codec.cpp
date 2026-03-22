@@ -54,6 +54,8 @@ std::string UnescapeField(const std::string& input) {
     return out;
 }
 
+// 按分隔符切分并处理转义：保证 payload/topic 中包含 '|' 时仍可安全还原。
+// 这是 legacy/compact 文本协议正确性的关键基础能力。
 void SplitEscaped(const std::string& text, std::vector<std::string>* fields) {
     fields->clear();
 
@@ -171,6 +173,11 @@ vr::core::ErrorCode MessageCodec::EncodeCompact(const MessageEnvelope& envelope,
     return vr::core::ErrorCode::kOk;
 }
 
+// 解码入口：同时兼容完整字段与 compact 字段。
+// 关键防护：
+// - 字段数不匹配直接拒收；
+// - schema 低于兼容基线直接拒收；
+// - channel/qos 枚举非法直接拒收。
 vr::core::ErrorCode MessageCodec::Decode(const std::string& text, MessageEnvelope* out) noexcept {
     if (out == nullptr || text.empty()) {
         return vr::core::ErrorCode::kInvalidParam;

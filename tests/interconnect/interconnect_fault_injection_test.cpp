@@ -1,4 +1,6 @@
 #include <chrono>
+#include <cstdio>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -29,9 +31,9 @@ public:
 
     vr::core::ErrorCode SendWithTimeout(const std::string& message, std::uint32_t priority,
                                         std::int64_t timeout_ms) noexcept override {
-        (void)message;
         (void)priority;
         (void)timeout_ms;
+        last_message_ = message;
         ++send_calls_;
         if (fault_ == SendFault::kTimeoutOnce && send_calls_ == 1U) {
             return vr::core::ErrorCode::kTimeout;
@@ -60,11 +62,13 @@ public:
 
     std::uint32_t send_calls() const noexcept { return send_calls_; }
     std::uint32_t discard_calls() const noexcept { return discard_calls_; }
+    const std::string& last_message() const noexcept { return last_message_; }
 
 private:
     SendFault fault_{SendFault::kNone};
     std::uint32_t send_calls_{0U};
     std::uint32_t discard_calls_{0U};
+    std::string last_message_;
 };
 
 bool ExpectTrue(const bool condition, const std::string& msg) {
@@ -326,6 +330,162 @@ bool TestFailoverHealthAndDiagCounters() {
                       "dump diagnostic count should increase");
 }
 
+bool TestProtocolCanaryFallbackSelection() {
+    auto tx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+    auto rx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+    auto* tx_raw = tx.get();
+
+    vr::interconnect::InterconnectBridge bridge(std::move(tx), std::move(rx));
+    auto config = MakeRetryConfig();
+    config.protocol_mode = vr::interconnect::MessageProtocolMode::kProtobufReserved;
+    config.protocol_canary_topic_prefix = "proto.";
+    config.protocol_canary_percent = 0U;
+
+    if (!ExpectTrue(bridge.Start(config) == vr::core::ErrorCode::kOk, "bridge start failed")) {
+        return false;
+    }
+
+    vr::interconnect::MessageEnvelope msg;
+    msg.source = "vehicle";
+    msg.target = "robot";
+    msg.topic = "proto.topic";
+    msg.channel = vr::interconnect::ChannelType::kEvent;
+    msg.payload = "payload";
+    msg.timestamp_ms = 1U;
+
+    const auto ec = bridge.PublishFromVehicle(msg);
+    const std::string sent = tx_raw->last_message();
+    bridge.Stop();
+
+    return ExpectTrue(ec == vr::core::ErrorCode::kOk, "publish should succeed") &&
+           ExpectTrue(sent.find("pm=compact") != std::string::npos,
+                      "canary percent 0 should fallback to compact mode");
+}
+
+bool TestIdempotencyDropWindow() {
+    auto tx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+    auto rx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+
+    vr::interconnect::InterconnectBridge bridge(std::move(tx), std::move(rx));
+    auto config = MakeRetryConfig();
+    config.idempotency_topics = {"idem.topic"};
+    config.idempotency_window_size = 4U;
+
+    if (!ExpectTrue(bridge.Start(config) == vr::core::ErrorCode::kOk, "bridge start failed")) {
+        return false;
+    }
+
+    vr::interconnect::MessageEnvelope msg;
+    msg.source = "vehicle";
+    msg.target = "robot";
+    msg.topic = "idem.topic";
+    msg.channel = vr::interconnect::ChannelType::kEvent;
+    msg.payload = "payload";
+    msg.idempotency_key = "idem-key-1";
+    msg.sequence = 10U;
+    msg.timestamp_ms = 1U;
+
+    const auto first = bridge.PublishFromVehicle(msg);
+    const auto second = bridge.PublishFromVehicle(msg);
+    bridge.Stop();
+
+    return ExpectTrue(first == vr::core::ErrorCode::kOk, "first message should pass") &&
+           ExpectTrue(second == vr::core::ErrorCode::kWouldBlock,
+                      "second duplicate should be dropped by idempotency window");
+}
+
+bool TestIdempotencyIsolationBetweenBridgeInstances() {
+    auto tx1 = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+    auto rx1 = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+
+    vr::interconnect::InterconnectBridge bridge1(std::move(tx1), std::move(rx1));
+    auto config = MakeRetryConfig();
+    config.idempotency_topics = {"idem.isolation"};
+    config.idempotency_window_size = 4U;
+
+    if (!ExpectTrue(bridge1.Start(config) == vr::core::ErrorCode::kOk, "bridge1 start failed")) {
+        return false;
+    }
+
+    vr::interconnect::MessageEnvelope msg;
+    msg.source = "vehicle";
+    msg.target = "robot";
+    msg.topic = "idem.isolation";
+    msg.channel = vr::interconnect::ChannelType::kEvent;
+    msg.payload = "payload";
+    msg.idempotency_key = "idem-isolation-key";
+    msg.sequence = 1U;
+    msg.timestamp_ms = 1U;
+
+    const auto first_bridge1 = bridge1.PublishFromVehicle(msg);
+    const auto second_bridge1 = bridge1.PublishFromVehicle(msg);
+    bridge1.Stop();
+
+    auto tx2 = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+    auto rx2 = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+    vr::interconnect::InterconnectBridge bridge2(std::move(tx2), std::move(rx2));
+
+    if (!ExpectTrue(bridge2.Start(config) == vr::core::ErrorCode::kOk, "bridge2 start failed")) {
+        return false;
+    }
+
+    const auto first_bridge2 = bridge2.PublishFromVehicle(msg);
+    bridge2.Stop();
+
+    return ExpectTrue(first_bridge1 == vr::core::ErrorCode::kOk,
+                      "bridge1 first publish should pass") &&
+           ExpectTrue(second_bridge1 == vr::core::ErrorCode::kWouldBlock,
+                      "bridge1 duplicate should be dropped") &&
+           ExpectTrue(first_bridge2 == vr::core::ErrorCode::kOk,
+                      "bridge2 first publish should pass (isolation)");
+}
+
+bool TestDiagnosticsSnapshotTrim() {
+    auto tx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+    auto rx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
+
+    vr::interconnect::InterconnectBridge bridge(std::move(tx), std::move(rx));
+    auto config = MakeRetryConfig();
+    config.enable_config_canary = true;
+    config.config_canary_percent = 0U;
+    config.config_canary_topic_prefix = "snap.";
+    config.config_canary_channel = static_cast<std::int32_t>(vr::interconnect::ChannelType::kEvent);
+    config.diagnostics_snapshot_path = "build/diag_trim_test.jsonl";
+    config.diagnostics_snapshot_limit = 3U;
+
+    std::remove(config.diagnostics_snapshot_path.c_str());
+
+    if (!ExpectTrue(bridge.Start(config) == vr::core::ErrorCode::kOk, "bridge start failed")) {
+        return false;
+    }
+
+    for (int i = 0; i < 5; ++i) {
+        vr::interconnect::MessageEnvelope msg;
+        msg.source = "vehicle";
+        msg.target = "robot";
+        msg.topic = "snap.topic";
+        msg.channel = vr::interconnect::ChannelType::kEvent;
+        msg.payload = "payload";
+        msg.sequence = static_cast<std::uint64_t>(i);
+        msg.timestamp_ms = 1U;
+        (void)bridge.PublishFromVehicle(msg);
+    }
+
+    bridge.Stop();
+
+    std::ifstream in(config.diagnostics_snapshot_path);
+    std::string line;
+    std::size_t lines = 0U;
+    while (std::getline(in, line)) {
+        if (!line.empty()) {
+            ++lines;
+        }
+    }
+
+    return ExpectTrue(lines <= config.diagnostics_snapshot_limit,
+                      "snapshot file should be trimmed to configured limit");
+}
+
 bool TestDiagnosticCommandInterface() {
     auto tx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
     auto rx = std::make_unique<FaultInjectTransport>(FaultInjectTransport::SendFault::kNone);
@@ -390,6 +550,22 @@ int main() {
         return 1;
     }
     if (!TestDiagnosticCommandInterface()) {
+        std::cerr << "interconnect fault injection test failed." << std::endl;
+        return 1;
+    }
+    if (!TestProtocolCanaryFallbackSelection()) {
+        std::cerr << "interconnect fault injection test failed." << std::endl;
+        return 1;
+    }
+    if (!TestIdempotencyDropWindow()) {
+        std::cerr << "interconnect fault injection test failed." << std::endl;
+        return 1;
+    }
+    if (!TestIdempotencyIsolationBetweenBridgeInstances()) {
+        std::cerr << "interconnect fault injection test failed." << std::endl;
+        return 1;
+    }
+    if (!TestDiagnosticsSnapshotTrim()) {
         std::cerr << "interconnect fault injection test failed." << std::endl;
         return 1;
     }

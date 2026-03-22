@@ -206,8 +206,6 @@ public:
         oss << "\"reload_success\":" << bridge_metrics_.reload_success_count << ",";
         oss << "\"reload_fail\":" << bridge_metrics_.reload_fail_count << ",";
         oss << "\"reload_rollback\":" << bridge_metrics_.reload_rollback_count << ",";
-        oss << "\"policy_lint_issue\":" << bridge_metrics_.policy_lint_issue_count << ",";
-        oss << "\"policy_lint_warning\":" << bridge_metrics_.policy_lint_warning_count << ",";
         oss << "\"reload_status\":" << bridge_metrics_.last_reload_status_code << ",";
         oss << "\"reload_reason\":" << bridge_metrics_.reload_rollback_reason_code << ",";
         oss << "\"protocol_mode\":" << bridge_metrics_.protocol_mode_code << ",";

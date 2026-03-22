@@ -20,6 +20,8 @@ vr::core::ErrorCode DecodeByProtocol(MessageProtocolMode mode,
                                      const std::string& text,
                                      MessageEnvelope* out) noexcept;
 
+std::uint32_t ProtocolWireVersion(MessageProtocolMode mode) noexcept;
+
 bool SelfCheckProtocolCapability(MessageProtocolMode mode) noexcept;
 
 }  // namespace interconnect

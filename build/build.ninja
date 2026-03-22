@@ -162,6 +162,34 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/tcp_transport.cpp.obj: C
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
 
+build CMakeFiles/vr_base_framework.dir/src/interconnect/policy_manager.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/policy_manager.cpp || cmake_object_order_depends_target_vr_base_framework
+  DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\policy_manager.cpp.obj.d
+  FLAGS = -g -std=c++17 -Wall -Wextra -Wpedantic -Werror
+  INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
+  OBJECT_DIR = CMakeFiles\vr_base_framework.dir
+  OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+
+build CMakeFiles/vr_base_framework.dir/src/interconnect/protocol_manager.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/protocol_manager.cpp || cmake_object_order_depends_target_vr_base_framework
+  DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\protocol_manager.cpp.obj.d
+  FLAGS = -g -std=c++17 -Wall -Wextra -Wpedantic -Werror
+  INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
+  OBJECT_DIR = CMakeFiles\vr_base_framework.dir
+  OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+
+build CMakeFiles/vr_base_framework.dir/src/interconnect/diagnostics_manager.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/diagnostics_manager.cpp || cmake_object_order_depends_target_vr_base_framework
+  DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\diagnostics_manager.cpp.obj.d
+  FLAGS = -g -std=c++17 -Wall -Wextra -Wpedantic -Werror
+  INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
+  OBJECT_DIR = CMakeFiles\vr_base_framework.dir
+  OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+
+build CMakeFiles/vr_base_framework.dir/src/interconnect/transport_orchestrator.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/transport_orchestrator.cpp || cmake_object_order_depends_target_vr_base_framework
+  DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\transport_orchestrator.cpp.obj.d
+  FLAGS = -g -std=c++17 -Wall -Wextra -Wpedantic -Werror
+  INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
+  OBJECT_DIR = CMakeFiles\vr_base_framework.dir
+  OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+
 
 # =============================================================================
 # Link build statements for STATIC_LIBRARY target vr_base_framework
@@ -170,7 +198,7 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/tcp_transport.cpp.obj: C
 #############################################
 # Link the static library libvr_base_framework.a
 
-build libvr_base_framework.a: CXX_STATIC_LIBRARY_LINKER__vr_base_framework_Debug CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.obj CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/message_codec.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/message_protocol_adapter.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/message_router.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/interconnect_bridge.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/tcp_transport.cpp.obj || libcommonsvc_log.a libvr_error_code.a
+build libvr_base_framework.a: CXX_STATIC_LIBRARY_LINKER__vr_base_framework_Debug CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.obj CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/message_codec.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/message_protocol_adapter.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/message_router.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/interconnect_bridge.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/tcp_transport.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/policy_manager.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/protocol_manager.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/diagnostics_manager.cpp.obj CMakeFiles/vr_base_framework.dir/src/interconnect/transport_orchestrator.cpp.obj || libcommonsvc_log.a libvr_error_code.a
   LANGUAGE_COMPILE_FLAGS = -g
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   POST_BUILD = cd .

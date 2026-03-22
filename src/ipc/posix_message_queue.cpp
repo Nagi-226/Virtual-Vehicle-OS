@@ -12,6 +12,8 @@ namespace ipc {
 
 namespace {
 
+// 将相对超时（ms）转换为 POSIX 绝对超时（timespec）。
+// 说明：mq_timedsend/mq_timedreceive 使用“绝对时间”，不是相对时长。
 timespec MakeAbsTimeout(const std::int64_t timeout_ms) noexcept {
     timespec ts{};
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -30,6 +32,8 @@ timespec MakeAbsTimeout(const std::int64_t timeout_ms) noexcept {
     return ts;
 }
 
+// 切换队列非阻塞模式，并返回原始 flags 以便恢复。
+// 注意：失败时必须保持调用方可感知，避免“半切换”造成不可预测阻塞。
 bool SetQueueNonBlocking(const int mqd, bool enable, long* original_flags) noexcept {
     if (original_flags == nullptr) {
         return false;

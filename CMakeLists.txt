@@ -51,6 +51,10 @@ endif()
 
 list(APPEND VR_BASE_SOURCES
     src/interconnect/tcp_transport.cpp
+    src/interconnect/policy_manager.cpp
+    src/interconnect/protocol_manager.cpp
+    src/interconnect/diagnostics_manager.cpp
+    src/interconnect/transport_orchestrator.cpp
 )
 
 add_library(vr_base_framework ${VR_BASE_SOURCES})
@@ -74,6 +78,12 @@ if(NOT WIN32)
 
     add_executable(interconnect_benchmark_driver demo/interconnect_benchmark_driver.cpp)
     target_link_libraries(interconnect_benchmark_driver PRIVATE vr_base_framework)
+
+    add_executable(rtos_adapter_sample demo/rtos_adapter_sample.cpp)
+    target_link_libraries(rtos_adapter_sample PRIVATE vr_base_framework)
+
+    add_executable(ros2_adapter_sample demo/ros2_adapter_sample.cpp)
+    target_link_libraries(ros2_adapter_sample PRIVATE vr_base_framework)
 endif()
 
 if(ENABLE_TESTS)
@@ -165,6 +175,11 @@ if(ENABLE_TESTS)
     set_tests_properties(ros2_adapter_stub_test PROPERTIES LABELS "platform" TIMEOUT 10)
 
     if(NOT WIN32)
+        add_test(NAME rtos_adapter_sample_run COMMAND rtos_adapter_sample)
+        set_tests_properties(rtos_adapter_sample_run PROPERTIES LABELS "platform" TIMEOUT 10)
+
+        add_test(NAME ros2_adapter_sample_run COMMAND ros2_adapter_sample)
+        set_tests_properties(ros2_adapter_sample_run PROPERTIES LABELS "platform" TIMEOUT 10)
         add_executable(posix_message_queue_test tests/ipc/posix_message_queue_test.cpp)
         target_link_libraries(posix_message_queue_test PRIVATE vr_base_framework)
         add_test(NAME posix_message_queue_test COMMAND posix_message_queue_test)
