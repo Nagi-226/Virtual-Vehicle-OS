@@ -1,4 +1,4 @@
-Virtual-Vehicle-OS 项目详解总览
+![Virtual-Vehicle-OS架构设计图示](https://github.com/user-attachments/assets/9595361e-9a97-470d-be79-5c125619ca62)Virtual-Vehicle-OS 项目详解总览
 
 【内容分布改版规划（结构重排）】
 目标：将文档重排为“历史版本 -> 当前版本 -> 下一版本规划”三段式，降低信息混杂，便于版本审计与发布评审。
@@ -40,6 +40,9 @@ C. 规划章节（v0.8）
 【重排执行说明】
 - 本次先给出结构改版规划并固定章节标准。
 - 下一步可按该结构对现有全文做“物理重排”（将现有段落迁移到对应章节并去重）。
+
+  ![Virtual-Vehicle-OS架构设计图示](https://github.com/user-attachments/assets/7c62d368-04bf-4d75-9ab8-6f726f1009f0)
+
 
 一、总体介绍
 本项目是一个车载端与机器人端之间的“嵌入式互通业务软件”基础框架，目标是提供稳定、可插拔、可观测的消息互通能力。核心定位是：
