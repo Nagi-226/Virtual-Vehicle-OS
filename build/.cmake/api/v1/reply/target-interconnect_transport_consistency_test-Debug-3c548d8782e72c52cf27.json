@@ -2,10 +2,10 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "logger_format_test.exe"
+			"path" : "interconnect_transport_consistency_test.exe"
 		},
 		{
-			"path" : "logger_format_test.pdb"
+			"path" : "interconnect_transport_consistency_test.pdb"
 		}
 	],
 	"backtrace" : 1,
@@ -30,13 +30,13 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 102,
+				"line" : 147,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 103,
+				"line" : 148,
 				"parent" : 0
 			},
 			{
@@ -110,18 +110,18 @@
 	[
 		{
 			"backtrace" : 2,
-			"id" : "commonsvc_log::@6890427a1f51a3e7e1df"
+			"id" : "vr_base_framework::@6890427a1f51a3e7e1df"
 		},
 		{
 			"backtrace" : 2,
-			"id" : "vr_base_framework::@6890427a1f51a3e7e1df"
+			"id" : "commonsvc_log::@6890427a1f51a3e7e1df"
 		},
 		{
 			"backtrace" : 2,
 			"id" : "vr_error_code::@6890427a1f51a3e7e1df"
 		}
 	],
-	"id" : "logger_format_test::@6890427a1f51a3e7e1df",
+	"id" : "interconnect_transport_consistency_test::@6890427a1f51a3e7e1df",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -156,8 +156,8 @@
 		],
 		"language" : "CXX"
 	},
-	"name" : "logger_format_test",
-	"nameOnDisk" : "logger_format_test.exe",
+	"name" : "interconnect_transport_consistency_test",
+	"nameOnDisk" : "interconnect_transport_consistency_test.exe",
 	"paths" : 
 	{
 		"build" : ".",
@@ -178,7 +178,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "tests/log/logger_format_test.cpp",
+			"path" : "tests/interconnect/interconnect_transport_consistency_test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

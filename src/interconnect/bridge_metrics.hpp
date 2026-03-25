@@ -35,6 +35,9 @@ struct BridgeMetrics {
     std::uint64_t trace_id_present_count{0U};
     std::uint64_t trace_id_missing_count{0U};
     std::uint64_t trace_id_sampled_count{0U};
+    std::uint64_t trace_index_hit_count{0U};
+    std::uint64_t trace_index_miss_count{0U};
+    std::uint64_t trace_linked_event_count{0U};
     std::uint64_t sla_violation_sampled_count{0U};
 
     std::uint64_t reload_success_count{0U};

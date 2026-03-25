@@ -61,6 +61,9 @@ struct BridgeConfig {
     std::uint32_t idempotency_window_size{128U};
     std::string diagnostics_snapshot_path{"build/diagnostics_snapshots.jsonl"};
     std::uint32_t diagnostics_snapshot_limit{100U};
+    bool enable_config_risk_guard{false};
+    bool auto_rollback_on_high_risk{true};
+    std::uint32_t high_risk_block_threshold{3U};
     MessageProtocolMode protocol_mode{MessageProtocolMode::kLegacyPipe};
 };
 
@@ -202,6 +205,9 @@ private:
     std::atomic<std::uint64_t> trace_id_present_count_{0U};
     std::atomic<std::uint64_t> trace_id_missing_count_{0U};
     std::atomic<std::uint64_t> trace_id_sampled_count_{0U};
+    std::atomic<std::uint64_t> trace_index_hit_count_{0U};
+    std::atomic<std::uint64_t> trace_index_miss_count_{0U};
+    std::atomic<std::uint64_t> trace_linked_event_count_{0U};
     std::atomic<std::uint64_t> sla_violation_sampled_count_{0U};
     std::atomic<std::uint64_t> reload_success_count_{0U};
     std::atomic<std::uint64_t> reload_fail_count_{0U};
@@ -267,6 +273,9 @@ private:
 
     mutable std::mutex idempotency_mutex_;
     std::unordered_map<std::string, std::deque<std::string>> idempotency_recent_keys_;
+
+    mutable std::mutex trace_index_mutex_;
+    std::unordered_map<std::string, std::uint64_t> trace_index_last_seen_ms_;
 
     std::uint64_t loaded_config_version_{0U};
     std::string loaded_config_source_;

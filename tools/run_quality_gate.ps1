@@ -3,6 +3,8 @@ param(
     [string]$BenchmarkOutput = "",
     [string]$BaselineFile = "tools/benchmark_baseline.json",
     [double]$MinThroughput = 500.0,
+    [double]$MaxErrorRate = 0.05,
+    [double]$MaxP99LatencyMs = 200.0,
     [switch]$RunCtest = $true
 )
 
@@ -52,6 +54,66 @@ function Parse-Throughput {
     return 0.0
 }
 
+function Parse-ErrorRate {
+    param([string]$Content)
+
+    if ($Content -match '"error_rate"\s*:\s*([0-9]+\.?[0-9]*)') {
+        return [double]$matches[1]
+    }
+    if ($Content -match 'error_rate:\s*([0-9]+\.?[0-9]*)') {
+        return [double]$matches[1]
+    }
+    return 0.0
+}
+
+function Parse-P99 {
+    param([string]$Content)
+
+    if ($Content -match '"latency_p99_ms"\s*:\s*([0-9]+\.?[0-9]*)') {
+        return [double]$matches[1]
+    }
+    if ($Content -match 'latency_p99_ms:\s*([0-9]+\.?[0-9]*)') {
+        return [double]$matches[1]
+    }
+    return 0.0
+}
+
+function Parse-FaultAssertion {
+    param([string]$Content)
+
+    if ($Content -match '"fault_assertion_pass"\s*:\s*(true|false)') {
+        return $matches[1] -eq 'true'
+    }
+    if ($Content -match 'fault_assertion_pass:\s*(true|false)') {
+        return $matches[1] -eq 'true'
+    }
+    return $false
+}
+
+function Parse-ErrorRate {
+    param([string]$Content)
+
+    if ($Content -match '"error_rate"\s*:\s*([0-9]+\.?[0-9]*)') {
+        return [double]$matches[1]
+    }
+    if ($Content -match 'error_rate:\s*([0-9]+\.?[0-9]*)') {
+        return [double]$matches[1]
+    }
+    return 0.0
+}
+
+function Parse-P99 {
+    param([string]$Content)
+
+    if ($Content -match '"latency_p99_ms"\s*:\s*([0-9]+\.?[0-9]*)') {
+        return [double]$matches[1]
+    }
+    if ($Content -match 'latency_p99_ms:\s*([0-9]+\.?[0-9]*)') {
+        return [double]$matches[1]
+    }
+    return 0.0
+}
+
 function Load-Baseline {
     param([string]$Path)
 
@@ -93,26 +155,50 @@ if ($RunCtest) {
 }
 
 $throughput = 0.0
+$errorRate = 0.0
+$p99 = 0.0
+$faultAssertPass = $true
 $benchPass = $true
+$soakPass = $true
 $regressWarn = $false
+$blockReasons = @()
 $baseline = Load-Baseline -Path $BaselineFile
 $baselineThroughput = [double]$baseline.throughput
 
 if ($BenchmarkOutput -and (Test-Path $BenchmarkOutput)) {
     $content = Get-Content $BenchmarkOutput -Raw
     $throughput = Parse-Throughput -Content $content
+    $errorRate = Parse-ErrorRate -Content $content
+    $p99 = Parse-P99 -Content $content
 
     $benchPass = $throughput -ge $MinThroughput
+    $soakPass = ($errorRate -le $MaxErrorRate) -and ($p99 -le $MaxP99LatencyMs)
+    $faultAssertPass = Parse-FaultAssertion -Content $content
+
     if ($baselineThroughput -gt 0 -and $throughput -lt ($baselineThroughput * 0.95)) {
         $regressWarn = $true
     }
 
     Write-Host "[quality-gate][benchmark] throughput=$throughput min=$MinThroughput baseline=$baselineThroughput"
+    Write-Host "[quality-gate][soak] error_rate=$errorRate max=$MaxErrorRate p99=$p99 max_p99=$MaxP99LatencyMs"
 } else {
     Write-Host "[quality-gate][benchmark] output not provided, skip hard gate"
 }
 
-if ($requiredFailed.Count -eq 0 -and $benchPass) {
+if ($requiredFailed.Count -gt 0) {
+    $blockReasons += "required_tests_failed"
+}
+if (-not $benchPass) {
+    $blockReasons += "benchmark_throughput_below_threshold"
+}
+if (-not $soakPass) {
+    $blockReasons += "soak_or_fault_threshold_violation"
+}
+if (-not $faultAssertPass) {
+    $blockReasons += "fault_assertion_failed"
+}
+
+if ($blockReasons.Count -eq 0) {
     Write-Host "[quality-gate] release_gate=pass"
 } else {
     Write-Host "[quality-gate] release_gate=fail"
@@ -124,8 +210,13 @@ if ($advisoryFailed.Count -gt 0) {
 if ($regressWarn) {
     Write-Host "[quality-gate] performance_regression_warning=true"
 }
+if ($blockReasons.Count -gt 0) {
+    Write-Host "[quality-gate] block_reasons=$($blockReasons -join ',')"
+}
 
-if ($requiredFailed.Count -eq 0 -and $benchPass) {
+Write-Host "[quality-gate] ci_report={\"throughput\":$throughput,\"error_rate\":$errorRate,\"p99_ms\":$p99,\"fault_assertion\":$($faultAssertPass.ToString().ToLower()),\"release_gate\":\"$([string]::Join('', @($(if ($blockReasons.Count -eq 0) {'pass'} else {'fail'}))))\",\"block_reasons\":\"$($blockReasons -join '|')\"}"
+
+if ($blockReasons.Count -eq 0) {
     exit 0
 }
 exit 1

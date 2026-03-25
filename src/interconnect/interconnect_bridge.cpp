@@ -967,6 +967,35 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
 
     const std::uint64_t next_signature = ComputePolicySignature(next_config.policy_table);
 
+    std::uint32_t risk_score = 0U;
+    if (next_config.policy_table.default_policy.max_end_to_end_latency_ms !=
+        config_.policy_table.default_policy.max_end_to_end_latency_ms) {
+        ++risk_score;
+    }
+    if (next_config.protocol_mode != config_.protocol_mode) {
+        ++risk_score;
+    }
+    if (next_config.thread_pool.worker_count != config_.thread_pool.worker_count) {
+        ++risk_score;
+    }
+
+    if (config_.enable_config_risk_guard && config_.auto_rollback_on_high_risk &&
+        risk_score >= config_.high_risk_block_threshold) {
+        reload_fail_count_.fetch_add(1U, std::memory_order_relaxed);
+        reload_rollback_count_.fetch_add(1U, std::memory_order_relaxed);
+        last_reload_status_code_.store(static_cast<std::int32_t>(vr::core::ErrorCode::kInvalidParam),
+                                       std::memory_order_relaxed);
+        reload_rollback_reason_code_.store(6, std::memory_order_relaxed);
+        last_reload_audit_summary_ = "reload_audit:{status=rollback,reason=high_risk_config_change}";
+        diagnostics_manager_.RecordSnapshot(config_.diagnostics_snapshot_path,
+                                           config_.diagnostics_snapshot_limit,
+                                           "high_risk_config_change",
+                                           nullptr);
+        diagnostic_snapshot_write_count_.fetch_add(1U, std::memory_order_relaxed);
+        RefreshAggregatedMetrics(true);
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
     if (!should_preserve_locked_policy(next_config)) {
         reload_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         reload_rollback_count_.fetch_add(1U, std::memory_order_relaxed);
@@ -1515,6 +1544,21 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
                     trace_id_sampled_count_.fetch_add(1U, std::memory_order_relaxed);
                 }
             }
+
+            {
+                std::lock_guard<std::mutex> lock(trace_index_mutex_);
+                const auto it = trace_index_last_seen_ms_.find(envelope.trace_id);
+                if (it == trace_index_last_seen_ms_.end()) {
+                    trace_index_miss_count_.fetch_add(1U, std::memory_order_relaxed);
+                } else {
+                    trace_index_hit_count_.fetch_add(1U, std::memory_order_relaxed);
+                }
+                trace_index_last_seen_ms_[envelope.trace_id] = now_ms;
+                if (trace_index_last_seen_ms_.size() > 1024U) {
+                    trace_index_last_seen_ms_.erase(trace_index_last_seen_ms_.begin());
+                }
+            }
+            trace_linked_event_count_.fetch_add(1U, std::memory_order_relaxed);
         } else {
             trace_id_missing_count_.fetch_add(1U, std::memory_order_relaxed);
         }
@@ -1628,6 +1672,12 @@ void InterconnectBridge::RefreshAggregatedMetrics(const bool force) noexcept {
         trace_id_missing_count_.load(std::memory_order_relaxed);
     bridge_metrics.trace_id_sampled_count =
         trace_id_sampled_count_.load(std::memory_order_relaxed);
+    bridge_metrics.trace_index_hit_count =
+        trace_index_hit_count_.load(std::memory_order_relaxed);
+    bridge_metrics.trace_index_miss_count =
+        trace_index_miss_count_.load(std::memory_order_relaxed);
+    bridge_metrics.trace_linked_event_count =
+        trace_linked_event_count_.load(std::memory_order_relaxed);
     bridge_metrics.sla_violation_sampled_count =
         sla_violation_sampled_count_.load(std::memory_order_relaxed);
     bridge_metrics.reload_success_count = reload_success_count_.load(std::memory_order_relaxed);

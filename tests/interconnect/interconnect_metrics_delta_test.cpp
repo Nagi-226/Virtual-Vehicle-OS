@@ -28,6 +28,9 @@ bool TestSnapshotAndDelta() {
     bm1.reload_fail_count = 1;
     bm1.reload_rollback_count = 1;
     bm1.last_reload_status_code = 42;
+    bm1.trace_index_hit_count = 5;
+    bm1.trace_index_miss_count = 2;
+    bm1.trace_linked_event_count = 7;
     agg.UpdateBridgeMetrics(bm1);
 
     vr::core::ThreadPoolMetrics tp1;
@@ -59,9 +62,15 @@ bool TestSnapshotAndDelta() {
 
     const bool has_lint = json.find("policy_lint_issue") != std::string::npos &&
         json.find("policy_lint_warning") != std::string::npos;
+    const bool has_trace_index_json = json.find("trace_index_hit") != std::string::npos &&
+        json.find("trace_index_miss") != std::string::npos &&
+        json.find("trace_linked_event") != std::string::npos;
     const bool has_reload = json.find("reload_status") != std::string::npos;
     const bool has_lite_lint = lite.find("lint_i") != std::string::npos &&
         lite.find("lint_w") != std::string::npos;
+    const bool has_trace_index_lite = lite.find("tidx_h") != std::string::npos &&
+        lite.find("tidx_m") != std::string::npos &&
+        lite.find("tlink") != std::string::npos;
     const bool has_lite_code = lite.find("r_code") != std::string::npos;
     const bool has_prom = prom.find("vv_policy_lint_issue_total") != std::string::npos &&
         prom.find("vv_policy_lint_warning_total") != std::string::npos &&

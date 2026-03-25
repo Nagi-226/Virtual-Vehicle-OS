@@ -754,6 +754,42 @@ v0.9 里程碑建议（面向 v1.0）
   2) 对 PBV2/CBV2 解码失败率设告警阈值，超阈值自动降级。
   3) M2 开始前优先完成 manager 余量收敛与真实 protobuf/cbor 库接入评估。
 
+【M2（v0.9.2）可验收态清单】
+验收结论：通过（R03+R04+R05 达到可验收态）
+
+通过项与证据点：
+1) R05 配置风险分级与自动回滚止损
+- 通过项：新增配置风险护栏字段（enable_config_risk_guard / auto_rollback_on_high_risk / high_risk_block_threshold）。
+- 通过项：ReloadConfigIfChanged 接入风险评分与高风险自动回滚，回滚原因码=6（high_risk_config_change）。
+- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp
+- 测试点：tests/interconnect/interconnect_config_reload_test.cpp（TestHighRiskConfigAutoRollback）
+
+2) R04 trace 关联索引与导出一致性
+- 通过项：新增 trace_index_hit/miss/linked 三项指标并接入 bridge 侧统计。
+- 通过项：Prometheus/JSON/轻量 JSON 三种导出字段齐全。
+- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp, src/interconnect/system_metrics_aggregator.hpp
+- 测试点：tests/interconnect/interconnect_metrics_delta_test.cpp（trace 关联字段一致性断言）
+
+3) R03 长稳与门禁整合
+- 通过项：benchmark driver 支持 duration/burst/fault 参数，并输出 error_rate/recovery_ms/latency_p95/p99。
+- 通过项：支持 fault_mode=timeout/reorder 模拟与 fault_assertion_pass 自动化断言字段。
+- 通过项：quality gate 增加 soak/fault gate（error_rate 与 p99）并阻断发布，输出 block_reasons 与 ci_report 机器可读字段。
+- 证据点：demo/interconnect_benchmark_driver.cpp, tools/run_quality_gate.ps1
+
+4) 质量与门禁
+- 通过项：M2 新增逻辑已纳入现有测试与门禁流程，lint 无错误。
+- 证据点：tests/interconnect/*, tools/run_quality_gate.ps1, ReadLints=No errors。
+
+【v0.9 M2 发布建议】
+- 建议发布等级：可灰度发布（建议先在压测与风险配置联动场景小流量验证）。
+- 运行建议：
+  1) R05 默认在关键环境开启风险护栏，并对高风险变更启用自动回滚。
+  2) R04 trace 索引建议设置容量告警，观察 hit/miss 比例波动。
+  3) R03 门禁阈值（error_rate/p99）按真实环境与历史基线滚动校准。
+- 当前阶段风险：
+  - R03 阈值仍需持续校准（当前为保守初值）；
+  - trace 索引当前为内存轻量实现，后续需评估高流量场景下的容量与淘汰策略。
+
 v1.0 准入门槛（由 v0.9 输出）
 - 质量门槛：全量回归 + 长稳测试 + 关键性能基线连续达标。
 - 稳定门槛：高优先级缺陷清零，P1 缺陷可控并有回避策略。

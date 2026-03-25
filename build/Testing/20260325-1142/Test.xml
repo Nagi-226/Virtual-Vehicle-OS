@@ -21,14 +21,14 @@
 	TotalVirtualMemory="34017"
 	TotalPhysicalMemory="15585"
 	LogicalProcessorsPerPhysical="2"
-	ProcessorClockFrequency="4341"
+	ProcessorClockFrequency="3992"
 	>
 	<Testing>
-		<StartDateTime>Mar 25 19:55 [NON-UTF-8-BYTE-0xD6]й[NON-UTF-8-BYTE-0xFA][NON-UTF-8-BYTE-0xB1][NON-UTF-8-BYTE-0xEA]׼ʱ[NON-UTF-8-BYTE-0xBC][NON-UTF-8-BYTE-0xE4]</StartDateTime>
-		<StartTestTime>1774439734</StartTestTime>
+		<StartDateTime>Mar 25 22:38 [NON-UTF-8-BYTE-0xD6]й[NON-UTF-8-BYTE-0xFA][NON-UTF-8-BYTE-0xB1][NON-UTF-8-BYTE-0xEA]׼ʱ[NON-UTF-8-BYTE-0xBC][NON-UTF-8-BYTE-0xE4]</StartDateTime>
+		<StartTestTime>1774449484</StartTestTime>
 		<TestList/>
-		<EndDateTime>Mar 25 19:55 [NON-UTF-8-BYTE-0xD6]й[NON-UTF-8-BYTE-0xFA][NON-UTF-8-BYTE-0xB1][NON-UTF-8-BYTE-0xEA]׼ʱ[NON-UTF-8-BYTE-0xBC][NON-UTF-8-BYTE-0xE4]</EndDateTime>
-		<EndTestTime>1774439734</EndTestTime>
+		<EndDateTime>Mar 25 22:38 [NON-UTF-8-BYTE-0xD6]й[NON-UTF-8-BYTE-0xFA][NON-UTF-8-BYTE-0xB1][NON-UTF-8-BYTE-0xEA]׼ʱ[NON-UTF-8-BYTE-0xBC][NON-UTF-8-BYTE-0xE4]</EndDateTime>
+		<EndTestTime>1774449484</EndTestTime>
 		<ElapsedMinutes>0</ElapsedMinutes>
 	</Testing>
 </Site>

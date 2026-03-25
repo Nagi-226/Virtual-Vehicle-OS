@@ -129,6 +129,9 @@ public:
         emit_counter("vv_policy_lint_issue_total", bridge_metrics_.policy_lint_issue_count, default_labels);
         emit_counter("vv_policy_lint_warning_total", bridge_metrics_.policy_lint_warning_count, default_labels);
         emit_counter("vv_trace_id_present_total", bridge_metrics_.trace_id_present_count, default_labels);
+        emit_counter("vv_trace_index_hit_total", bridge_metrics_.trace_index_hit_count, default_labels);
+        emit_counter("vv_trace_index_miss_total", bridge_metrics_.trace_index_miss_count, default_labels);
+        emit_counter("vv_trace_linked_event_total", bridge_metrics_.trace_linked_event_count, default_labels);
         oss << "vv_reload_status_code" << default_labels << " "
             << bridge_metrics_.last_reload_status_code << " " << ts << "\n";
         emit_counter("vv_trace_id_missing_total", bridge_metrics_.trace_id_missing_count, default_labels);
@@ -200,6 +203,9 @@ public:
         oss << "\"policy_lint_issue\":" << bridge_metrics_.policy_lint_issue_count << ",";
         oss << "\"policy_lint_warning\":" << bridge_metrics_.policy_lint_warning_count << ",";
         oss << "\"trace_id_present\":" << bridge_metrics_.trace_id_present_count << ",";
+        oss << "\"trace_index_hit\":" << bridge_metrics_.trace_index_hit_count << ",";
+        oss << "\"trace_index_miss\":" << bridge_metrics_.trace_index_miss_count << ",";
+        oss << "\"trace_linked_event\":" << bridge_metrics_.trace_linked_event_count << ",";
         oss << "\"trace_id_missing\":" << bridge_metrics_.trace_id_missing_count << ",";
         oss << "\"trace_id_sampled\":" << bridge_metrics_.trace_id_sampled_count << ",";
         oss << "\"sla_violation_sampled\":" << bridge_metrics_.sla_violation_sampled_count << ",";
@@ -245,6 +251,9 @@ public:
         oss << "\"pol_hit\":" << bridge_metrics_.policy_hit_count << ",";
         oss << "\"pol_miss\":" << bridge_metrics_.policy_cache_miss_count << ",";
         oss << "\"tid_p\":" << bridge_metrics_.trace_id_present_count << ",";
+        oss << "\"tidx_h\":" << bridge_metrics_.trace_index_hit_count << ",";
+        oss << "\"tidx_m\":" << bridge_metrics_.trace_index_miss_count << ",";
+        oss << "\"tlink\":" << bridge_metrics_.trace_linked_event_count << ",";
         oss << "\"tid_m\":" << bridge_metrics_.trace_id_missing_count << ",";
         oss << "\"sla_s\":" << bridge_metrics_.sla_violation_sampled_count << ",";
         oss << "\"r_ok\":" << bridge_metrics_.reload_success_count << ",";

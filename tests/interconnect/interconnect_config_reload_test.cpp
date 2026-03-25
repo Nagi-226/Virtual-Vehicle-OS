@@ -118,6 +118,39 @@ bool TestReloadRollbackOnPolicyLockViolation() {
                       "audit should include policy lock violation");
 }
 
+bool TestHighRiskConfigAutoRollback() {
+    auto transport_tx = std::make_unique<NoopTransport>();
+    auto transport_rx = std::make_unique<NoopTransport>();
+    vr::interconnect::InterconnectBridge bridge(std::move(transport_tx), std::move(transport_rx));
+
+    auto base = MakeValidConfig();
+    base.enable_config_risk_guard = true;
+    base.auto_rollback_on_high_risk = true;
+    base.high_risk_block_threshold = 2U;
+
+    vr::interconnect::StaticConfigProvider provider(base, "static://risk_base");
+    if (!ExpectTrue(bridge.Start(&provider) == vr::core::ErrorCode::kOk, "bridge start failed")) {
+        return false;
+    }
+
+    auto risky = base;
+    risky.protocol_mode = vr::interconnect::MessageProtocolMode::kProtobufReserved;
+    risky.thread_pool.worker_count = 2U;
+    provider.UpdateConfigForTest(risky, "static://risk_high");
+
+    const auto ec = bridge.ReloadConfigIfChanged(&provider);
+    const auto metrics = bridge.CaptureMetricsSnapshot();
+    const auto audit = bridge.GetLastReloadAuditSummary();
+    bridge.Stop();
+
+    return ExpectTrue(ec == vr::core::ErrorCode::kInvalidParam,
+                      "high risk config should auto rollback") &&
+           ExpectTrue(metrics.bridge_metrics.reload_rollback_reason_code == 6,
+                      "rollback reason should be high risk") &&
+           ExpectTrue(audit.find("high_risk_config_change") != std::string::npos,
+                      "audit should include high risk reason");
+}
+
 bool TestCanarySegmentGateByTopicChannel() {
     auto transport_tx = std::make_unique<NoopTransport>();
     auto transport_rx = std::make_unique<NoopTransport>();
@@ -166,6 +199,10 @@ int main() {
         return 1;
     }
     if (!TestCanarySegmentGateByTopicChannel()) {
+        std::cerr << "interconnect config reload test failed." << std::endl;
+        return 1;
+    }
+    if (!TestHighRiskConfigAutoRollback()) {
         std::cerr << "interconnect config reload test failed." << std::endl;
         return 1;
     }
