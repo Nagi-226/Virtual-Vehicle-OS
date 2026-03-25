@@ -1,0 +1,231 @@
+{
+	"configurations" : 
+	[
+		{
+			"directories" : 
+			[
+				{
+					"build" : ".",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
+					"minimumCMakeVersion" : 
+					{
+						"string" : "3.16"
+					},
+					"projectIndex" : 0,
+					"source" : ".",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19
+					]
+				}
+			],
+			"name" : "Debug",
+			"projects" : 
+			[
+				{
+					"directoryIndexes" : 
+					[
+						0
+					],
+					"name" : "VehicleRobotBaseFramework",
+					"targetIndexes" : 
+					[
+						0,
+						1,
+						2,
+						3,
+						4,
+						5,
+						6,
+						7,
+						8,
+						9,
+						10,
+						11,
+						12,
+						13,
+						14,
+						15,
+						16,
+						17,
+						18,
+						19
+					]
+				}
+			],
+			"targets" : 
+			[
+				{
+					"directoryIndex" : 0,
+					"id" : "commonsvc_log::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-commonsvc_log-Debug-cf7df8f86c42163acb23.json",
+					"name" : "commonsvc_log",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_backpressure_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_backpressure_test-Debug-df3c781d41370f78c1fd.json",
+					"name" : "interconnect_backpressure_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_codec_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_codec_test-Debug-9b4b9776fef657034d13.json",
+					"name" : "interconnect_codec_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_config_provider_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_config_provider_test-Debug-29314c1a36697c494c98.json",
+					"name" : "interconnect_config_provider_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_config_reload_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_config_reload_test-Debug-b5d1e6e8e78d6d700af0.json",
+					"name" : "interconnect_config_reload_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_fault_injection_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_fault_injection_test-Debug-9e0429fccde8e61dc790.json",
+					"name" : "interconnect_fault_injection_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_metrics_delta_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_metrics_delta_test-Debug-b5b8b7f509f4c14c7afe.json",
+					"name" : "interconnect_metrics_delta_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_policy_matrix_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_policy_matrix_test-Debug-d3621b8b199ddff76921.json",
+					"name" : "interconnect_policy_matrix_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_protocol_adapter_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_protocol_adapter_test-Debug-a9d16ed9771e7aa554b9.json",
+					"name" : "interconnect_protocol_adapter_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_router_exception_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_router_exception_test-Debug-0ced62029c653fc2d0f7.json",
+					"name" : "interconnect_router_exception_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_tcp_loopback_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_tcp_loopback_test-Debug-89dfd6bef0733d0e8ef3.json",
+					"name" : "interconnect_tcp_loopback_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_transport_consistency_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_transport_consistency_test-Debug-1596dfd5675c613e741e.json",
+					"name" : "interconnect_transport_consistency_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "interconnect_ttl_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-interconnect_ttl_test-Debug-cb00b6468a235eea957a.json",
+					"name" : "interconnect_ttl_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "logger_format_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-logger_format_test-Debug-66ea7a8b8319c08ee02a.json",
+					"name" : "logger_format_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "retry_policy_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-retry_policy_test-Debug-f724cd7f1c657dcae5a3.json",
+					"name" : "retry_policy_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "ros2_adapter_stub_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-ros2_adapter_stub_test-Debug-b1e2aa85d6e46192776c.json",
+					"name" : "ros2_adapter_stub_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "rtos_adapter_stub_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-rtos_adapter_stub_test-Debug-b000b0ae6f5445f45a32.json",
+					"name" : "rtos_adapter_stub_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "thread_pool_test::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-thread_pool_test-Debug-31980a4e95dfac0498e9.json",
+					"name" : "thread_pool_test",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vr_base_framework::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vr_base_framework-Debug-e5c61e126837577b3d2f.json",
+					"name" : "vr_base_framework",
+					"projectIndex" : 0
+				},
+				{
+					"directoryIndex" : 0,
+					"id" : "vr_error_code::@6890427a1f51a3e7e1df",
+					"jsonFile" : "target-vr_error_code-Debug-8350c9a753c536751284.json",
+					"name" : "vr_error_code",
+					"projectIndex" : 0
+				}
+			]
+		}
+	],
+	"kind" : "codemodel",
+	"paths" : 
+	{
+		"build" : "E:/Github Project/Virtual-Vehicle-OS/build",
+		"source" : "E:/Github Project/Virtual-Vehicle-OS"
+	},
+	"version" : 
+	{
+		"major" : 2,
+		"minor" : 7
+	}
+}

@@ -132,10 +132,8 @@ private:
     std::string BuildPolicyLintReport() const;
     std::string BuildPolicyLintSummary() const;
     bool ShouldApplyCanaryForEnvelope(const MessageEnvelope& envelope) const;
-    MessageProtocolMode ResolveProtocolModeForEnvelope(const MessageEnvelope& envelope) const;
     bool ShouldApplyIdempotency(const MessageEnvelope& envelope) const;
     bool IsDuplicateWithinWindow(const MessageEnvelope& envelope);
-    void RecordDiagnosticSnapshot(const std::string& event, const MessageEnvelope* envelope) const;
     const BridgeSlaPolicy* FindBestPolicyMatch(
         const std::vector<PolicyRule>& rules,
         const std::unordered_map<std::string, std::vector<std::size_t>>& index,

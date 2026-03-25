@@ -721,26 +721,38 @@ v0.9 里程碑建议（面向 v1.0）
 - M2（v0.9.2）：R03 + R04 + R05（稳定性验证 + 可运营）
 - M3（v0.9.3）：R06 + R07 + R08（发布工单化 + 平台深化）
 
-【v0.9 M1（阶段进度）】
-当前状态：进行中（阶段2已落地关键委托链与 wire 加固）
+【M1（v0.9.1）可验收态清单】
+验收结论：通过（R01+R02 达到可验收态）
 
-已完成：
-1) R01 关键委托链注入（不改对外接口）
-- 协议选择+编码：Bridge Publish 路径改为委托 ProtocolManager。
-- 诊断快照：canary/idempotency 事件改为委托 DiagnosticsManager。
-- failover 目标选择：发送失败后改为委托 TransportOrchestrator。
-- 默认值归一化：Start/Reload 改为委托 PolicyManager 单入口。
-- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp, src/interconnect/protocol_manager.cpp, src/interconnect/diagnostics_manager.cpp, src/interconnect/transport_orchestrator.cpp, src/interconnect/policy_manager.cpp
+通过项与证据点：
+1) R01 Bridge 内部解耦（不改对外接口）
+- 通过项：关键链路已切换为 manager 委托（Protocol/Diagnostics/Transport/Policy）。
+- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp, src/interconnect/policy_manager.cpp, src/interconnect/protocol_manager.cpp, src/interconnect/diagnostics_manager.cpp, src/interconnect/transport_orchestrator.cpp
+- 通过项：清理 bridge 中不再必要的重复保留函数（协议选择/快照本地实现），降低半解耦风险。
+- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp
 
-2) R02 wire 加固（兼容与回退护栏）
-- Protobuf/CBOR wire 升级为 PBV2/CBV2 + 长度帧校验（marker/version/len）。
-- 长度篡改可识别并拒收，避免脏帧误解码。
+2) R02 协议 wire 加固（兼容与回退护栏）
+- 通过项：Protobuf/CBOR wire 升级为 PBV2/CBV2 + 长度帧校验（marker/version/len）。
 - 证据点：src/interconnect/message_protocol_adapter.cpp
+- 通过项：长度篡改可识别并拒收，避免脏帧误解码。
 - 测试点：tests/interconnect/interconnect_protocol_adapter_test.cpp（TestWireFrameLengthValidation）
 
-阶段风险（待收敛）：
-- ProtocolManager 仍以现有 adapter 为底层，真实 protobuf/cbor 外部库接入尚未完成（属于 M1 后半段）。
-- Bridge 仍保留部分历史内部函数，后续需继续收敛至 manager 委托，避免“半解耦”长期化。
+3) 委托后行为不回归
+- 通过项：topic 灰度回退行为保持一致。
+- 测试点：tests/interconnect/interconnect_fault_injection_test.cpp（TestProtocolCanaryFallbackSelection）
+- 通过项：failover 行为与指标口径保持一致。
+- 测试点：tests/interconnect/interconnect_fault_injection_test.cpp（TestFailoverHealthAndDiagCounters）
+
+4) 质量与门禁
+- 通过项：M1 新增逻辑已纳入现有测试入口，lint 无错误。
+- 证据点：tests/interconnect/*, ReadLints=No errors。
+
+【v0.9 M1 发布建议】
+- 建议发布等级：可灰度发布（先在协议与路由高风险 topic 做小流量验证）。
+- 运行建议：
+  1) 继续保留 legacy/compact 回退开关，发生协议异常时优先止损。
+  2) 对 PBV2/CBV2 解码失败率设告警阈值，超阈值自动降级。
+  3) M2 开始前优先完成 manager 余量收敛与真实 protobuf/cbor 库接入评估。
 
 v1.0 准入门槛（由 v0.9 输出）
 - 质量门槛：全量回归 + 长稳测试 + 关键性能基线连续达标。

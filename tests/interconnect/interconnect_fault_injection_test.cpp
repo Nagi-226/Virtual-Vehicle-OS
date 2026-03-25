@@ -327,7 +327,9 @@ bool TestFailoverHealthAndDiagCounters() {
            ExpectTrue(metrics.bridge_metrics.transport_secondary_healthy >= 1U,
                       "secondary should be healthy") &&
            ExpectTrue(metrics.bridge_metrics.diag_dump_state_count >= 1U,
-                      "dump diagnostic count should increase");
+                      "dump diagnostic count should increase") &&
+           ExpectTrue(metrics.bridge_metrics.failover_hit_count >= 1U,
+                      "failover metric should stay consistent after manager delegation");
 }
 
 bool TestProtocolCanaryFallbackSelection() {
@@ -355,11 +357,21 @@ bool TestProtocolCanaryFallbackSelection() {
 
     const auto ec = bridge.PublishFromVehicle(msg);
     const std::string sent = tx_raw->last_message();
+
+    vr::interconnect::MessageEnvelope bypass = msg;
+    bypass.topic = "other.topic";
+    const auto bypass_ec = bridge.PublishFromVehicle(bypass);
+    const std::string bypass_sent = tx_raw->last_message();
+
     bridge.Stop();
 
     return ExpectTrue(ec == vr::core::ErrorCode::kOk, "publish should succeed") &&
            ExpectTrue(sent.find("pm=compact") != std::string::npos,
-                      "canary percent 0 should fallback to compact mode");
+                      "canary percent 0 should fallback to compact mode") &&
+           ExpectTrue(bypass_ec == vr::core::ErrorCode::kOk,
+                      "non-canary topic should still publish") &&
+           ExpectTrue(bypass_sent.find("pm=compact") != std::string::npos,
+                      "non-canary topic should stay on compact mode");
 }
 
 bool TestIdempotencyDropWindow() {

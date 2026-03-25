@@ -354,12 +354,18 @@ std::vector<std::string> InterconnectBridge::DumpPolicyConflicts() const {
 }
 
 std::string InterconnectBridge::ExportPolicyEffectiveView() const {
-    return policy_manager_.ExportEffectiveView(
-        config_,
-        policy_cache_items_.size(),
-        policy_cache_hit_count_.load(std::memory_order_relaxed),
-        policy_cache_miss_count_.load(std::memory_order_relaxed),
-        policy_conflict_count_.load(std::memory_order_relaxed));
+    std::ostringstream oss;
+    oss << "policy_effective_view:{";
+    oss << "default_policy_priority=" << config_.policy_table.default_policy.priority << ",";
+    oss << "rules=" << config_.policy_table.rules.size() << ",";
+    oss << "templates=" << config_.policy_table.template_rules.size() << ",";
+    oss << "overrides=" << config_.policy_table.runtime_overrides.size() << ",";
+    oss << "cache_size=" << policy_cache_items_.size() << ",";
+    oss << "cache_hits=" << policy_cache_hit_count_.load(std::memory_order_relaxed) << ",";
+    oss << "cache_miss=" << policy_cache_miss_count_.load(std::memory_order_relaxed) << ",";
+    oss << "policy_conflicts=" << policy_conflict_count_.load(std::memory_order_relaxed);
+    oss << "}";
+    return oss.str();
 }
 
 std::string InterconnectBridge::DumpRuntimeState() const {
@@ -1147,75 +1153,6 @@ bool InterconnectBridge::IsDuplicateWithinWindow(const MessageEnvelope& envelope
     return false;
 }
 
-// 记录诊断快照（JSON lines）：用于故障后追溯，按配置保留最近 N 条避免文件无限增长。
-void InterconnectBridge::RecordDiagnosticSnapshot(const std::string& event,
-                                                  const MessageEnvelope* envelope) const {
-    if (config_.diagnostics_snapshot_path.empty()) {
-        return;
-    }
-
-    const std::size_t limit = std::max<std::size_t>(1U, config_.diagnostics_snapshot_limit);
-    std::deque<std::string> lines;
-
-    {
-        std::ifstream in(config_.diagnostics_snapshot_path);
-        if (in.is_open()) {
-            std::string line;
-            while (std::getline(in, line)) {
-                if (!line.empty()) {
-                    lines.push_back(line);
-                    while (lines.size() > limit - 1U) {
-                        lines.pop_front();
-                    }
-                }
-            }
-        }
-    }
-
-    std::ostringstream snapshot;
-    snapshot << "{\"ts\":" << NowUnixMs() << ",\"event\":\"" << event << "\"";
-    if (envelope != nullptr) {
-        snapshot << ",\"topic\":\"" << envelope->topic << "\"";
-        snapshot << ",\"source\":\"" << envelope->source << "\"";
-        snapshot << ",\"trace_id\":\"" << envelope->trace_id << "\"";
-        snapshot << ",\"sequence\":" << envelope->sequence;
-    }
-    snapshot << "}";
-    lines.push_back(snapshot.str());
-
-    std::ofstream out(config_.diagnostics_snapshot_path, std::ios::trunc);
-    if (!out.is_open()) {
-        return;
-    }
-
-    for (const auto& entry : lines) {
-        out << entry << "\n";
-    }
-    diagnostic_snapshot_write_count_.fetch_add(1U, std::memory_order_relaxed);
-}
-
-// 按消息维度选择协议：支持 topic 灰度与自动回退，优先保证稳定性（回退 compact）。
-MessageProtocolMode InterconnectBridge::ResolveProtocolModeForEnvelope(
-    const MessageEnvelope& envelope) const {
-    if (config_.policy_table.default_policy.lock_policy) {
-        return MessageProtocolMode::kCompact;
-    }
-
-    if (config_.protocol_canary_topic_prefix.empty()) {
-        return protocol_mode_;
-    }
-
-    if (envelope.topic.rfind(config_.protocol_canary_topic_prefix, 0) != 0) {
-        return MessageProtocolMode::kCompact;
-    }
-
-    const std::uint32_t gate = static_cast<std::uint32_t>(NowUnixMs() % 100U);
-    if (gate < config_.protocol_canary_percent) {
-        return protocol_mode_;
-    }
-
-    return MessageProtocolMode::kCompact;
-}
 
 // 发布主路径（消息发送关键链路）
 // 顺序：运行态校验 -> envelope 合法性/鉴权 -> canary/幂等判定 -> 协议编码 -> 策略发送 -> failover。
@@ -1267,8 +1204,8 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
     }
 
     std::string encoded;
-    const MessageProtocolMode mode = protocol_manager_.ResolveMode(config_, envelope);
-    const vr::core::ErrorCode encode_ec = protocol_manager_.Encode(mode, envelope, &encoded);
+    const vr::core::ErrorCode encode_ec = protocol_manager_.Encode(
+        protocol_manager_.ResolveMode(config_, envelope), envelope, &encoded);
     if (encode_ec != vr::core::ErrorCode::kOk) {
         tx_fail_count_.fetch_add(1U, std::memory_order_relaxed);
         encode_fail_count_.fetch_add(1U, std::memory_order_relaxed);

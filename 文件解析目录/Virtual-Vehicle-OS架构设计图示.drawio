@@ -1,0 +1,145 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/29.6.1 Chrome/142.0.7444.265 Electron/39.8.0 Safari/537.36" version="29.6.1">
+  <diagram name="Page-1" id="page-1">
+    <mxGraphModel dx="1213" dy="722" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="2" parent="1" style="swimlane;fontStyle=1;fontSize=14;align=center;verticalAlign=middle;fillColor=#60a917;strokeColor=#2D7600;rounded=1;fontColor=#ffffff;" value="车载端 (Vehicle Domain)" vertex="1">
+          <mxGeometry height="400" width="200" x="40" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="3" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a20025;strokeColor=#6F0000;fontColor=#ffffff;" value="消息输入层" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="4" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a20025;strokeColor=#6F0000;fontColor=#ffffff;" value="POSIX MQ Transport" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="5" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a20025;strokeColor=#6F0000;fontColor=#ffffff;" value="TCP Transport" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="6" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a20025;strokeColor=#6F0000;fontColor=#ffffff;" value="Interconnect Bridge" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="7" parent="2" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a20025;strokeColor=#6F0000;fontColor=#ffffff;" value="Message Router" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="8" parent="1" style="swimlane;fontStyle=1;fontSize=14;align=center;verticalAlign=middle;fillColor=#60a917;strokeColor=#2D7600;rounded=1;fontColor=#ffffff;" value="机器人端 (Robot Domain)" vertex="1">
+          <mxGeometry height="400" width="200" x="580" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="9" parent="8" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="消息输出层" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="10" parent="8" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="ROS2 Transport" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="11" parent="8" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="RTOS Queue" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="12" parent="8" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="Interconnect Bridge" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="240" as="geometry" />
+        </mxCell>
+        <mxCell id="13" parent="8" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="Message Router" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="14" parent="1" style="swimlane;fontStyle=1;fontSize=16;align=center;verticalAlign=middle;fillColor=#6a00ff;strokeColor=#3700CC;rounded=1;fontColor=#ffffff;" value="Transformer 核心架构" vertex="1">
+          <mxGeometry height="400" width="300" x="260" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="15" parent="14" style="swimlane;fontStyle=1;fontSize=12;align=center;verticalAlign=middle;fillColor=#e3c800;strokeColor=#B09500;rounded=1;fontColor=#000000;" value="编码器层 (Encoder)" vertex="1">
+          <mxGeometry height="160" width="260" x="20" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="16" parent="15" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="输入嵌入" vertex="1">
+          <mxGeometry height="30" width="220" x="20" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="17" parent="15" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="位置编码" vertex="1">
+          <mxGeometry height="30" width="220" x="20" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="18" parent="15" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="多头注意力" vertex="1">
+          <mxGeometry height="30" width="220" x="20" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="19" parent="14" style="swimlane;fontStyle=1;fontSize=12;align=center;verticalAlign=middle;fillColor=#e3c800;strokeColor=#B09500;rounded=1;fontColor=#000000;" value="解码器层 (Decoder)" vertex="1">
+          <mxGeometry height="160" width="260" x="20" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="20" parent="19" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="输出嵌入" vertex="1">
+          <mxGeometry height="30" width="220" x="20" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="21" parent="19" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="掩码多头注意力" vertex="1">
+          <mxGeometry height="30" width="220" x="20" y="70" as="geometry" />
+        </mxCell>
+        <mxCell id="22" parent="19" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="编码器-解码器注意力" vertex="1">
+          <mxGeometry height="30" width="220" x="20" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="23" parent="1" style="swimlane;fontStyle=1;fontSize=12;align=center;verticalAlign=middle;fillColor=#60a917;strokeColor=#2D7600;rounded=1;fontColor=#ffffff;" value="核心基础设施层" vertex="1">
+          <mxGeometry height="120" width="740" x="40" y="460" as="geometry" />
+        </mxCell>
+        <mxCell id="24" parent="23" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#a20025;strokeColor=#6F0000;fontColor=#ffffff;" value="Thread Pool" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="25" parent="23" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#1ba1e2;strokeColor=#006EAF;fontColor=#ffffff;" value="System Metrics Aggregator" vertex="1">
+          <mxGeometry height="40" width="160" x="200" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="26" parent="23" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="Retry Policy Engine" vertex="1">
+          <mxGeometry height="40" width="160" x="380" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="27" parent="23" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#76608a;strokeColor=#432D57;fontColor=#ffffff;" value="Bridge Policy (SLA/TTL)" vertex="1">
+          <mxGeometry height="40" width="160" x="560" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="28" parent="1" style="swimlane;fontStyle=1;fontSize=12;align=center;verticalAlign=middle;fillColor=#a20025;strokeColor=#6F0000;rounded=1;fontColor=#ffffff;" value="协议适配层" vertex="1">
+          <mxGeometry height="80" width="740" x="40" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="29" parent="28" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="Legacy Protocol" vertex="1">
+          <mxGeometry height="40" width="160" x="20" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="30" parent="28" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="Compact Protocol" vertex="1">
+          <mxGeometry height="40" width="160" x="200" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="31" parent="28" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="Protobuf Protocol" vertex="1">
+          <mxGeometry height="40" width="160" x="380" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="32" parent="28" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f0a30a;strokeColor=#BD7000;fontColor=#000000;" value="CBOR Protocol" vertex="1">
+          <mxGeometry height="40" width="160" x="560" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="33" edge="1" parent="1" source="6" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=1;exitY=0.3;entryX=0;entryY=0.3;flowAnimation=1;" target="16" value="车载→Transformer 数据流">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="34" edge="1" parent="1" source="22" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=1;exitY=0.3;entryX=0;entryY=0.3;flowAnimation=1;" target="12" value="Transformer→机器人 数据流">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="35" edge="1" parent="1" source="18" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;" target="22" value="编码器→解码器注意力">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="36" edge="1" parent="1" source="16" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;" target="17" value="输入→编码器">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="37" edge="1" parent="1" source="17" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;" target="18" value="编码→注意力">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="38" edge="1" parent="1" source="20" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;" target="21" value="输出→掩码注意力">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="39" edge="1" parent="1" source="21" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;" target="22" value="掩码→编码器解码器">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="40" edge="1" parent="1" source="24" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;dashed=1;" target="6" value="基础设施支持">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="41" edge="1" parent="1" source="24" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;dashed=1;" target="12" value="基础设施支持">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="42" edge="1" parent="1" source="29" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;dashed=1;" target="16" value="协议选择">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="43" edge="1" parent="1" source="30" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;dashed=1;" target="16" value="协议选择">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="44" edge="1" parent="1" source="31" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;dashed=1;" target="16" value="协议选择">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="45" edge="1" parent="1" source="32" style="edgeStyle=orthogonalEdgeStyle;endArrow=classic;html=1;exitX=0.5;exitY=1;entryX=0.5;entryY=0;flowAnimation=1;dashed=1;" target="16" value="协议选择">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="46" parent="1" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontStyle=1;fontSize=18;" value="Virtual-Vehicle-OS Transformer 架构" vertex="1">
+          <mxGeometry height="30" width="300" x="300" y="10" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
