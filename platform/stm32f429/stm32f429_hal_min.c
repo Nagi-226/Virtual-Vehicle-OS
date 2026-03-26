@@ -6,6 +6,7 @@
 #define FMC_EXT_SRAM_WORDS_MAX (256U)
 
 static volatile uint32_t g_diag_snapshot_code = 0U;
+static volatile uint32_t g_last_selftest_cycles = 0U;
 static const char* g_audit_summary = "fmc_sram_audit:{status=init,code=0}";
 
 void HAL_Init(void) {
@@ -22,9 +23,11 @@ void HAL_Delay(uint32_t ms) {
 }
 
 FmcSramSelfTestCode FMC_SRAM_BringupSelfTest(uint32_t words_to_test) {
+    uint32_t cycles = 0U;
     if (words_to_test == 0U) {
         g_diag_snapshot_code = FMC_SRAM_TEST_ERR_PARAM;
-        g_audit_summary = "fmc_sram_audit:{status=fail,reason=invalid_param,code=1}";
+        g_last_selftest_cycles = cycles;
+        g_audit_summary = "fmc_sram_audit:{status=fail,reason=invalid_param,code=1,cycles=0}";
         return FMC_SRAM_TEST_ERR_PARAM;
     }
 
@@ -36,18 +39,22 @@ FmcSramSelfTestCode FMC_SRAM_BringupSelfTest(uint32_t words_to_test) {
     for (uint32_t i = 0U; i < words_to_test; ++i) {
         const uint32_t pattern = (0xA5A50000UL | (i & 0xFFFFUL));
         sram[i] = pattern;
+        ++cycles;
     }
 
     for (uint32_t i = 0U; i < words_to_test; ++i) {
         const uint32_t expected = (0xA5A50000UL | (i & 0xFFFFUL));
         const uint32_t actual = sram[i];
+        ++cycles;
         if (actual != expected) {
             g_diag_snapshot_code = FMC_SRAM_TEST_ERR_MISMATCH;
-            g_audit_summary = "fmc_sram_audit:{status=fail,reason=readback_mismatch,code=2}";
+            g_last_selftest_cycles = cycles;
+            g_audit_summary = "fmc_sram_audit:{status=fail,reason=readback_mismatch,code=2,cycles>0}";
             return FMC_SRAM_TEST_ERR_MISMATCH;
         }
     }
 
+    g_last_selftest_cycles = cycles;
     g_diag_snapshot_code = FMC_SRAM_TEST_OK;
     g_audit_summary = "fmc_sram_audit:{status=ok,code=0}";
     return FMC_SRAM_TEST_OK;

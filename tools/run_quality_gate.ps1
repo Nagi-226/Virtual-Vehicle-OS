@@ -5,6 +5,7 @@ param(
     [double]$MinThroughput = 500.0,
     [double]$MaxErrorRate = 0.05,
     [double]$MaxP99LatencyMs = 200.0,
+    [double]$MinSoakSamples = 50.0,
     [switch]$RunCtest = $true,
     [switch]$EnableSTM32F429Check = $false,
     [string]$STM32BuildDir = "build-stm32f429"
@@ -80,6 +81,20 @@ function Parse-P99 {
     return 0.0
 }
 
+function Parse-SoakSamples {
+    param([string]$Content)
+
+    $v2r = 0.0
+    $r2v = 0.0
+    if ($Content -match '"v2r_received"\s*:\s*([0-9]+\.?[0-9]*)') {
+        $v2r = [double]$matches[1]
+    }
+    if ($Content -match '"r2v_received"\s*:\s*([0-9]+\.?[0-9]*)') {
+        $r2v = [double]$matches[1]
+    }
+    return ($v2r + $r2v)
+}
+
 function Parse-FaultAssertion {
     param([string]$Content)
 
@@ -135,6 +150,7 @@ if ($RunCtest) {
 $throughput = 0.0
 $errorRate = 0.0
 $p99 = 0.0
+$soakSamples = 0.0
 $faultAssertPass = $true
 $benchPass = $true
 $soakPass = $true
@@ -148,9 +164,10 @@ if ($BenchmarkOutput -and (Test-Path $BenchmarkOutput)) {
     $throughput = Parse-Throughput -Content $content
     $errorRate = Parse-ErrorRate -Content $content
     $p99 = Parse-P99 -Content $content
+    $soakSamples = Parse-SoakSamples -Content $content
 
     $benchPass = $throughput -ge $MinThroughput
-    $soakPass = ($errorRate -le $MaxErrorRate) -and ($p99 -le $MaxP99LatencyMs)
+    $soakPass = ($errorRate -le $MaxErrorRate) -and ($p99 -le $MaxP99LatencyMs) -and ($soakSamples -ge $MinSoakSamples)
     $faultAssertPass = Parse-FaultAssertion -Content $content
 
     if ($baselineThroughput -gt 0 -and $throughput -lt ($baselineThroughput * 0.95)) {
@@ -158,7 +175,7 @@ if ($BenchmarkOutput -and (Test-Path $BenchmarkOutput)) {
     }
 
     Write-Host "[quality-gate][benchmark] throughput=$throughput min=$MinThroughput baseline=$baselineThroughput"
-    Write-Host "[quality-gate][soak] error_rate=$errorRate max=$MaxErrorRate p99=$p99 max_p99=$MaxP99LatencyMs"
+    Write-Host "[quality-gate][soak] error_rate=$errorRate max=$MaxErrorRate p99=$p99 max_p99=$MaxP99LatencyMs samples=$soakSamples min_samples=$MinSoakSamples"
 } else {
     Write-Host "[quality-gate][benchmark] output not provided, skip hard gate"
 }
@@ -190,7 +207,11 @@ if (-not $benchPass) {
     $blockReasons += "benchmark_throughput_below_threshold"
 }
 if (-not $soakPass) {
-    $blockReasons += "soak_or_fault_threshold_violation"
+    if ($soakSamples -lt $MinSoakSamples) {
+        $blockReasons += "soak_samples_too_low"
+    } else {
+        $blockReasons += "soak_or_fault_threshold_violation"
+    }
 }
 if (-not $faultAssertPass) {
     $blockReasons += "fault_assertion_failed"
@@ -212,7 +233,8 @@ if ($blockReasons.Count -gt 0) {
     Write-Host "[quality-gate] block_reasons=$($blockReasons -join ',')"
 }
 
-Write-Host "[quality-gate] ci_report={\"throughput\":$throughput,\"error_rate\":$errorRate,\"p99_ms\":$p99,\"fault_assertion\":$($faultAssertPass.ToString().ToLower()),\"release_gate\":\"$([string]::Join('', @($(if ($blockReasons.Count -eq 0) {'pass'} else {'fail'}))))\",\"block_reasons\":\"$($blockReasons -join '|')\"}"
+$releaseGate = if ($blockReasons.Count -eq 0) { 'pass' } else { 'fail' }
+Write-Host "[quality-gate] ci_report={\"throughput\":$throughput,\"error_rate\":$errorRate,\"p99_ms\":$p99,\"fault_assertion\":$($faultAssertPass.ToString().ToLower()),\"release_gate\":\"$releaseGate\",\"block_reasons\":\"$($blockReasons -join '|')\"}"
 
 if ($blockReasons.Count -eq 0) {
     exit 0

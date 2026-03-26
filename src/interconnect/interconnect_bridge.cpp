@@ -1258,6 +1258,7 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
     ReleaseFlowSlot(transport);
 
     if (send_ec != vr::core::ErrorCode::kOk) {
+        transport_orchestrator_.OnPrimarySendFailure();
         // failover 判定：仅在主链路发送失败且对应方向启用 failover 时尝试备用链路。
         // 注意：备用链路成功后需同步更新健康状态与 failover 事件计数。
         ITransport* failover_transport = transport_orchestrator_.ResolveFailover(
@@ -1289,6 +1290,7 @@ vr::core::ErrorCode InterconnectBridge::Publish(ITransport* const transport,
         return send_ec;
     }
 
+    transport_orchestrator_.OnPrimarySendSuccess();
     transport_primary_healthy_.store(1U, std::memory_order_relaxed);
     transport_secondary_healthy_.store(1U, std::memory_order_relaxed);
     tx_count_.fetch_add(1U, std::memory_order_relaxed);
@@ -1553,9 +1555,15 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
                 } else {
                     trace_index_hit_count_.fetch_add(1U, std::memory_order_relaxed);
                 }
+                const bool is_new_trace = (it == trace_index_last_seen_ms_.end());
                 trace_index_last_seen_ms_[envelope.trace_id] = now_ms;
-                if (trace_index_last_seen_ms_.size() > 1024U) {
-                    trace_index_last_seen_ms_.erase(trace_index_last_seen_ms_.begin());
+                if (is_new_trace) {
+                    trace_index_insert_order_.push_back(envelope.trace_id);
+                }
+                while (trace_index_insert_order_.size() > kTraceIndexMaxEntries) {
+                    const std::string evict_key = trace_index_insert_order_.front();
+                    trace_index_insert_order_.pop_front();
+                    trace_index_last_seen_ms_.erase(evict_key);
                 }
             }
             trace_linked_event_count_.fetch_add(1U, std::memory_order_relaxed);

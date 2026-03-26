@@ -5,7 +5,7 @@ extern "C" {
 }
 
 #include "interconnect/diagnostics_manager.hpp"
-#include "platform/stm32f429/f429_bridge_diag_adapter.hpp"
+#include "f429_bridge_diag_adapter.hpp"
 
 extern "C" {
 #include "uart_log_min.h"

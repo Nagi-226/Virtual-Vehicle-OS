@@ -1,5 +1,9 @@
 #include "uart_log_min.h"
 
+#ifndef F429_UART_BAUD_BRR
+#define F429_UART_BAUD_BRR     (0x2D9U)
+#endif
+
 #define USART1_BASE           (0x40011000UL)
 #define USART1_SR             (*(volatile uint32_t*)(USART1_BASE + 0x00UL))
 #define USART1_DR             (*(volatile uint32_t*)(USART1_BASE + 0x04UL))
@@ -18,8 +22,8 @@ static void UART_LogWriteChar(const char ch) {
 }
 
 void UART_LogInit(void) {
-    // 最小占位：BRR 设默认值（需按真实 APB2 时钟校准）
-    USART1_BRR = 0x2D9U; // 约 115200 @ 84MHz APB2（模板值）
+    // 参数化 BRR（默认约 115200 @ 84MHz APB2，实板可通过宏覆盖）
+    USART1_BRR = F429_UART_BAUD_BRR;
     USART1_CR1 = USART_CR1_TE;
     USART1_CR1 |= USART_CR1_UE;
 }

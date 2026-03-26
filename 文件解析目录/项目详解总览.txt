@@ -798,8 +798,8 @@ M3 启动前预置（R08：F429 软件侧适配首版）
   - R03 阈值仍需持续校准（当前为保守初值）；
   - trace 索引当前为内存轻量实现，后续需评估高流量场景下的容量与淘汰策略。
 
-【v0.9 统一发布摘要（M1/M2，面向 M3 启动）】
-发布结论：v0.9 当前可灰度发布（M1/M2 已达可验收态），可进入 M3 启动阶段。
+【v0.9 统一发布摘要（M1/M2/M3）】
+发布结论：v0.9 可灰度发布（M1/M2/M3 均达到当前可验收态）。
 
 1) M1（v0.9.1）摘要：架构解耦 + 协议 wire 加固
 - 已完成 Bridge 关键链路 manager 委托（Protocol/Diagnostics/Transport/Policy），对外接口保持稳定。
@@ -811,22 +811,113 @@ M3 启动前预置（R08：F429 软件侧适配首版）
 - 已完成 trace 关联索引指标与三格式导出一致性（Prometheus/JSON/轻量 JSON）。
 - 已完成 benchmark 参数化与 soak/fault gate，质量门禁支持 block_reasons + ci_report 机器可读输出。
 
-M3 启动前检查项（建议）
+3) M3（v0.9.3）摘要：发布工单化 + 调度增强 + F429 参数收敛
+- 已完成 release_gate_v09 工单化输出（status/block_reasons/owner/suggested_action）。
+- 已完成多路 transport 高级调度首版框架（权重/熔断/恢复）及最小回归测试。
+- 已完成 F429 参数化收敛首版（FMC/PLL/UART 模板）与平台诊断桥接硬门禁。
+
+发布后持续跟踪项（建议）
 - 门禁基线：required tests + soak/fault gate 连续通过（至少连续 3 次）。
 - 风险基线：R03 阈值完成一轮真实环境校准并固化到质量门禁默认参数。
 - 观测基线：trace 索引 hit/miss 比例与容量水位纳入告警策略。
-- 平台基线（新增）：STM32F429ZGT6 软件侧最小闭环通过（toolchain/linker/startup/SystemInit/HAL_min/STLINK-V2 下载脚本 + 实机下载 checklist）。
+- 平台基线：STM32F429ZGT6 完成实板参数定版（FMC/UART/PLL）后再升级为默认生产配置。
+
+【M3（v0.9.3）可验收态清单】
+验收结论：通过（R06+R07+R08 达到当前可验收态）
+
+通过项与证据点：
+1) R06 发布工单化与审计留痕
+- 通过项：新增 release_gate_v09，支持机器可读工单（status/block_reasons/owner/suggested_action）。
+- 通过项：支持 F429 平台检查与失败摘要输出，便于责任域定位。
+- 证据点：tools/release_gate_v09.ps1
+
+2) R07 多路 transport 高级调度（首版）
+- 通过项：落地权重/熔断/恢复基础框架（Policy + circuit open/close）。
+- 通过项：Bridge 发送路径接入熔断状态更新。
+- 通过项：新增最小回归测试覆盖“熔断开启/恢复”。
+- 证据点：src/interconnect/transport_orchestrator.hpp/.cpp, src/interconnect/interconnect_bridge.cpp
+- 测试点：tests/interconnect/transport_orchestrator_test.cpp（TestCircuitOpenAndRecover）
+
+3) R08 F429 实板参数收敛（首版）
+- 通过项：FMC SRAM 参数化（F429_FMC_BANK1_BCR1_VALUE/F429_FMC_BANK1_BTR1_VALUE）。
+- 通过项：UART BRR 参数化（F429_UART_BAUD_BRR）。
+- 通过项：文档补齐 8MHz + 115200 推荐模板参数，便于插板首轮验证。
+- 证据点：platform/stm32f429/system_stm32f429_min.c, platform/stm32f429/uart_log_min.c, docs/platform_integration_v08.md
+
+4) 质量与门禁
+- 通过项：新增 interconnect/platform 测试目标纳入 CTest（transport_orchestrator_test / f429_bridge_diag_adapter_test）。
+- 通过项：quality gate 对 F429 诊断桥接测试失败执行硬阻断。
+- 证据点：CMakeLists.txt, tools/run_quality_gate.ps1
+
+【v0.9 M3 发布建议】
+- 建议发布等级：可灰度发布（优先在实验板与预发环境逐步放量）。
+- 运行建议：
+  1) R07 熔断阈值按业务压测结果调优，避免误开/误关；
+  2) R08 参数模板作为起点，需完成实板 FMC/UART 校准后固化为默认值；
+  3) R06 工单输出接入 CI 归档，形成版本审计闭环。
+- 当前阶段风险：
+  - R07 当前为首版策略框架，权重调度细粒度策略仍需后续增强；
+  - F429 实板参数尚未完成全温全压条件下长稳验证。
 
 M3 启动风险提示
 - 真实 protobuf/cbor 外部库接入与兼容矩阵扩展仍需谨慎推进，避免破坏 legacy/compact 回退路径。
-- trace 索引目前为内存轻量实现，若进入高流量场景需优先验证容量与淘汰策略。
-- STM32F429 外扩 SRAM 已接入 bring-up 自检骨架，但 FMC 时序参数与硬件原理图绑定，需实板校准后方可作为生产默认配置。
+- R07 当前为首版框架，权重调度策略与熔断阈值需结合压测数据继续调优。
+- STM32F429 外扩 SRAM 参数与 UART BRR 已参数化，但仍需实板校准后方可作为生产默认配置。
 
-v1.0 准入门槛（由 v0.9 输出）
-- 质量门槛：全量回归 + 长稳测试 + 关键性能基线连续达标。
-- 稳定门槛：高优先级缺陷清零，P1 缺陷可控并有回避策略。
-- 运营门槛：故障定位路径闭环（日志/指标/快照/审计）。
-- 交付门槛：平台接入文档、样例、门禁脚本可复用并可审计。
+【定期全项目审计（本轮）】
+审计范围：src/interconnect, platform/stm32f429, tools/run_quality_gate.ps1, tests/platform, docs
+
+1) 冗余/耦合问题修复
+- 问题：F429 适配器头文件在同目录场景下走工程全路径 include，存在构建耦合与可移植性风险。
+- 修复：改为同目录相对 include（f429_bridge_diag_adapter.hpp），降低路径耦合。
+- 证据点：platform/stm32f429/main_min.cpp, platform/stm32f429/f429_bridge_diag_adapter.cpp
+
+2) quality gate 可维护性修复
+- 问题：ci_report 中 release_gate 通过复杂字符串拼接生成，可读性差且易引入转义错误。
+- 修复：引入 $releaseGate 变量统一输出，逻辑更直接可维护。
+- 证据点：tools/run_quality_gate.ps1
+
+3) 平台硬门禁闭环核验
+- 通过项：F429 诊断桥接测试已纳入 quality gate platform required，失败阻断发布。
+- 证据点：tools/run_quality_gate.ps1（f429_bridge_diag_adapter_test）, tests/platform/f429_bridge_diag_adapter_test.cpp
+
+本轮结论：
+- 已完成低风险冗余/BUG/耦合修复，保持公开接口稳定，lint 全绿。
+- 默认机制持续有效：每版本后执行“审计 -> 修复 -> 回归 -> 总览同步”。
+
+【性能与容量导向审计（本轮）】
+审计重点：trace 索引容量、FMC 自检耗时、quality gate 阈值合理性
+
+1) trace 索引容量治理
+- 风险：原超限淘汰基于 unordered_map.begin()，淘汰目标非确定，命中率统计可能抖动。
+- 修复：改为“插入顺序队列 + map”确定性 FIFO 淘汰，容量常量化（kTraceIndexMaxEntries）。
+- 证据点：src/interconnect/interconnect_bridge.hpp/.cpp
+
+2) FMC 自检耗时可观测
+- 风险：仅有成功/失败状态，缺少耗时近似指标，不利于启动性能评估。
+- 修复：在自检中增加 cycle 计数并写入审计语义（失败路径可识别）。
+- 证据点：platform/stm32f429/stm32f429_hal_min.c
+
+3) quality gate 阈值样本量约束
+- 风险：低样本下 error_rate/p99 统计不稳定，易误判发布结论。
+- 修复：新增 MinSoakSamples 与样本量解析，样本不足直接阻断（soak_samples_too_low）。
+- 证据点：tools/run_quality_gate.ps1
+
+v0.9 落地完整性核对结论：
+- M1/M2 已落地并形成门禁闭环；M3 启动前平台预置已具备。
+- F429 当前达到“可编译/可烧录/可自检/可诊断/可门禁”的初步适配验证级别。
+- “插板即用”仍有实板前置项：FMC 时序参数需按具体 SRAM 与板级走线校准，PLL/UART 参数需实测确认。
+
+v1.0 准入建议版本（基于 v0.9）
+- 建议版本：v1.0.0-rc1（灰度候选）
+- 升级条件：
+  1) 质量门槛：全量回归 + 长稳测试 + 关键性能基线连续达标（建议连续 3 次）；
+  2) 稳定门槛：高优先级缺陷清零，P1 缺陷可控并有回避策略；
+  3) 运营门槛：故障定位路径闭环（日志/指标/快照/审计）且 release 工单可追溯；
+  4) 平台门槛：STM32F429 实板参数定版（FMC/UART/PLL）+ 平台硬门禁持续通过。
+- 发布策略建议：
+  - 阶段1：v1.0.0-rc1 小流量灰度（保留协议/配置回退开关）；
+  - 阶段2：v1.0.0 正式版（完成平台定版与阈值校准后）。
 
 七、项目价值总结
 

@@ -276,6 +276,8 @@ private:
 
     mutable std::mutex trace_index_mutex_;
     std::unordered_map<std::string, std::uint64_t> trace_index_last_seen_ms_;
+    std::deque<std::string> trace_index_insert_order_;
+    static constexpr std::size_t kTraceIndexMaxEntries = 1024U;
 
     std::uint64_t loaded_config_version_{0U};
     std::string loaded_config_source_;

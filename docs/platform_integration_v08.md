@@ -65,10 +65,21 @@ This guide defines minimal integration steps for RTOS/STM32 and ROS2 sample path
 - FMC SRAM init upgraded from pure stub to parameterized register setup via macros:
   - `F429_FMC_BANK1_BCR1_VALUE`
   - `F429_FMC_BANK1_BTR1_VALUE`
+- UART BRR made configurable for board-level calibration:
+  - `F429_UART_BAUD_BRR`
 - Added minimal UART logs (startup + SRAM selftest result):
   - `[boot] stm32f429_min start`
   - `[diag] fmc_sram code=0x...`
   - `[diag] fmc_sram selftest OK/FAIL`
+
+## 6.2) Recommended Template Values (8MHz HSE + 115200 UART)
+- PLL (HSE=8MHz -> SYSCLK=168MHz):
+  - `PLLM=8`, `PLLN=336`, `PLLP=2`, `PLLQ=7`
+- FMC SRAM template (needs board-level tuning):
+  - `F429_FMC_BANK1_BCR1_VALUE = 0x00001011`
+  - `F429_FMC_BANK1_BTR1_VALUE = 0x00110413`
+- UART (USART1, APB2 ~84MHz):
+  - `F429_UART_BAUD_BRR = 0x2D9` (115200 template)
 - Self test behavior:
   - write/read loopback at `0x68000000`
   - returns error code (`FMC_SRAM_TEST_*`)

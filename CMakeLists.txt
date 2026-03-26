@@ -173,6 +173,11 @@ if(ENABLE_TESTS)
     add_test(NAME interconnect_transport_consistency_test COMMAND interconnect_transport_consistency_test)
     set_tests_properties(interconnect_transport_consistency_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
+    add_executable(transport_orchestrator_test tests/interconnect/transport_orchestrator_test.cpp)
+    target_link_libraries(transport_orchestrator_test PRIVATE vr_base_framework)
+    add_test(NAME transport_orchestrator_test COMMAND transport_orchestrator_test)
+    set_tests_properties(transport_orchestrator_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
+
     add_executable(interconnect_fault_injection_test tests/interconnect/interconnect_fault_injection_test.cpp)
     target_link_libraries(interconnect_fault_injection_test PRIVATE vr_base_framework)
     add_test(NAME interconnect_fault_injection_test COMMAND interconnect_fault_injection_test)
