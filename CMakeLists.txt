@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(VehicleRobotBaseFramework VERSION 1.0.0 LANGUAGES CXX)
+project(VehicleRobotBaseFramework VERSION 1.0.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -8,6 +8,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(ENABLE_TESTS "Build unit tests" ON)
 option(ENABLE_SANITIZER "Enable address/undefined sanitizers for Debug on GCC/Clang" OFF)
 option(ENABLE_STRICT_WARNINGS "Enable strict warnings as errors" ON)
+option(ENABLE_STM32F429_TARGET "Build STM32F429ZGT6 minimal firmware target" OFF)
 
 if(ENABLE_STRICT_WARNINGS)
     if(MSVC)
@@ -67,6 +68,29 @@ if(UNIX AND NOT APPLE)
     target_link_libraries(vr_base_framework PUBLIC rt pthread)
 elseif(UNIX)
     target_link_libraries(vr_base_framework PUBLIC pthread)
+endif()
+
+if(ENABLE_STM32F429_TARGET)
+    add_executable(stm32f429_min_fw
+        platform/stm32f429/startup_stm32f429xx_min.c
+        platform/stm32f429/system_stm32f429_min.c
+        platform/stm32f429/stm32f429_hal_min.c
+        platform/stm32f429/uart_log_min.c
+        platform/stm32f429/main_min.cpp
+    )
+    target_include_directories(stm32f429_min_fw PRIVATE platform/stm32f429)
+    target_link_options(stm32f429_min_fw PRIVATE
+        -T${CMAKE_SOURCE_DIR}/platform/stm32f429/STM32F429ZGTX_FLASH.ld
+        -nostartfiles
+    )
+
+    if(CMAKE_OBJCOPY)
+        add_custom_command(TARGET stm32f429_min_fw POST_BUILD
+            COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:stm32f429_min_fw> $<TARGET_FILE_DIR:stm32f429_min_fw>/stm32f429_min_fw.hex
+            COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:stm32f429_min_fw> $<TARGET_FILE_DIR:stm32f429_min_fw>/stm32f429_min_fw.bin
+            COMMENT "Generating STM32F429 HEX/BIN artifacts"
+        )
+    endif()
 endif()
 
 if(NOT WIN32)
@@ -173,6 +197,11 @@ if(ENABLE_TESTS)
     target_link_libraries(ros2_adapter_stub_test PRIVATE vr_base_framework)
     add_test(NAME ros2_adapter_stub_test COMMAND ros2_adapter_stub_test)
     set_tests_properties(ros2_adapter_stub_test PROPERTIES LABELS "platform" TIMEOUT 10)
+
+    add_executable(f429_bridge_diag_adapter_test tests/platform/f429_bridge_diag_adapter_test.cpp)
+    target_link_libraries(f429_bridge_diag_adapter_test PRIVATE vr_base_framework)
+    add_test(NAME f429_bridge_diag_adapter_test COMMAND f429_bridge_diag_adapter_test)
+    set_tests_properties(f429_bridge_diag_adapter_test PROPERTIES LABELS "platform" TIMEOUT 10)
 
     if(NOT WIN32)
         add_test(NAME rtos_adapter_sample_run COMMAND rtos_adapter_sample)

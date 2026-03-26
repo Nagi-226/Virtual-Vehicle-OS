@@ -27,6 +27,21 @@ void DiagnosticsManager::RecordSnapshot(const std::string& path,
                                         const std::uint32_t limit,
                                         const std::string& event,
                                         const MessageEnvelope* envelope) const {
+    std::unordered_map<std::string, std::string> fields;
+    if (envelope != nullptr) {
+        fields["topic"] = envelope->topic;
+        fields["source"] = envelope->source;
+        fields["trace_id"] = envelope->trace_id;
+        fields["sequence"] = std::to_string(envelope->sequence);
+    }
+    RecordSnapshotWithFields(path, limit, event, fields);
+}
+
+void DiagnosticsManager::RecordSnapshotWithFields(
+    const std::string& path,
+    const std::uint32_t limit,
+    const std::string& event,
+    const std::unordered_map<std::string, std::string>& fields) const {
     if (path.empty()) {
         return;
     }
@@ -44,11 +59,8 @@ void DiagnosticsManager::RecordSnapshot(const std::string& path,
 
     std::string entry = "{\"ts\":" + std::to_string(NowMs()) +
         ",\"event\":\"" + event + "\"";
-    if (envelope != nullptr) {
-        entry += ",\"topic\":\"" + envelope->topic + "\"";
-        entry += ",\"source\":\"" + envelope->source + "\"";
-        entry += ",\"trace_id\":\"" + envelope->trace_id + "\"";
-        entry += ",\"sequence\":" + std::to_string(envelope->sequence);
+    for (const auto& [key, value] : fields) {
+        entry += ",\"" + key + "\":\"" + value + "\"";
     }
     entry += "}";
 

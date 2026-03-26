@@ -5,7 +5,9 @@ param(
     [double]$MinThroughput = 500.0,
     [double]$MaxErrorRate = 0.05,
     [double]$MaxP99LatencyMs = 200.0,
-    [switch]$RunCtest = $true
+    [switch]$RunCtest = $true,
+    [switch]$EnableSTM32F429Check = $false,
+    [string]$STM32BuildDir = "build-stm32f429"
 )
 
 $ErrorActionPreference = "Stop"
@@ -90,30 +92,6 @@ function Parse-FaultAssertion {
     return $false
 }
 
-function Parse-ErrorRate {
-    param([string]$Content)
-
-    if ($Content -match '"error_rate"\s*:\s*([0-9]+\.?[0-9]*)') {
-        return [double]$matches[1]
-    }
-    if ($Content -match 'error_rate:\s*([0-9]+\.?[0-9]*)') {
-        return [double]$matches[1]
-    }
-    return 0.0
-}
-
-function Parse-P99 {
-    param([string]$Content)
-
-    if ($Content -match '"latency_p99_ms"\s*:\s*([0-9]+\.?[0-9]*)') {
-        return [double]$matches[1]
-    }
-    if ($Content -match 'latency_p99_ms:\s*([0-9]+\.?[0-9]*)') {
-        return [double]$matches[1]
-    }
-    return 0.0
-}
-
 function Load-Baseline {
     param([string]$Path)
 
@@ -183,6 +161,26 @@ if ($BenchmarkOutput -and (Test-Path $BenchmarkOutput)) {
     Write-Host "[quality-gate][soak] error_rate=$errorRate max=$MaxErrorRate p99=$p99 max_p99=$MaxP99LatencyMs"
 } else {
     Write-Host "[quality-gate][benchmark] output not provided, skip hard gate"
+}
+
+if ($EnableSTM32F429Check) {
+    $stm32Elf = Join-Path $STM32BuildDir "stm32f429_min_fw"
+    $stm32Hex = Join-Path $STM32BuildDir "stm32f429_min_fw.hex"
+    $stm32Bin = Join-Path $STM32BuildDir "stm32f429_min_fw.bin"
+
+    $stm32ArtifactsOk = (Test-Path $stm32Elf) -and (Test-Path $stm32Hex) -and (Test-Path $stm32Bin)
+    if (-not $stm32ArtifactsOk) {
+        $blockReasons += "stm32f429_artifacts_missing"
+    }
+
+    if ($RunCtest) {
+        Write-Host "[quality-gate][platform-required] running f429_bridge_diag_adapter_test"
+        ctest --test-dir $BuildDir -R "^f429_bridge_diag_adapter_test$" --output-on-failure
+        if ($LASTEXITCODE -ne 0) {
+            $blockReasons += "f429_diag_bridge_test_failed"
+            Write-Host "[quality-gate][platform-required] fail: f429_bridge_diag_adapter_test"
+        }
+    }
 }
 
 if ($requiredFailed.Count -gt 0) {

@@ -2,6 +2,7 @@
 #define VR_INTERCONNECT_DIAGNOSTICS_MANAGER_HPP
 
 #include <string>
+#include <unordered_map>
 
 #include "interconnect/message_envelope.hpp"
 
@@ -15,6 +16,10 @@ public:
                         std::uint32_t limit,
                         const std::string& event,
                         const MessageEnvelope* envelope) const;
+    void RecordSnapshotWithFields(const std::string& path,
+                                  std::uint32_t limit,
+                                  const std::string& event,
+                                  const std::unordered_map<std::string, std::string>& fields) const;
 };
 
 }  // namespace interconnect
