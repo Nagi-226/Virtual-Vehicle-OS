@@ -151,6 +151,12 @@
 },
 {
   "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\transport_orchestrator_test.dir\\tests\\interconnect\\transport_orchestrator_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\transport_orchestrator_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\transport_orchestrator_test.cpp",
+  "output": "CMakeFiles\\transport_orchestrator_test.dir\\tests\\interconnect\\transport_orchestrator_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
   "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\interconnect_fault_injection_test.dir\\tests\\interconnect\\interconnect_fault_injection_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_fault_injection_test.cpp\"",
   "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\interconnect\\interconnect_fault_injection_test.cpp",
   "output": "CMakeFiles\\interconnect_fault_injection_test.dir\\tests\\interconnect\\interconnect_fault_injection_test.cpp.obj"
@@ -178,5 +184,11 @@
   "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\ros2_adapter_stub_test.dir\\tests\\platform\\ros2_adapter_stub_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\platform\\ros2_adapter_stub_test.cpp\"",
   "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\platform\\ros2_adapter_stub_test.cpp",
   "output": "CMakeFiles\\ros2_adapter_stub_test.dir\\tests\\platform\\ros2_adapter_stub_test.cpp.obj"
+},
+{
+  "directory": "E:/Github Project/Virtual-Vehicle-OS/build",
+  "command": "E:\\mingw64\\bin\\g++.exe -I\"E:/Github Project/Virtual-Vehicle-OS/src\" -g -std=c++17 -Wall -Wextra -Wpedantic -Werror -o CMakeFiles\\f429_bridge_diag_adapter_test.dir\\tests\\platform\\f429_bridge_diag_adapter_test.cpp.obj -c \"E:\\Github Project\\Virtual-Vehicle-OS\\tests\\platform\\f429_bridge_diag_adapter_test.cpp\"",
+  "file": "E:\\Github Project\\Virtual-Vehicle-OS\\tests\\platform\\f429_bridge_diag_adapter_test.cpp",
+  "output": "CMakeFiles\\f429_bridge_diag_adapter_test.dir\\tests\\platform\\f429_bridge_diag_adapter_test.cpp.obj"
 }
 ]

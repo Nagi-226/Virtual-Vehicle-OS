@@ -55,6 +55,8 @@ build CMakeFiles/vr_error_code.dir/src/core/error_code.cpp.obj: CXX_COMPILER__vr
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_error_code.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_error_code.dir\src\core
+  TARGET_COMPILE_PDB = CMakeFiles\vr_error_code.dir\vr_error_code.pdb
+  TARGET_PDB = libvr_error_code.pdb
 
 
 # =============================================================================
@@ -69,8 +71,9 @@ build libvr_error_code.a: CXX_STATIC_LIBRARY_LINKER__vr_error_code_Debug CMakeFi
   OBJECT_DIR = CMakeFiles\vr_error_code.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\vr_error_code.dir\vr_error_code.pdb
   TARGET_FILE = libvr_error_code.a
-  TARGET_PDB = vr_error_code.a.dbg
+  TARGET_PDB = libvr_error_code.pdb
 
 # =============================================================================
 # Object build statements for STATIC_LIBRARY target commonsvc_log
@@ -87,6 +90,8 @@ build CMakeFiles/commonsvc_log.dir/src/log/logger.cpp.obj: CXX_COMPILER__commons
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\commonsvc_log.dir
   OBJECT_FILE_DIR = CMakeFiles\commonsvc_log.dir\src\log
+  TARGET_COMPILE_PDB = CMakeFiles\commonsvc_log.dir\commonsvc_log.pdb
+  TARGET_PDB = libcommonsvc_log.pdb
 
 
 # =============================================================================
@@ -101,8 +106,9 @@ build libcommonsvc_log.a: CXX_STATIC_LIBRARY_LINKER__commonsvc_log_Debug CMakeFi
   OBJECT_DIR = CMakeFiles\commonsvc_log.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\commonsvc_log.dir\commonsvc_log.pdb
   TARGET_FILE = libcommonsvc_log.a
-  TARGET_PDB = commonsvc_log.a.dbg
+  TARGET_PDB = libcommonsvc_log.pdb
 
 # =============================================================================
 # Object build statements for STATIC_LIBRARY target vr_base_framework
@@ -119,6 +125,8 @@ build CMakeFiles/vr_base_framework.dir/src/core/thread_pool.cpp.obj: CXX_COMPILE
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\core
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/core/retry_policy.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\core\retry_policy.cpp.obj.d
@@ -126,6 +134,8 @@ build CMakeFiles/vr_base_framework.dir/src/core/retry_policy.cpp.obj: CXX_COMPIL
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\core
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/interconnect/message_codec.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/message_codec.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\message_codec.cpp.obj.d
@@ -133,6 +143,8 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/message_codec.cpp.obj: C
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/interconnect/message_protocol_adapter.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/message_protocol_adapter.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\message_protocol_adapter.cpp.obj.d
@@ -140,6 +152,8 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/message_protocol_adapter
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/interconnect/message_router.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/message_router.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\message_router.cpp.obj.d
@@ -147,6 +161,8 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/message_router.cpp.obj: 
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/interconnect/interconnect_bridge.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/interconnect_bridge.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\interconnect_bridge.cpp.obj.d
@@ -154,6 +170,8 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/interconnect_bridge.cpp.
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/interconnect/tcp_transport.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/tcp_transport.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\tcp_transport.cpp.obj.d
@@ -161,6 +179,8 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/tcp_transport.cpp.obj: C
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/interconnect/policy_manager.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/policy_manager.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\policy_manager.cpp.obj.d
@@ -168,6 +188,8 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/policy_manager.cpp.obj: 
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/interconnect/protocol_manager.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/protocol_manager.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\protocol_manager.cpp.obj.d
@@ -175,6 +197,8 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/protocol_manager.cpp.obj
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/interconnect/diagnostics_manager.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/diagnostics_manager.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\diagnostics_manager.cpp.obj.d
@@ -182,6 +206,8 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/diagnostics_manager.cpp.
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 build CMakeFiles/vr_base_framework.dir/src/interconnect/transport_orchestrator.cpp.obj: CXX_COMPILER__vr_base_framework_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/src/interconnect/transport_orchestrator.cpp || cmake_object_order_depends_target_vr_base_framework
   DEP_FILE = CMakeFiles\vr_base_framework.dir\src\interconnect\transport_orchestrator.cpp.obj.d
@@ -189,6 +215,8 @@ build CMakeFiles/vr_base_framework.dir/src/interconnect/transport_orchestrator.c
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   OBJECT_FILE_DIR = CMakeFiles\vr_base_framework.dir\src\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
+  TARGET_PDB = libvr_base_framework.pdb
 
 
 # =============================================================================
@@ -203,8 +231,9 @@ build libvr_base_framework.a: CXX_STATIC_LIBRARY_LINKER__vr_base_framework_Debug
   OBJECT_DIR = CMakeFiles\vr_base_framework.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\vr_base_framework.dir\vr_base_framework.pdb
   TARGET_FILE = libvr_base_framework.a
-  TARGET_PDB = vr_base_framework.a.dbg
+  TARGET_PDB = libvr_base_framework.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target thread_pool_test
@@ -221,6 +250,8 @@ build CMakeFiles/thread_pool_test.dir/tests/thread_pool_test.cpp.obj: CXX_COMPIL
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\thread_pool_test.dir
   OBJECT_FILE_DIR = CMakeFiles\thread_pool_test.dir\tests
+  TARGET_COMPILE_PDB = CMakeFiles\thread_pool_test.dir\
+  TARGET_PDB = thread_pool_test.pdb
 
 
 # =============================================================================
@@ -236,9 +267,10 @@ build thread_pool_test.exe: CXX_EXECUTABLE_LINKER__thread_pool_test_Debug CMakeF
   OBJECT_DIR = CMakeFiles\thread_pool_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\thread_pool_test.dir\
   TARGET_FILE = thread_pool_test.exe
   TARGET_IMPLIB = libthread_pool_test.dll.a
-  TARGET_PDB = thread_pool_test.exe.dbg
+  TARGET_PDB = thread_pool_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target retry_policy_test
@@ -255,6 +287,8 @@ build CMakeFiles/retry_policy_test.dir/tests/core/retry_policy_test.cpp.obj: CXX
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\retry_policy_test.dir
   OBJECT_FILE_DIR = CMakeFiles\retry_policy_test.dir\tests\core
+  TARGET_COMPILE_PDB = CMakeFiles\retry_policy_test.dir\
+  TARGET_PDB = retry_policy_test.pdb
 
 
 # =============================================================================
@@ -270,9 +304,10 @@ build retry_policy_test.exe: CXX_EXECUTABLE_LINKER__retry_policy_test_Debug CMak
   OBJECT_DIR = CMakeFiles\retry_policy_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\retry_policy_test.dir\
   TARGET_FILE = retry_policy_test.exe
   TARGET_IMPLIB = libretry_policy_test.dll.a
-  TARGET_PDB = retry_policy_test.exe.dbg
+  TARGET_PDB = retry_policy_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target logger_format_test
@@ -289,6 +324,8 @@ build CMakeFiles/logger_format_test.dir/tests/log/logger_format_test.cpp.obj: CX
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\logger_format_test.dir
   OBJECT_FILE_DIR = CMakeFiles\logger_format_test.dir\tests\log
+  TARGET_COMPILE_PDB = CMakeFiles\logger_format_test.dir\
+  TARGET_PDB = logger_format_test.pdb
 
 
 # =============================================================================
@@ -304,9 +341,10 @@ build logger_format_test.exe: CXX_EXECUTABLE_LINKER__logger_format_test_Debug CM
   OBJECT_DIR = CMakeFiles\logger_format_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\logger_format_test.dir\
   TARGET_FILE = logger_format_test.exe
   TARGET_IMPLIB = liblogger_format_test.dll.a
-  TARGET_PDB = logger_format_test.exe.dbg
+  TARGET_PDB = logger_format_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_codec_test
@@ -323,6 +361,8 @@ build CMakeFiles/interconnect_codec_test.dir/tests/interconnect/interconnect_cod
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_codec_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_codec_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_codec_test.dir\
+  TARGET_PDB = interconnect_codec_test.pdb
 
 
 # =============================================================================
@@ -338,9 +378,10 @@ build interconnect_codec_test.exe: CXX_EXECUTABLE_LINKER__interconnect_codec_tes
   OBJECT_DIR = CMakeFiles\interconnect_codec_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_codec_test.dir\
   TARGET_FILE = interconnect_codec_test.exe
   TARGET_IMPLIB = libinterconnect_codec_test.dll.a
-  TARGET_PDB = interconnect_codec_test.exe.dbg
+  TARGET_PDB = interconnect_codec_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_ttl_test
@@ -357,6 +398,8 @@ build CMakeFiles/interconnect_ttl_test.dir/tests/interconnect/interconnect_ttl_t
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_ttl_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_ttl_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_ttl_test.dir\
+  TARGET_PDB = interconnect_ttl_test.pdb
 
 
 # =============================================================================
@@ -372,9 +415,10 @@ build interconnect_ttl_test.exe: CXX_EXECUTABLE_LINKER__interconnect_ttl_test_De
   OBJECT_DIR = CMakeFiles\interconnect_ttl_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_ttl_test.dir\
   TARGET_FILE = interconnect_ttl_test.exe
   TARGET_IMPLIB = libinterconnect_ttl_test.dll.a
-  TARGET_PDB = interconnect_ttl_test.exe.dbg
+  TARGET_PDB = interconnect_ttl_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_router_exception_test
@@ -391,6 +435,8 @@ build CMakeFiles/interconnect_router_exception_test.dir/tests/interconnect/inter
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_router_exception_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_router_exception_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_router_exception_test.dir\
+  TARGET_PDB = interconnect_router_exception_test.pdb
 
 
 # =============================================================================
@@ -406,9 +452,10 @@ build interconnect_router_exception_test.exe: CXX_EXECUTABLE_LINKER__interconnec
   OBJECT_DIR = CMakeFiles\interconnect_router_exception_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_router_exception_test.dir\
   TARGET_FILE = interconnect_router_exception_test.exe
   TARGET_IMPLIB = libinterconnect_router_exception_test.dll.a
-  TARGET_PDB = interconnect_router_exception_test.exe.dbg
+  TARGET_PDB = interconnect_router_exception_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_backpressure_test
@@ -425,6 +472,8 @@ build CMakeFiles/interconnect_backpressure_test.dir/tests/interconnect/interconn
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_backpressure_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_backpressure_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_backpressure_test.dir\
+  TARGET_PDB = interconnect_backpressure_test.pdb
 
 
 # =============================================================================
@@ -440,9 +489,10 @@ build interconnect_backpressure_test.exe: CXX_EXECUTABLE_LINKER__interconnect_ba
   OBJECT_DIR = CMakeFiles\interconnect_backpressure_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_backpressure_test.dir\
   TARGET_FILE = interconnect_backpressure_test.exe
   TARGET_IMPLIB = libinterconnect_backpressure_test.dll.a
-  TARGET_PDB = interconnect_backpressure_test.exe.dbg
+  TARGET_PDB = interconnect_backpressure_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_metrics_delta_test
@@ -459,6 +509,8 @@ build CMakeFiles/interconnect_metrics_delta_test.dir/tests/interconnect/intercon
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_metrics_delta_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_metrics_delta_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_metrics_delta_test.dir\
+  TARGET_PDB = interconnect_metrics_delta_test.pdb
 
 
 # =============================================================================
@@ -474,9 +526,10 @@ build interconnect_metrics_delta_test.exe: CXX_EXECUTABLE_LINKER__interconnect_m
   OBJECT_DIR = CMakeFiles\interconnect_metrics_delta_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_metrics_delta_test.dir\
   TARGET_FILE = interconnect_metrics_delta_test.exe
   TARGET_IMPLIB = libinterconnect_metrics_delta_test.dll.a
-  TARGET_PDB = interconnect_metrics_delta_test.exe.dbg
+  TARGET_PDB = interconnect_metrics_delta_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_config_provider_test
@@ -493,6 +546,8 @@ build CMakeFiles/interconnect_config_provider_test.dir/tests/interconnect/interc
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_config_provider_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_config_provider_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_config_provider_test.dir\
+  TARGET_PDB = interconnect_config_provider_test.pdb
 
 
 # =============================================================================
@@ -508,9 +563,10 @@ build interconnect_config_provider_test.exe: CXX_EXECUTABLE_LINKER__interconnect
   OBJECT_DIR = CMakeFiles\interconnect_config_provider_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_config_provider_test.dir\
   TARGET_FILE = interconnect_config_provider_test.exe
   TARGET_IMPLIB = libinterconnect_config_provider_test.dll.a
-  TARGET_PDB = interconnect_config_provider_test.exe.dbg
+  TARGET_PDB = interconnect_config_provider_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_config_reload_test
@@ -527,6 +583,8 @@ build CMakeFiles/interconnect_config_reload_test.dir/tests/interconnect/intercon
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_config_reload_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_config_reload_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_config_reload_test.dir\
+  TARGET_PDB = interconnect_config_reload_test.pdb
 
 
 # =============================================================================
@@ -542,9 +600,10 @@ build interconnect_config_reload_test.exe: CXX_EXECUTABLE_LINKER__interconnect_c
   OBJECT_DIR = CMakeFiles\interconnect_config_reload_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_config_reload_test.dir\
   TARGET_FILE = interconnect_config_reload_test.exe
   TARGET_IMPLIB = libinterconnect_config_reload_test.dll.a
-  TARGET_PDB = interconnect_config_reload_test.exe.dbg
+  TARGET_PDB = interconnect_config_reload_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_policy_matrix_test
@@ -561,6 +620,8 @@ build CMakeFiles/interconnect_policy_matrix_test.dir/tests/interconnect/intercon
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_policy_matrix_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_policy_matrix_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_policy_matrix_test.dir\
+  TARGET_PDB = interconnect_policy_matrix_test.pdb
 
 
 # =============================================================================
@@ -576,9 +637,10 @@ build interconnect_policy_matrix_test.exe: CXX_EXECUTABLE_LINKER__interconnect_p
   OBJECT_DIR = CMakeFiles\interconnect_policy_matrix_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_policy_matrix_test.dir\
   TARGET_FILE = interconnect_policy_matrix_test.exe
   TARGET_IMPLIB = libinterconnect_policy_matrix_test.dll.a
-  TARGET_PDB = interconnect_policy_matrix_test.exe.dbg
+  TARGET_PDB = interconnect_policy_matrix_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_transport_consistency_test
@@ -595,6 +657,8 @@ build CMakeFiles/interconnect_transport_consistency_test.dir/tests/interconnect/
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_transport_consistency_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_transport_consistency_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_transport_consistency_test.dir\
+  TARGET_PDB = interconnect_transport_consistency_test.pdb
 
 
 # =============================================================================
@@ -610,9 +674,47 @@ build interconnect_transport_consistency_test.exe: CXX_EXECUTABLE_LINKER__interc
   OBJECT_DIR = CMakeFiles\interconnect_transport_consistency_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_transport_consistency_test.dir\
   TARGET_FILE = interconnect_transport_consistency_test.exe
   TARGET_IMPLIB = libinterconnect_transport_consistency_test.dll.a
-  TARGET_PDB = interconnect_transport_consistency_test.exe.dbg
+  TARGET_PDB = interconnect_transport_consistency_test.pdb
+
+# =============================================================================
+# Object build statements for EXECUTABLE target transport_orchestrator_test
+
+
+#############################################
+# Order-only phony target for transport_orchestrator_test
+
+build cmake_object_order_depends_target_transport_orchestrator_test: phony || cmake_object_order_depends_target_commonsvc_log cmake_object_order_depends_target_vr_base_framework cmake_object_order_depends_target_vr_error_code
+
+build CMakeFiles/transport_orchestrator_test.dir/tests/interconnect/transport_orchestrator_test.cpp.obj: CXX_COMPILER__transport_orchestrator_test_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/tests/interconnect/transport_orchestrator_test.cpp || cmake_object_order_depends_target_transport_orchestrator_test
+  DEP_FILE = CMakeFiles\transport_orchestrator_test.dir\tests\interconnect\transport_orchestrator_test.cpp.obj.d
+  FLAGS = -g -std=c++17 -Wall -Wextra -Wpedantic -Werror
+  INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
+  OBJECT_DIR = CMakeFiles\transport_orchestrator_test.dir
+  OBJECT_FILE_DIR = CMakeFiles\transport_orchestrator_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\transport_orchestrator_test.dir\
+  TARGET_PDB = transport_orchestrator_test.pdb
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target transport_orchestrator_test
+
+
+#############################################
+# Link the executable transport_orchestrator_test.exe
+
+build transport_orchestrator_test.exe: CXX_EXECUTABLE_LINKER__transport_orchestrator_test_Debug CMakeFiles/transport_orchestrator_test.dir/tests/interconnect/transport_orchestrator_test.cpp.obj | libvr_base_framework.a libcommonsvc_log.a libvr_error_code.a || libcommonsvc_log.a libvr_base_framework.a libvr_error_code.a
+  FLAGS = -g
+  LINK_LIBRARIES = libvr_base_framework.a  libcommonsvc_log.a  libvr_error_code.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  OBJECT_DIR = CMakeFiles\transport_orchestrator_test.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\transport_orchestrator_test.dir\
+  TARGET_FILE = transport_orchestrator_test.exe
+  TARGET_IMPLIB = libtransport_orchestrator_test.dll.a
+  TARGET_PDB = transport_orchestrator_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_fault_injection_test
@@ -629,6 +731,8 @@ build CMakeFiles/interconnect_fault_injection_test.dir/tests/interconnect/interc
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_fault_injection_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_fault_injection_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_fault_injection_test.dir\
+  TARGET_PDB = interconnect_fault_injection_test.pdb
 
 
 # =============================================================================
@@ -644,9 +748,10 @@ build interconnect_fault_injection_test.exe: CXX_EXECUTABLE_LINKER__interconnect
   OBJECT_DIR = CMakeFiles\interconnect_fault_injection_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_fault_injection_test.dir\
   TARGET_FILE = interconnect_fault_injection_test.exe
   TARGET_IMPLIB = libinterconnect_fault_injection_test.dll.a
-  TARGET_PDB = interconnect_fault_injection_test.exe.dbg
+  TARGET_PDB = interconnect_fault_injection_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_tcp_loopback_test
@@ -663,6 +768,8 @@ build CMakeFiles/interconnect_tcp_loopback_test.dir/tests/interconnect/interconn
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_tcp_loopback_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_tcp_loopback_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_tcp_loopback_test.dir\
+  TARGET_PDB = interconnect_tcp_loopback_test.pdb
 
 
 # =============================================================================
@@ -678,9 +785,10 @@ build interconnect_tcp_loopback_test.exe: CXX_EXECUTABLE_LINKER__interconnect_tc
   OBJECT_DIR = CMakeFiles\interconnect_tcp_loopback_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_tcp_loopback_test.dir\
   TARGET_FILE = interconnect_tcp_loopback_test.exe
   TARGET_IMPLIB = libinterconnect_tcp_loopback_test.dll.a
-  TARGET_PDB = interconnect_tcp_loopback_test.exe.dbg
+  TARGET_PDB = interconnect_tcp_loopback_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target interconnect_protocol_adapter_test
@@ -697,6 +805,8 @@ build CMakeFiles/interconnect_protocol_adapter_test.dir/tests/interconnect/inter
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\interconnect_protocol_adapter_test.dir
   OBJECT_FILE_DIR = CMakeFiles\interconnect_protocol_adapter_test.dir\tests\interconnect
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_protocol_adapter_test.dir\
+  TARGET_PDB = interconnect_protocol_adapter_test.pdb
 
 
 # =============================================================================
@@ -712,9 +822,10 @@ build interconnect_protocol_adapter_test.exe: CXX_EXECUTABLE_LINKER__interconnec
   OBJECT_DIR = CMakeFiles\interconnect_protocol_adapter_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\interconnect_protocol_adapter_test.dir\
   TARGET_FILE = interconnect_protocol_adapter_test.exe
   TARGET_IMPLIB = libinterconnect_protocol_adapter_test.dll.a
-  TARGET_PDB = interconnect_protocol_adapter_test.exe.dbg
+  TARGET_PDB = interconnect_protocol_adapter_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target rtos_adapter_stub_test
@@ -731,6 +842,8 @@ build CMakeFiles/rtos_adapter_stub_test.dir/tests/platform/rtos_adapter_stub_tes
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\rtos_adapter_stub_test.dir
   OBJECT_FILE_DIR = CMakeFiles\rtos_adapter_stub_test.dir\tests\platform
+  TARGET_COMPILE_PDB = CMakeFiles\rtos_adapter_stub_test.dir\
+  TARGET_PDB = rtos_adapter_stub_test.pdb
 
 
 # =============================================================================
@@ -746,9 +859,10 @@ build rtos_adapter_stub_test.exe: CXX_EXECUTABLE_LINKER__rtos_adapter_stub_test_
   OBJECT_DIR = CMakeFiles\rtos_adapter_stub_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\rtos_adapter_stub_test.dir\
   TARGET_FILE = rtos_adapter_stub_test.exe
   TARGET_IMPLIB = librtos_adapter_stub_test.dll.a
-  TARGET_PDB = rtos_adapter_stub_test.exe.dbg
+  TARGET_PDB = rtos_adapter_stub_test.pdb
 
 # =============================================================================
 # Object build statements for EXECUTABLE target ros2_adapter_stub_test
@@ -765,6 +879,8 @@ build CMakeFiles/ros2_adapter_stub_test.dir/tests/platform/ros2_adapter_stub_tes
   INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
   OBJECT_DIR = CMakeFiles\ros2_adapter_stub_test.dir
   OBJECT_FILE_DIR = CMakeFiles\ros2_adapter_stub_test.dir\tests\platform
+  TARGET_COMPILE_PDB = CMakeFiles\ros2_adapter_stub_test.dir\
+  TARGET_PDB = ros2_adapter_stub_test.pdb
 
 
 # =============================================================================
@@ -780,9 +896,47 @@ build ros2_adapter_stub_test.exe: CXX_EXECUTABLE_LINKER__ros2_adapter_stub_test_
   OBJECT_DIR = CMakeFiles\ros2_adapter_stub_test.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\ros2_adapter_stub_test.dir\
   TARGET_FILE = ros2_adapter_stub_test.exe
   TARGET_IMPLIB = libros2_adapter_stub_test.dll.a
-  TARGET_PDB = ros2_adapter_stub_test.exe.dbg
+  TARGET_PDB = ros2_adapter_stub_test.pdb
+
+# =============================================================================
+# Object build statements for EXECUTABLE target f429_bridge_diag_adapter_test
+
+
+#############################################
+# Order-only phony target for f429_bridge_diag_adapter_test
+
+build cmake_object_order_depends_target_f429_bridge_diag_adapter_test: phony || cmake_object_order_depends_target_commonsvc_log cmake_object_order_depends_target_vr_base_framework cmake_object_order_depends_target_vr_error_code
+
+build CMakeFiles/f429_bridge_diag_adapter_test.dir/tests/platform/f429_bridge_diag_adapter_test.cpp.obj: CXX_COMPILER__f429_bridge_diag_adapter_test_unscanned_Debug E$:/Github$ Project/Virtual-Vehicle-OS/tests/platform/f429_bridge_diag_adapter_test.cpp || cmake_object_order_depends_target_f429_bridge_diag_adapter_test
+  DEP_FILE = CMakeFiles\f429_bridge_diag_adapter_test.dir\tests\platform\f429_bridge_diag_adapter_test.cpp.obj.d
+  FLAGS = -g -std=c++17 -Wall -Wextra -Wpedantic -Werror
+  INCLUDES = -I"E:/Github Project/Virtual-Vehicle-OS/src"
+  OBJECT_DIR = CMakeFiles\f429_bridge_diag_adapter_test.dir
+  OBJECT_FILE_DIR = CMakeFiles\f429_bridge_diag_adapter_test.dir\tests\platform
+  TARGET_COMPILE_PDB = CMakeFiles\f429_bridge_diag_adapter_test.dir\
+  TARGET_PDB = f429_bridge_diag_adapter_test.pdb
+
+
+# =============================================================================
+# Link build statements for EXECUTABLE target f429_bridge_diag_adapter_test
+
+
+#############################################
+# Link the executable f429_bridge_diag_adapter_test.exe
+
+build f429_bridge_diag_adapter_test.exe: CXX_EXECUTABLE_LINKER__f429_bridge_diag_adapter_test_Debug CMakeFiles/f429_bridge_diag_adapter_test.dir/tests/platform/f429_bridge_diag_adapter_test.cpp.obj | libvr_base_framework.a libcommonsvc_log.a libvr_error_code.a || libcommonsvc_log.a libvr_base_framework.a libvr_error_code.a
+  FLAGS = -g
+  LINK_LIBRARIES = libvr_base_framework.a  libcommonsvc_log.a  libvr_error_code.a  -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
+  OBJECT_DIR = CMakeFiles\f429_bridge_diag_adapter_test.dir
+  POST_BUILD = cd .
+  PRE_LINK = cd .
+  TARGET_COMPILE_PDB = CMakeFiles\f429_bridge_diag_adapter_test.dir\
+  TARGET_FILE = f429_bridge_diag_adapter_test.exe
+  TARGET_IMPLIB = libf429_bridge_diag_adapter_test.dll.a
+  TARGET_PDB = f429_bridge_diag_adapter_test.pdb
 
 
 #############################################
@@ -825,6 +979,8 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 
 build commonsvc_log: phony libcommonsvc_log.a
 
+build f429_bridge_diag_adapter_test: phony f429_bridge_diag_adapter_test.exe
+
 build interconnect_backpressure_test: phony interconnect_backpressure_test.exe
 
 build interconnect_codec_test: phony interconnect_codec_test.exe
@@ -859,6 +1015,8 @@ build rtos_adapter_stub_test: phony rtos_adapter_stub_test.exe
 
 build thread_pool_test: phony thread_pool_test.exe
 
+build transport_orchestrator_test: phony transport_orchestrator_test.exe
+
 build vr_base_framework: phony libvr_base_framework.a
 
 build vr_error_code: phony libvr_error_code.a
@@ -871,7 +1029,7 @@ build vr_error_code: phony libvr_error_code.a
 #############################################
 # Folder: E:/Github Project/Virtual-Vehicle-OS/build
 
-build all: phony libvr_error_code.a libcommonsvc_log.a libvr_base_framework.a thread_pool_test.exe retry_policy_test.exe logger_format_test.exe interconnect_codec_test.exe interconnect_ttl_test.exe interconnect_router_exception_test.exe interconnect_backpressure_test.exe interconnect_metrics_delta_test.exe interconnect_config_provider_test.exe interconnect_config_reload_test.exe interconnect_policy_matrix_test.exe interconnect_transport_consistency_test.exe interconnect_fault_injection_test.exe interconnect_tcp_loopback_test.exe interconnect_protocol_adapter_test.exe rtos_adapter_stub_test.exe ros2_adapter_stub_test.exe
+build all: phony libvr_error_code.a libcommonsvc_log.a libvr_base_framework.a thread_pool_test.exe retry_policy_test.exe logger_format_test.exe interconnect_codec_test.exe interconnect_ttl_test.exe interconnect_router_exception_test.exe interconnect_backpressure_test.exe interconnect_metrics_delta_test.exe interconnect_config_provider_test.exe interconnect_config_reload_test.exe interconnect_policy_matrix_test.exe interconnect_transport_consistency_test.exe transport_orchestrator_test.exe interconnect_fault_injection_test.exe interconnect_tcp_loopback_test.exe interconnect_protocol_adapter_test.exe rtos_adapter_stub_test.exe ros2_adapter_stub_test.exe f429_bridge_diag_adapter_test.exe
 
 # =============================================================================
 # Built-in targets
@@ -880,14 +1038,14 @@ build all: phony libvr_error_code.a libcommonsvc_log.a libvr_base_framework.a th
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/3.29.0/CMakeCXXCompiler.cmake CMakeFiles/3.29.0/CMakeRCCompiler.cmake CMakeFiles/3.29.0/CMakeSystem.cmake E$:/Github$ Project/Virtual-Vehicle-OS/CMakeLists.txt
+build build.ninja: RERUN_CMAKE | C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCCompiler.cmake.in C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCCompilerABI.c C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCompilerIdDetection.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCompileFeatures.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeFindBinUtils.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeParseImplicitIncludeInfo.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeParseImplicitLinkInfo.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeParseLibraryArchitecture.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeTestCCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeTestCompilerCommon.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/ADSP-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/ARMCC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/ARMClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/AppleClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Borland-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Bruce-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Clang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Clang-DetermineCompilerInternal.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Compaq-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Cray-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/CrayClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Embarcadero-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Fujitsu-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GHS-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-FindBinUtils.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/HP-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/IAR-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/IBMClang-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Intel-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/LCC-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/MSVC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/NVHPC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/NVIDIA-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/OrangeC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/PGI-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/PathScale-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/SCO-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/SDCC-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/SunPro-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/TI-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/TIClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Tasking-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Watcom-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/XL-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/XLClang-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/zOS-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Internal/CMakeDetermineLinkerId.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Internal/FeatureTesting.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/3.29.0/CMakeCCompiler.cmake CMakeFiles/3.29.0/CMakeCXXCompiler.cmake CMakeFiles/3.29.0/CMakeRCCompiler.cmake CMakeFiles/3.29.0/CMakeSystem.cmake E$:/Github$ Project/Virtual-Vehicle-OS/CMakeLists.txt
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/3.29.0/CMakeCXXCompiler.cmake CMakeFiles/3.29.0/CMakeRCCompiler.cmake CMakeFiles/3.29.0/CMakeSystem.cmake E$:/Github$ Project/Virtual-Vehicle-OS/CMakeLists.txt: phony
+build C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCCompiler.cmake.in C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCCompilerABI.c C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeCompilerIdDetection.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCompileFeatures.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCompilerABI.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeDetermineCompilerId.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeFindBinUtils.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeParseImplicitIncludeInfo.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeParseImplicitLinkInfo.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeParseLibraryArchitecture.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeRCInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeTestCCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/CMakeTestCompilerCommon.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/ADSP-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/ARMCC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/ARMClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/AppleClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Borland-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Bruce-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Clang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Clang-DetermineCompilerInternal.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Compaq-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Cray-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/CrayClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Embarcadero-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Fujitsu-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/FujitsuClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GHS-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU-FindBinUtils.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/GNU.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/HP-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/IAR-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/IBMCPP-C-DetermineVersionInternal.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/IBMClang-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Intel-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/IntelLLVM-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/LCC-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/MSVC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/NVHPC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/NVIDIA-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/OpenWatcom-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/OrangeC-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/PGI-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/PathScale-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/SCO-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/SDCC-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/SunPro-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/TI-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/TIClang-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Tasking-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/TinyCC-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/VisualAge-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/Watcom-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/XL-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/XLClang-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Compiler/zOS-C-DetermineCompiler.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Internal/CMakeDetermineLinkerId.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Internal/FeatureTesting.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-C-ABI.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-C.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX-ABI.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU-CXX.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-GNU.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-Initialize.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows-windres.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/Windows.cmake C$:/Program$ Files/CMake/share/cmake-3.29/Modules/Platform/WindowsPaths.cmake CMakeCache.txt CMakeFiles/3.29.0/CMakeCCompiler.cmake CMakeFiles/3.29.0/CMakeCXXCompiler.cmake CMakeFiles/3.29.0/CMakeRCCompiler.cmake CMakeFiles/3.29.0/CMakeSystem.cmake E$:/Github$ Project/Virtual-Vehicle-OS/CMakeLists.txt: phony
 
 
 #############################################
