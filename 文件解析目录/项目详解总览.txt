@@ -919,6 +919,153 @@ v1.0 准入建议版本（基于 v0.9）
   - 阶段1：v1.0.0-rc1 小流量灰度（保留协议/配置回退开关）；
   - 阶段2：v1.0.0 正式版（完成平台定版与阈值校准后）。
 
+八、v1.0 稳健规划（求稳不求快）
+导航摘要：v1.0 以“车载-机器人互通生产可用”为目标，优先保障安全、确定性、可回退、可审计；所有扩展能力必须遵循“先小场景闭环，再跨场景放量”。
+
+8.1 v1.0 目标边界（冻结范围）
+- 功能冻结：不新增高复杂业务特性，聚焦已落地能力的生产化定版。
+- 接口冻结：InterconnectBridge 对外接口冻结，新增能力通过配置与平台适配层扩展。
+- 风险冻结：任何会破坏 legacy/compact 回退路径的改动，默认拒绝进入 v1.0。
+
+8.2 F429（车载/机器人互通）实战场景分层规划
+A. 车载 -> 机器人（感知与状态上报）
+- 场景 S1：车速/档位/转向灯状态上报（1~10Hz，低丢包容忍）
+- 场景 S2：底盘故障码/健康事件上报（事件触发，要求可追溯）
+- 场景 S3：定位与姿态简报（10~20Hz，时延敏感）
+- 关键约束：优先 compact 协议稳态运行，PB/CB 仅灰度 topic 放量。
+
+B. 机器人 -> 车载（执行与反馈）
+- 场景 S4：任务状态回传（开始/暂停/完成/失败）
+- 场景 S5：安全联动请求（急停/降级/手动接管提示）
+- 场景 S6：路径执行反馈（里程碑点位/偏差告警）
+- 关键约束：控制类消息必须启用幂等与去重窗口；失败优先回退再重试。
+
+C. 双向协同（车-机闭环）
+- 场景 S7：装卸作业握手（请求-确认-完成）
+- 场景 S8：异常协同（一侧故障触发另一侧安全策略）
+- 场景 S9：离线恢复（断链重连后状态一致性修复）
+- 关键约束：必须有 trace_id 全链路关联与审计快照。
+
+8.3 F429 平台定版任务（必须完成）
+1) 时钟与串口定版
+- 固化 HSE=8MHz -> PLL 168MHz 参数，验证 UART 115200 在温漂/供电波动下稳定。
+- 验收：连续 24h 日志无乱码、无异常复位。
+
+2) FMC SRAM 时序定版
+- 按具体 SRAM 器件与板级走线校准 BCR/BTR 参数，输出参数对照表。
+- 验收：上电自检 + 深度读写回环（多 pattern）连续通过。
+
+3) 启动与诊断闭环定版
+- 固化 FMC_SRAM_BringupSelfTest 结果桥接到统一诊断事件，纳入 release 工单证据。
+- 验收：失败可在 5 分钟内定位到“平台/协议/路由”责任域。
+
+4) 门禁与交付定版
+- F429 相关测试（含 f429_bridge_diag_adapter_test）保持 required 级别。
+- 验收：quality/release gate 连续 3 次通过且无人工豁免。
+
+8.4 v1.0 分阶段里程碑（稳态推进）
+- M1（v1.0.0-rc1-pre）：F429 参数定版 + 场景 S1/S4/S7 闭环。
+- M2（v1.0.0-rc1）：扩展到 S2/S5/S8，完成预发灰度与回退演练。
+- M3（v1.0.0）：扩展到 S3/S6/S9，完成正式发布评审与证据归档。
+
+8.5 风险护栏（v1.0）
+- 安全红线：控制链路异常时，必须优先触发回退/降级，不允许静默失败。
+- 性能红线：关键场景 p99 超阈值或错误率上升，立即阻断放量。
+- 平台红线：F429 未完成实板参数定版，不得宣称“插板即用生产可用”。
+- 变更红线：任何跨协议/跨平台改动必须附带回退路径与审计证据。
+
+8.6 v1.0 发布建议版本（最终）
+- 建议：先发布 v1.0.0-rc1（限定场景灰度），再发布 v1.0.0（全场景正式）。
+- 升级到 v1.0.0 的前置条件：
+  1) F429 参数定版报告已归档；
+  2) 场景 S1~S9 验收记录齐全；
+  3) quality/release gate 连续通过并可追溯到工单。
+
+8.7 场景 S1~S9 文件级实施任务 + 验收用例清单
+
+S1 车速/档位/转向灯状态上报（车载 -> 机器人）
+- 文件级实施任务：
+  - src/interconnect/interconnect_bridge.cpp：新增 vehicle_status 主题映射与默认优先级。
+  - src/interconnect/message_envelope.hpp：补充 vehicle_status 扩展字段（gear/speed/turn_signal）或 payload 约定注释。
+  - docs/platform_integration_v08.md：补充 F429 发送端字段约定与采样频率建议（1~10Hz）。
+- 验收测试（至少 1 条）：
+  - tests/interconnect/interconnect_transport_consistency_test.cpp：TestVehicleStatusPublishHz
+
+S2 底盘故障码/健康事件上报（车载 -> 机器人）
+- 文件级实施任务：
+  - src/interconnect/diagnostics_manager.cpp：扩展 chassis_fault 事件字段规范（fault_code/severity/module）。
+  - src/interconnect/system_metrics_aggregator.hpp：新增 chassis_fault_total 指标导出。
+  - tools/release_gate_v09.ps1：将 chassis_fault 事件缺失纳入工单告警项。
+- 验收测试：
+  - tests/interconnect/interconnect_fault_injection_test.cpp：TestChassisFaultEventSnapshot
+
+S3 定位与姿态简报（车载 -> 机器人，10~20Hz）
+- 文件级实施任务：
+  - src/interconnect/message_codec.cpp：增加 pose_brief 的轻量编码分支（兼容 compact）。
+  - src/interconnect/interconnect_bridge.cpp：针对 pose 主题设置低延迟策略模板。
+  - tools/run_quality_gate.ps1：新增 pose 场景 p99 子阈值（可选开关）。
+- 验收测试：
+  - tests/interconnect/interconnect_metrics_delta_test.cpp：TestPoseBriefP99Budget
+
+S4 任务状态回传（机器人 -> 车载）
+- 文件级实施任务：
+  - src/interconnect/message_router.cpp：补充 task_state 主题路由与状态机回调入口。
+  - src/interconnect/interconnect_bridge.cpp：补充任务状态消息审计摘要。
+  - docs/platform_integration_v08.md：补充 task_state 状态枚举（start/pause/done/fail）。
+- 验收测试：
+  - tests/interconnect/interconnect_router_exception_test.cpp：TestTaskStateRouteAndAudit
+
+S5 安全联动请求（机器人 -> 车载）
+- 文件级实施任务：
+  - src/interconnect/bridge_policy.hpp：新增 safety_control 策略模板（高优先级 + 幂等开启）。
+  - src/interconnect/interconnect_bridge.cpp：对 safety_control 默认开启 idempotency。
+  - src/interconnect/policy_manager.cpp：支持 safety_control 策略冲突优先级。
+- 验收测试：
+  - tests/interconnect/interconnect_fault_injection_test.cpp：TestSafetyControlIdempotency
+
+S6 路径执行反馈（机器人 -> 车载）
+- 文件级实施任务：
+  - src/interconnect/message_envelope.hpp：补充 path_progress 字段约定（waypoint/progress/deviation）。
+  - src/interconnect/system_metrics_aggregator.hpp：新增 path_feedback_total。
+  - src/interconnect/interconnect_bridge.cpp：路径偏差告警审计事件。
+- 验收测试：
+  - tests/interconnect/interconnect_transport_consistency_test.cpp：TestPathFeedbackDeviationAudit
+
+S7 装卸作业握手（双向）
+- 文件级实施任务：
+  - src/interconnect/interconnect_bridge.cpp：新增 handshake 请求-确认-完成模板流程。
+  - src/interconnect/diagnostics_manager.cpp：握手链路 trace 统一字段（handshake_id/stage）。
+  - tools/release_gate_v09.ps1：握手失败率超过阈值生成专用工单动作。
+- 验收测试：
+  - tests/interconnect/interconnect_config_reload_test.cpp：TestHandshakeThreeStageFlow
+
+S8 异常协同（双向）
+- 文件级实施任务：
+  - src/interconnect/interconnect_bridge.cpp：异常协同事件触发降级/回退动作。
+  - src/interconnect/transport_orchestrator.cpp：异常期间切换策略（保守权重 + 熔断保护）。
+  - src/interconnect/bridge_metrics.hpp：新增协同异常计数。
+- 验收测试：
+  - tests/interconnect/interconnect_fault_injection_test.cpp：TestCoordinatedFaultDegrade
+
+S9 离线恢复（双向）
+- 文件级实施任务：
+  - src/interconnect/interconnect_bridge.cpp：重连后状态修复逻辑（最近状态快照重放）。
+  - src/interconnect/diagnostics_manager.cpp：离线恢复审计事件（reconnect/replay_count/result）。
+  - tools/run_quality_gate.ps1：离线恢复场景检查项与阻断理由。
+- 验收测试：
+  - tests/interconnect/interconnect_transport_consistency_test.cpp：TestReconnectStateReplay
+
+8.8 直接进入 v1.0 M1 执行模式（当前迭代）
+- 迭代范围（I1）：S1 + S4 + S7（优先闭环“状态上报 + 任务回传 + 握手流程”）。
+- 执行顺序：
+  1) 先落 S1（车载状态上报）并打通基础吞吐与审计；
+  2) 再落 S4（任务状态回传）并打通路由与审计；
+  3) 最后落 S7（三阶段握手）并纳入 release 工单门禁。
+- I1 完成判定：
+  - 对应 3 条测试全部通过；
+  - quality gate 与 release_gate_v09 连续 2 次通过；
+  - 文档与总览证据点同步完成。
+
 七、项目价值总结
 
 本项目已形成“车载-机器人互通”中间层的核心骨架，具备以下特征：
