@@ -30,6 +30,17 @@ public:
         return vr::core::ErrorCode::kTimeout;
     }
     vr::core::ErrorCode DiscardOldest() noexcept override { return vr::core::ErrorCode::kOk; }
+    // ITransport 要求实现 Name()/Caps()。
+    const char* Name() const noexcept override { return "test.noop"; }
+
+    vr::interconnect::TransportCapabilities Caps() const noexcept override {
+        vr::interconnect::TransportCapabilities caps;
+        caps.supports_priority = false;
+        caps.supports_discard_oldest = false;
+        caps.supports_unlink = false;
+        return caps;
+    }
+
     void Close() noexcept override {}
     void Unlink() noexcept override {}
 };

@@ -86,8 +86,10 @@ bool TestSnapshotAndDelta() {
            ExpectTrue(d2.thread_pool_exception_delta == 0U,
                       "second delta exception should be zero") &&
            ExpectTrue(has_lint, "json should include policy lint counts") &&
+           ExpectTrue(has_trace_index_json, "json should include trace index counters") &&
            ExpectTrue(has_reload, "json should include reload status") &&
            ExpectTrue(has_lite_lint, "lightweight json should include lint counts") &&
+           ExpectTrue(has_trace_index_lite, "lightweight json should include trace index counters") &&
            ExpectTrue(has_lite_code, "lightweight json should include reload status") &&
            ExpectTrue(has_prom, "prometheus should include lint and reload status");
 }

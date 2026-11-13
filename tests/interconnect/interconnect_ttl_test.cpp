@@ -62,6 +62,17 @@ public:
         return vr::core::ErrorCode::kOk;
     }
 
+    // ITransport 要求实现 Name()/Caps()。
+    const char* Name() const noexcept override { return "test.in-memory"; }
+
+    vr::interconnect::TransportCapabilities Caps() const noexcept override {
+        vr::interconnect::TransportCapabilities caps;
+        caps.supports_priority = true;
+        caps.supports_discard_oldest = true;
+        caps.supports_unlink = false;
+        return caps;
+    }
+
     void Close() noexcept override {}
     void Unlink() noexcept override {}
 
@@ -122,11 +133,18 @@ bool TestExpiredMessageDropped() {
     (void)bridge.PublishFromVehicle(msg);
 
     std::this_thread::sleep_for(std::chrono::milliseconds(50));
-    const auto metrics = bridge.GetBridgeMetrics();
+    // 必须用强刷版本读数（BL-02）：
+    //   GetBridgeMetrics() 返回 metrics_aggregator_ 的**缓存快照**，刷新间隔
+    //   100ms（kMetricsRefreshIntervalMs），而这里只等了 50ms ⇒ 读到旧值 0，
+    //   断言会误报失败（丢弃其实已经发生了）。
+    //   CaptureMetricsSnapshot() 会先 RefreshAggregatedMetrics(true) 再取快照，
+    //   才是"动作之后立刻观察"应该用的 API。断言语义未变。
+    const auto snapshot = bridge.CaptureMetricsSnapshot();
     bridge.Stop();
 
     return ExpectTrue(routed_count == 0U, "expired message should not be routed") &&
-           ExpectTrue(metrics.expired_drop_count >= 1U, "expired_drop_count should increase");
+           ExpectTrue(snapshot.bridge_metrics.expired_drop_count >= 1U,
+                      "expired_drop_count should increase");
 }
 
 }  // namespace

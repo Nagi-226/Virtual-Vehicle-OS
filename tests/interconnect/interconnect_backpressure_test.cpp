@@ -42,6 +42,18 @@ public:
         return vr::core::ErrorCode::kOk;
     }
 
+    // ITransport 要求实现 Name()/Caps()：discard_oldest 必须报 true，
+    // 否则桥不会走 DiscardOldest() 分支，drop-oldest 用例就测不到东西。
+    const char* Name() const noexcept override { return "test.backpressure"; }
+
+    vr::interconnect::TransportCapabilities Caps() const noexcept override {
+        vr::interconnect::TransportCapabilities caps;
+        caps.supports_priority = true;
+        caps.supports_discard_oldest = true;
+        caps.supports_unlink = false;
+        return caps;
+    }
+
     void Close() noexcept override {}
     void Unlink() noexcept override {}
 
@@ -92,13 +104,20 @@ bool TestDropOldestBackpressure() {
     msg.timestamp_ms = 1U;
 
     const auto ec = bridge.PublishFromVehicle(msg);
-    const auto metrics = bridge.GetBridgeMetrics();
+    // 必须用强刷版本读数（BL-02）：
+    //   GetBridgeMetrics() 返回缓存快照，刷新间隔 100ms（kMetricsRefreshIntervalMs）；
+    //   本用例在 Start() 触发的首次刷新之后立刻发布并读，落在同一 100ms 窗口内，
+    //   backpressure_drop_count 会读到旧值 0 —— 断言误报失败（丢弃其实已经发生）。
+    //   CaptureMetricsSnapshot() 先 RefreshAggregatedMetrics(true) 再取快照，
+    //   才是"动作之后立刻观察"应该用的 API。断言语义未变。
+    const auto snapshot = bridge.CaptureMetricsSnapshot();
     bridge.Stop();
 
     return ExpectTrue(ec == vr::core::ErrorCode::kOk, "publish should recover after drop-oldest") &&
            ExpectTrue(tx_raw->discard_calls() >= 1U, "discard oldest should be called") &&
            ExpectTrue(tx_raw->send_calls() >= 2U, "send should retry") &&
-           ExpectTrue(metrics.backpressure_drop_count >= 1U, "backpressure metric should increase");
+           ExpectTrue(snapshot.bridge_metrics.backpressure_drop_count >= 1U,
+                      "backpressure metric should increase");
 }
 
 }  // namespace

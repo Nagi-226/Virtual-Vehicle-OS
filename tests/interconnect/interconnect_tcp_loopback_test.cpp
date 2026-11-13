@@ -11,7 +11,11 @@
 #ifdef _WIN32
 #include <winsock2.h>
 #include <ws2tcpip.h>
+// MSVC 专有链接指令；GCC/Clang(MinGW) 会因 -Wunknown-pragmas 在 -Werror 下编失败。
+// MinGW 的 ws2_32 由 CMakeLists.txt 的 WIN32 分支显式链接。
+#if defined(_MSC_VER)
 #pragma comment(lib, "Ws2_32.lib")
+#endif
 #else
 #include <arpa/inet.h>
 #include <sys/socket.h>

@@ -57,6 +57,17 @@ public:
         return vr::core::ErrorCode::kOk;
     }
 
+    // ITransport 要求实现 Name()/Caps()。
+    const char* Name() const noexcept override { return "test.fault-inject"; }
+
+    vr::interconnect::TransportCapabilities Caps() const noexcept override {
+        vr::interconnect::TransportCapabilities caps;
+        caps.supports_priority = true;
+        caps.supports_discard_oldest = true;
+        caps.supports_unlink = false;
+        return caps;
+    }
+
     void Close() noexcept override {}
     void Unlink() noexcept override {}
 

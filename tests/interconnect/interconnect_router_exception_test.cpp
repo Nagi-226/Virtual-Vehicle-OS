@@ -28,8 +28,12 @@ bool TestRouterExceptionIsolation() {
     vr::interconnect::MessageEnvelope envelope;
     envelope.topic = "topic.throw";
 
-    const bool route_ok = router.Route(envelope);
-    return ExpectTrue(!route_ok, "router should return false when handler throws");
+    // Route() 返回 RouteResult（kOk=0/kNoHandler/kHandlerError）。
+    // 原写法把枚举直接赋给 bool，"处理函数抛异常时不应返回成功"这条断言的
+    // 语义保持不变：RouteResult 非 kOk 即为失败。
+    const vr::interconnect::RouteResult route_result = router.Route(envelope);
+    return ExpectTrue(route_result != vr::interconnect::RouteResult::kOk,
+                      "router should return false when handler throws");
 }
 
 }  // namespace
