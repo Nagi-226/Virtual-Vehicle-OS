@@ -5,12 +5,11 @@
 #include <string>
 
 #include "core/error_code.hpp"
+#include "interconnect/bridge_config.hpp"
 #include "interconnect/message_envelope.hpp"
 
 namespace vr {
 namespace interconnect {
-
-enum class MessageProtocolMode : std::uint8_t;
 
 vr::core::ErrorCode EncodeByProtocol(MessageProtocolMode mode,
                                      const MessageEnvelope& envelope,

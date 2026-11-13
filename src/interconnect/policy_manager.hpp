@@ -1,8 +1,11 @@
 #ifndef VR_INTERCONNECT_POLICY_MANAGER_HPP
 #define VR_INTERCONNECT_POLICY_MANAGER_HPP
 
+#include <cstddef>
+#include <cstdint>
 #include <string>
 
+#include "interconnect/bridge_config.hpp"
 #include "interconnect/bridge_policy.hpp"
 #include "interconnect/message_envelope.hpp"
 

@@ -53,6 +53,9 @@ public:
         emit_counter("vv_bridge_invalid_envelope_total", bridge_metrics_.invalid_envelope_count, default_labels);
         emit_counter("vv_bridge_transport_error_total", bridge_metrics_.transport_error_count, default_labels);
         emit_counter("vv_bridge_backpressure_drop_total", bridge_metrics_.backpressure_drop_count, default_labels);
+        emit_counter("vv_bridge_idempotency_drop_total", bridge_metrics_.idempotency_drop_count, default_labels);
+        emit_counter("vv_bridge_diagnostic_snapshot_write_total",
+                     bridge_metrics_.diagnostic_snapshot_write_count, default_labels);
 
         auto emit_by_topic = [&oss, ts](const std::string& name,
                                         const std::unordered_map<std::string, std::uint64_t>& bucket,
@@ -194,6 +197,8 @@ public:
         oss << "\"invalid_envelope\":" << bridge_metrics_.invalid_envelope_count << ",";
         oss << "\"transport_error\":" << bridge_metrics_.transport_error_count << ",";
         oss << "\"backpressure_drop\":" << bridge_metrics_.backpressure_drop_count << ",";
+        oss << "\"idempotency_drop\":" << bridge_metrics_.idempotency_drop_count << ",";
+        oss << "\"diagnostic_snapshot_write\":" << bridge_metrics_.diagnostic_snapshot_write_count << ",";
         oss << "\"policy_hit\":" << bridge_metrics_.policy_hit_count << ",";
         oss << "\"policy_override\":" << bridge_metrics_.policy_override_count << ",";
         oss << "\"policy_conflict\":" << bridge_metrics_.policy_conflict_count << ",";
@@ -333,6 +338,11 @@ public:
             bridge_metrics_.transport_error_count - last_export_bridge_.transport_error_count;
         delta.bridge_metrics_delta.backpressure_drop_count =
             bridge_metrics_.backpressure_drop_count - last_export_bridge_.backpressure_drop_count;
+        delta.bridge_metrics_delta.idempotency_drop_count =
+            bridge_metrics_.idempotency_drop_count - last_export_bridge_.idempotency_drop_count;
+        delta.bridge_metrics_delta.diagnostic_snapshot_write_count =
+            bridge_metrics_.diagnostic_snapshot_write_count -
+            last_export_bridge_.diagnostic_snapshot_write_count;
         delta.bridge_metrics_delta.policy_hit_count =
             bridge_metrics_.policy_hit_count - last_export_bridge_.policy_hit_count;
         delta.bridge_metrics_delta.policy_override_count =

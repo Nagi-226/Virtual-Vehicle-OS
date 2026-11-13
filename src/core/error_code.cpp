@@ -22,6 +22,8 @@ const char* ToString(const ErrorCode code) noexcept {
             return "TIMEOUT";
         case ErrorCode::kWouldBlock:
             return "WOULD_BLOCK";
+        case ErrorCode::kExpired:
+            return "EXPIRED";
         case ErrorCode::kThreadStartFailed:
             return "THREAD_START_FAILED";
         case ErrorCode::kThreadPrioritySetFailed:

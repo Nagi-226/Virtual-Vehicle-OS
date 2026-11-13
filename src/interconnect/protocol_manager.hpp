@@ -4,7 +4,7 @@
 #include <string>
 
 #include "core/error_code.hpp"
-#include "interconnect/interconnect_bridge.hpp"
+#include "interconnect/bridge_config.hpp"
 #include "interconnect/message_envelope.hpp"
 
 namespace vr {

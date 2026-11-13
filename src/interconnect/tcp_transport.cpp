@@ -9,7 +9,13 @@
 #include <cstring>
 #include <mutex>
 
+// MSVC 专有的链接器指令：仅 MSVC 识别。GCC/Clang（含 MinGW，它同样定义 _WIN32）
+// 会报 -Wunknown-pragmas，在 -Werror 下升级为编译错误（诊断见 A1.8）。
+// 可移植的等价做法是在 CMakeLists.txt 的 WIN32 分支里显式
+// target_link_libraries(... ws2_32)，见 CMakeLists.txt 中 vr_base_framework 的链接段。
+#if defined(_MSC_VER)
 #pragma comment(lib, "Ws2_32.lib")
+#endif
 
 namespace vr {
 namespace interconnect {

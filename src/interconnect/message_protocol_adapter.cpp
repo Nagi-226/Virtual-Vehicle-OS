@@ -1,10 +1,10 @@
 #include "interconnect/message_protocol_adapter.hpp"
 
+#include <algorithm>
 #include <cctype>
 #include <cstring>
 #include <string>
 
-#include "interconnect/interconnect_bridge.hpp"
 #include "interconnect/message_codec.hpp"
 
 namespace vr {
@@ -148,7 +148,9 @@ std::uint32_t ProtocolWireVersion(const MessageProtocolMode mode) noexcept {
 }
 
 // 按协议模式编码：统一出口，便于未来替换为真实 protobuf/cbor 库实现。
-// 当前 protobuf/cbor 走最小可用 wire（PB|/CB|）路径，同时保留头部声明与版本字段。
+// 注意：当前 kProtobufReserved / kCborReserved 分支并不是 protobuf / CBOR 编码，
+// 而是 "compact 文本帧 + PBV2;/CBV2; 长度前缀"。对端只能按同样的假实现解码，
+// 不能与任何真实的 protobuf / CBOR 库互通。能力位见 SelfCheckProtocolCapability()。
 vr::core::ErrorCode EncodeByProtocol(const MessageProtocolMode mode,
                                      const MessageEnvelope& envelope,
                                      std::string* out) noexcept {
@@ -246,7 +248,29 @@ vr::core::ErrorCode DecodeByProtocol(const MessageProtocolMode mode,
     return ec;
 }
 
+// 协议能力自检：只有**真实实现**过 wire 编解码的模式才会通过。
+//
+// 为什么 kProtobufReserved / kCborReserved 必须返回 false：
+//   EncodeByProtocol() 对这两条分支的实际动作是
+//     MessageCodec::EncodeCompact(envelope, &compact)
+//     -> BuildWireFrame("PBV2;"/"CBV2;", compact)
+//   即"compact 文本 + 版本标记 + 长度前缀"。产物是 '|' 分隔的 UTF-8 文本，
+//   **一个 protobuf / CBOR 字节都没有**。原来的实现用"本端 encode 再本端 decode
+//   能对上"来判能力，这种自证对任何对称的假实现都恒为真，于是把
+//   BridgeMetrics.protocol_cap_protobuf / protocol_cap_cbor 谎报成 1。
+//   能力位是给调度与对端协商看的事实，不能自证；未实现就必须报 0。
 bool SelfCheckProtocolCapability(const MessageProtocolMode mode) noexcept {
+    switch (mode) {
+        case MessageProtocolMode::kLegacyPipe:
+        case MessageProtocolMode::kCompact:
+            break;
+        case MessageProtocolMode::kProtobufReserved:
+        case MessageProtocolMode::kCborReserved:
+            return false;
+        default:
+            return false;
+    }
+
     MessageEnvelope envelope;
     envelope.source = "selfcheck";
     envelope.target = "selfcheck";

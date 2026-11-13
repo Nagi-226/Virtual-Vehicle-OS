@@ -81,12 +81,13 @@ ProtocolCapabilitySnapshot GetProtocolCapabilitySnapshot(const std::uint64_t now
 }
 
 std::uint64_t ComputePolicySignature(const BridgePolicyTable& table) {
-    std::uint64_t signature = HashCombine(0U, static_cast<std::uint64_t>(table.default_policy.max_end_to_end_latency_ms));
+    std::uint64_t signature = HashCombine(0U, static_cast<std::uint64_t>(table.default_policy.priority));
+    signature = HashCombine(signature, static_cast<std::uint64_t>(table.default_policy.max_end_to_end_latency_ms));
     signature = HashCombine(signature, static_cast<std::uint64_t>(table.default_policy.transport_receive_timeout_ms));
     signature = HashCombine(signature, static_cast<std::uint64_t>(table.default_policy.transport_send_timeout_ms));
     signature = HashCombine(signature, static_cast<std::uint64_t>(table.default_policy.backpressure_policy));
     signature = HashCombine(signature, static_cast<std::uint64_t>(table.default_policy.drop_policy));
-    signature = HashCombine(signature, static_cast<std::uint64_t>(table.default_policy.retry_budget.max_retries));
+    signature = HashCombine(signature, static_cast<std::uint64_t>(table.default_policy.retry_budget.max_retries.value_or(0)));
     signature = HashCombine(signature, static_cast<std::uint64_t>(table.default_policy.retry_budget.initial_backoff_ms));
     signature = HashCombine(signature, static_cast<std::uint64_t>(table.default_policy.retry_budget.max_backoff_ms));
 
@@ -101,12 +102,13 @@ std::uint64_t ComputePolicySignature(const BridgePolicyTable& table) {
         signature = HashCombine(signature, static_cast<std::uint64_t>(rule.match_any_qos));
         signature = HashCombine(signature, static_cast<std::uint64_t>(rule.qos));
         signature = HashCombine(signature, HashString(rule.topic));
+        signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.priority));
         signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.max_end_to_end_latency_ms));
         signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.transport_receive_timeout_ms));
         signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.transport_send_timeout_ms));
         signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.backpressure_policy));
         signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.drop_policy));
-        signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.retry_budget.max_retries));
+        signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.retry_budget.max_retries.value_or(0)));
         signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.retry_budget.initial_backoff_ms));
         signature = HashCombine(signature, static_cast<std::uint64_t>(rule.policy.retry_budget.max_backoff_ms));
     };
@@ -149,11 +151,9 @@ vr::core::ErrorCode InterconnectBridge::Start(IConfigProvider* const provider) n
 
     loaded_config_source_ = source;
     loaded_config_version_ = provider->GetVersion();
-    last_known_good_config_ = cfg;
-    last_known_good_version_ = loaded_config_version_;
-    last_known_good_source_ = loaded_config_source_;
-    last_known_good_signature_ = ComputePolicySignature(cfg.policy_table);
-    last_loaded_signature_ = last_known_good_signature_;
+    // 已知良好快照与策略签名**不在这里**取：这里的 cfg 还是 provider 交来的
+    // 原始表（未归一化、未填模板规则），拿它算出来的签名描述的不是"实际生效的表"。
+    // 统一由 Start(const BridgeConfig&) 在配置完全成型之后再落快照，见那里的注释。
     return Start(cfg);
 }
 
@@ -173,13 +173,6 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
 
     config_ = config;
     policy_manager_.NormalizePolicyDefaults(&config_);
-    if (last_known_good_version_ == 0U) {
-        last_known_good_config_ = config_;
-        last_known_good_version_ = loaded_config_version_;
-        last_known_good_source_ = loaded_config_source_;
-        last_known_good_signature_ = ComputePolicySignature(config_.policy_table);
-        last_loaded_signature_ = last_known_good_signature_;
-    }
     trace_sample_rate_percent_ = std::min(config_.trace_sample_rate_percent, 100U);
     trace_sample_interval_ms_ = config_.trace_sample_interval_ms == 0U
                                     ? kTraceIdSampleIntervalMsDefault
@@ -192,15 +185,31 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
                                           : config_.diagnostics_report_interval_ms;
     enable_diagnostics_reporting_ = config_.enable_diagnostics_reporting;
     protocol_mode_ = config_.protocol_mode;
-    PopulateDefaultTemplateRules();
+    PopulateDefaultTemplateRules(&config_.policy_table);
     RebuildPolicyIndex();
 
-    if (config_.enable_config_canary && config_.config_canary_percent < 100U) {
+    // 已知良好快照与策略签名必须描述**实际生效**的策略表，即"已归一化 +
+    // 已填充默认模板规则"之后的状态。放在这里是本次修复的核心（Bug 1）：
+    //   旧实现在 Start(provider) 里趁归一化之前就算了一次签名，而这里的重算
+    //   又被 last_known_good_version_ != 0 挡住（provider 的初始 version 是 1），
+    //   于是 last_known_good_signature_ 描述"归一化前"的表，
+    //   ReloadConfigIfChanged() 的 next_signature 描述"归一化后"的表 ——
+    //   两者必然不等，于是每一次 reload 都被判成签名不符并回滚。
+    //
+    // 注意顺序：快照必须落在 canary 判定**之后**。canary 未命中时要回退到
+    // 上一份已知良好配置，若先覆盖了快照，回退就成了"回退到自己"，灰度失效。
+    const bool canary_gate_pending = config_.enable_config_canary &&
+                                     config_.config_canary_percent < 100U &&
+                                     has_committed_config_;
+    if (canary_gate_pending) {
         const std::uint32_t gate = static_cast<std::uint32_t>(NowUnixMs() % 100U);
         if (gate >= config_.config_canary_percent) {
             config_ = last_known_good_config_;
             loaded_config_source_ = last_known_good_source_;
             loaded_config_version_ = last_known_good_version_;
+            // 回退后策略表换了，索引必须按回退后的表重建，否则索引描述的是
+            // 那份被拒绝的配置（原始实现漏了这一步）。
+            RebuildPolicyIndex();
             last_loaded_signature_ = last_known_good_signature_;
             reload_rollback_count_.fetch_add(1U, std::memory_order_relaxed);
             reload_fail_count_.fetch_add(1U, std::memory_order_relaxed);
@@ -210,6 +219,13 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
             return vr::core::ErrorCode::kWouldBlock;
         }
     }
+
+    last_known_good_config_ = config_;
+    last_known_good_version_ = loaded_config_version_;
+    last_known_good_source_ = loaded_config_source_;
+    last_known_good_signature_ = ComputePolicySignature(config_.policy_table);
+    last_loaded_signature_ = last_known_good_signature_;
+
     ApplyTransportTuning(config_);
 
     vr::core::ErrorCode ec = vehicle_to_robot_transport_->Create(config_.vehicle_to_robot_endpoint);
@@ -247,6 +263,8 @@ vr::core::ErrorCode InterconnectBridge::Start(const BridgeConfig& config) noexce
         return ec;
     }
 
+    // 启动成功 = 这份配置已成为"已知良好配置"，后续 Start/reload 才允许做灰度回退。
+    has_committed_config_ = true;
     RefreshAggregatedMetrics();
     return vr::core::ErrorCode::kOk;
 }
@@ -306,14 +324,29 @@ MetricsDelta InterconnectBridge::ExportMetricsDelta() noexcept {
     return metrics_aggregator_.ExportDeltaSinceLastCall();
 }
 
+// 导出 Prometheus 文本。
+// 进入时先强刷：本族 API 里 ExportMetricsDelta() 一直是这么做的，而
+// RefreshAggregatedMetrics 的注释明写「force=true：用于关键路径（如配置提交/回滚、
+// 快照导出前）强制刷新，保证观测一致性」。同族里一个遵守、两个不遵守 ⇒ 这是 bug，
+// 不是设计选择。不修的话，"事件刚发生就抓 Prometheus 必须看到"会静默失败（滞后 ≤100ms）。
+// 代价：每次调用 = 一次完整聚合（含 9 张 map 深拷贝），**不要放进高频循环**。
 std::string InterconnectBridge::ExportPrometheusMetrics() const {
+    RefreshAggregatedMetrics(true);
     return metrics_aggregator_.ExportPrometheus();
 }
 
+// 导出 JSON。理由同 ExportPrometheusMetrics()：见上。
 std::string InterconnectBridge::ExportJsonMetrics() const {
+    RefreshAggregatedMetrics(true);
     return metrics_aggregator_.ExportJson();
 }
 
+// 轻量 JSON：**故意保持不强刷**，读缓存（最多滞后 100ms）。
+// 「轻」指的是**输出字段更少** —— 它是全量 JSON 的**子集**，省掉
+// idempotency_drop / backpressure_drop / reload 等一批计数器（实测：判重发生
+// 刚发生时，这里的 tx 仍是旧值、且完全不含 idempotency_drop 字段）。
+// **不指"更新鲜"**：若将来有人需要"刚发生必可见"的轻量视图，应该在
+// CaptureMetricsSnapshot() 之上裁字段，而不是指望这个接口。
 std::string InterconnectBridge::ExportJsonMetricsLightweight() const {
     return metrics_aggregator_.ExportJsonLightweight();
 }
@@ -453,13 +486,14 @@ std::string InterconnectBridge::FormatRuleKey(const PolicyRule& rule) const {
 std::string InterconnectBridge::FormatRuleSummary(const PolicyRule& rule) const {
     const auto policy = std::string("sla=") + std::to_string(rule.policy.max_end_to_end_latency_ms) +
         "ms,tx_to=" + std::to_string(rule.policy.transport_send_timeout_ms) +
-        "ms,rx_to=" + std::to_string(rule.policy.transport_receive_timeout_ms) + "ms";
+        "ms,rx_to=" + std::to_string(rule.policy.transport_receive_timeout_ms) + "ms" +
+        ",sla_priority=" + std::to_string(rule.policy.priority);
     const auto backpressure = std::string("backpressure=") +
         std::to_string(static_cast<int>(rule.policy.backpressure_policy));
     const auto drop_policy = std::string("drop=") +
         std::to_string(static_cast<int>(rule.policy.drop_policy));
     const auto retry_policy = std::string("retry=") +
-        std::to_string(rule.policy.retry_budget.max_retries) + "/" +
+        std::to_string(rule.policy.retry_budget.max_retries.value_or(0)) + "/" +
         std::to_string(rule.policy.retry_budget.initial_backoff_ms) + "/" +
         std::to_string(rule.policy.retry_budget.max_backoff_ms);
     return "priority=" + std::to_string(rule.priority) + " {" + FormatRuleKey(rule) +
@@ -501,7 +535,7 @@ std::string InterconnectBridge::BuildPolicyLintReport() const {
         if (policy.transport_receive_timeout_ms < 0 || policy.transport_send_timeout_ms < 0) {
             issues.push_back(label + ": negative timeout");
         }
-        if (policy.retry_budget.max_retries < 0 ||
+        if (policy.retry_budget.max_retries.value_or(0) < 0 ||
             policy.retry_budget.initial_backoff_ms < 0 ||
             policy.retry_budget.max_backoff_ms < policy.retry_budget.initial_backoff_ms) {
             issues.push_back(label + ": retry budget invalid");
@@ -526,7 +560,7 @@ std::string InterconnectBridge::BuildPolicyLintReport() const {
                 rule.policy.transport_send_timeout_ms < 0) {
                 issues.push_back(label + " rule[" + std::to_string(i) + "] has negative timeout");
             }
-            if (rule.policy.retry_budget.max_retries < 0 ||
+            if (rule.policy.retry_budget.max_retries.value_or(0) < 0 ||
                 rule.policy.retry_budget.initial_backoff_ms < 0 ||
                 rule.policy.retry_budget.max_backoff_ms <
                     rule.policy.retry_budget.initial_backoff_ms) {
@@ -583,7 +617,7 @@ std::pair<std::uint64_t, std::uint64_t> InterconnectBridge::GetPolicyLintCounts(
         if (policy.transport_receive_timeout_ms < 0 || policy.transport_send_timeout_ms < 0) {
             issue_count += 1U;
         }
-        if (policy.retry_budget.max_retries < 0 ||
+        if (policy.retry_budget.max_retries.value_or(0) < 0 ||
             policy.retry_budget.initial_backoff_ms < 0 ||
             policy.retry_budget.max_backoff_ms < policy.retry_budget.initial_backoff_ms) {
             issue_count += 1U;
@@ -603,7 +637,7 @@ std::pair<std::uint64_t, std::uint64_t> InterconnectBridge::GetPolicyLintCounts(
                 rule.policy.transport_send_timeout_ms < 0) {
                 issue_count += 1U;
             }
-            if (rule.policy.retry_budget.max_retries < 0 ||
+            if (rule.policy.retry_budget.max_retries.value_or(0) < 0 ||
                 rule.policy.retry_budget.initial_backoff_ms < 0 ||
                 rule.policy.retry_budget.max_backoff_ms <
                     rule.policy.retry_budget.initial_backoff_ms) {
@@ -669,8 +703,8 @@ void InterconnectBridge::RebuildPolicyIndex() {
     }
 }
 
-void InterconnectBridge::PopulateDefaultTemplateRules() {
-    if (!config_.policy_table.template_rules.empty()) {
+void InterconnectBridge::PopulateDefaultTemplateRules(BridgePolicyTable* const table) {
+    if (table == nullptr || !table->template_rules.empty()) {
         return;
     }
 
@@ -691,8 +725,8 @@ void InterconnectBridge::PopulateDefaultTemplateRules() {
     telemetry_rule.policy.max_end_to_end_latency_ms = 150U;
     telemetry_rule.policy.backpressure_policy = BackpressurePolicy::kReject;
 
-    config_.policy_table.template_rules.push_back(control_rule);
-    config_.policy_table.template_rules.push_back(telemetry_rule);
+    table->template_rules.push_back(control_rule);
+    table->template_rules.push_back(telemetry_rule);
 }
 
 // 是否允许记录日志
@@ -730,7 +764,7 @@ bool InterconnectBridge::RuleMatches(const PolicyRule& rule,
     return true;
 }
 
-const InterconnectBridge::PolicyCacheEntry* InterconnectBridge::LookupPolicyCache(
+const PolicyCacheEntry* InterconnectBridge::LookupPolicyCache(
     const MessageEnvelope& envelope) const noexcept {
     const PolicyCacheKey key{envelope.topic, envelope.channel, envelope.qos};
     std::lock_guard<std::mutex> lock(policy_cache_mutex_);
@@ -744,7 +778,7 @@ const InterconnectBridge::PolicyCacheEntry* InterconnectBridge::LookupPolicyCach
     return &it->second->entry;
 }
 
-const InterconnectBridge::PolicyCacheEntry* InterconnectBridge::StorePolicyCache(
+const PolicyCacheEntry* InterconnectBridge::StorePolicyCache(
     const MessageEnvelope& envelope, const BridgeSlaPolicy& policy,
     const bool override_applied, const bool conflict_detected) const noexcept {
     const PolicyCacheKey key{envelope.topic, envelope.channel, envelope.qos};
@@ -865,18 +899,17 @@ const BridgeSlaPolicy& InterconnectBridge::ResolvePolicyInternal(
         *out_conflict_detected = true;
     }
 
+    // 命中优先级：override > rule > template。三个候选的优先级数值并不在这里
+    // 落地成任何输出，只用于紧随其后的冲突判定（见 :885-:894）。
+    // 发送用的调度优先级由 ResolvePriorityForPublish() 独立决定。
     const BridgeSlaPolicy* selected_policy = nullptr;
-    std::uint32_t selected_priority = 0U;
     if (override_policy != nullptr) {
         selected_policy = override_policy;
-        selected_priority = override_priority;
         *out_override_applied = true;
     } else if (rule_policy != nullptr) {
         selected_policy = rule_policy;
-        selected_priority = rule_priority;
     } else if (template_policy != nullptr) {
         selected_policy = template_policy;
-        selected_priority = template_priority;
     }
 
     if (override_policy != nullptr && rule_policy != nullptr && override_priority < rule_priority) {
@@ -900,6 +933,12 @@ const BridgeSlaPolicy& InterconnectBridge::ResolvePolicyInternal(
 // 重新加载配置（关键稳定路径）
 // 流程：provider reload -> load config -> 归一化 -> 签名与合法性校验 -> 成功提交或回滚。
 // 设计约束：任何中间失败都必须保持“上一个已知良好配置”可用，并输出可审计原因。
+//
+// ⚠️ 已知空白（P1，勿误判）：本函数**没有 config-canary 灰度门禁**。
+//    Start() 里那段 `canary_gate_pending` 只作用于启动路径，不要因为看过那里就以为
+//    reload 也被灰度保护 —— 目前通过热更新下发的新配置会直接全量生效（策略字段除外，
+//    会被判为 policy_fields_unsupported 并回滚）。
+//    影响与待决策的语义选项见：README「已知限制」段、docs/backlog.md BL-01。
 vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
     IConfigProvider* const provider) noexcept {
     if (provider == nullptr) {
@@ -910,6 +949,9 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
     constexpr const char* kReloadReasonProviderLoadFail = "provider_load_fail";
     constexpr const char* kReloadReasonConfigInvalid = "config_invalid";
     constexpr const char* kReloadReasonSignatureMismatch = "signature_mismatch";
+    // 与 signature_mismatch 分开：这是**产品限制**（reload 不支持改策略字段），
+    // 不是配置损坏。两者排查路径不同，混在一起会把 5 分钟的问题拖成半天。
+    constexpr const char* kReloadReasonPolicyFieldsUnsupported = "policy_fields_unsupported";
 
     auto should_preserve_locked_policy = [&](const BridgeConfig& next_cfg) {
         if (!config_.policy_table.default_policy.lock_policy) {
@@ -918,15 +960,17 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
 
         const BridgeSlaPolicy& current = config_.policy_table.default_policy;
         const BridgeSlaPolicy& candidate = next_cfg.policy_table.default_policy;
+        const bool same_priority = current.priority == candidate.priority;
         const bool same_latency = current.max_end_to_end_latency_ms == candidate.max_end_to_end_latency_ms;
         const bool same_recv = current.transport_receive_timeout_ms == candidate.transport_receive_timeout_ms;
         const bool same_send = current.transport_send_timeout_ms == candidate.transport_send_timeout_ms;
         const bool same_backpressure = current.backpressure_policy == candidate.backpressure_policy;
         const bool same_drop = current.drop_policy == candidate.drop_policy;
-        const bool same_retry = current.retry_budget.max_retries == candidate.retry_budget.max_retries &&
+        const bool same_retry = current.retry_budget.max_retries.value_or(0) == candidate.retry_budget.max_retries.value_or(0) &&
             current.retry_budget.initial_backoff_ms == candidate.retry_budget.initial_backoff_ms &&
             current.retry_budget.max_backoff_ms == candidate.retry_budget.max_backoff_ms;
-        return same_latency && same_recv && same_send && same_backpressure && same_drop && same_retry;
+        return same_latency && same_recv && same_send && same_backpressure && same_drop && same_retry &&
+               same_priority;
     };
 
     const vr::core::ErrorCode reload_ec = provider->Reload();
@@ -964,6 +1008,9 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
 
     BridgeConfig next_config = cfg;
     policy_manager_.NormalizePolicyDefaults(&next_config);
+    // 候选配置先补上默认模板规则，再做签名。签名必须与 Start() 里那份
+    // "已归一化 + 已填模板"的表比较，否则比的是两个不同的状态（Bug 1 的另一半）。
+    PopulateDefaultTemplateRules(&next_config.policy_table);
 
     const std::uint64_t next_signature = ComputePolicySignature(next_config.policy_table);
 
@@ -1029,7 +1076,9 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
                                           ? 1000U
                                           : config_.diagnostics_report_interval_ms;
     enable_diagnostics_reporting_ = config_.enable_diagnostics_reporting;
-    PopulateDefaultTemplateRules();
+    // next_config 上面已经填过模板规则；这里再调一次是幂等兜底，
+    // 保证"落盘后的 config_ 一定带着模板规则"这一不变量在任何路径下都成立。
+    PopulateDefaultTemplateRules(&config_.policy_table);
     RebuildPolicyIndex();
 
     const bool config_valid = config_.thread_pool.worker_count > 0U &&
@@ -1041,6 +1090,23 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
             config_.policy_table.default_policy.retry_budget.initial_backoff_ms;
     const bool signature_ok = (last_known_good_signature_ == 0U) ||
         (next_signature == last_known_good_signature_);
+
+    // 回滚原因要**分类**，不能一律叫"签名不符"。
+    // 运维看到"签名不符"会去查"我是不是改错文件了 / 配置是不是损坏了"，
+    // 而真实原因往往是"改了 reload 本就不支持的策略字段"——两者排查路径完全不同。
+    // 判据：把候选签名与"当前生效配置"的签名比。不等 = 候选确实改了策略字段；
+    // 相等但仍与 last_known_good 不符 = 记账不一致（防御性分支，理论上不该出现）。
+    const std::uint64_t current_signature = ComputePolicySignature(previous_config.policy_table);
+    const bool policy_fields_changed = (next_signature != current_signature);
+
+    enum class RollbackCause { kConfigInvalid, kPolicyFieldsUnsupported, kSignatureMismatch };
+    RollbackCause cause = RollbackCause::kSignatureMismatch;
+    if (signature_ok) {
+        cause = RollbackCause::kConfigInvalid;
+    } else if (policy_fields_changed) {
+        cause = RollbackCause::kPolicyFieldsUnsupported;
+    }
+
     if (!config_valid || !signature_ok) {
         config_ = previous_config;
         loaded_config_source_ = previous_source;
@@ -1048,13 +1114,38 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
         last_loaded_signature_ = previous_signature;
         reload_rollback_count_.fetch_add(1U, std::memory_order_relaxed);
         reload_fail_count_.fetch_add(1U, std::memory_order_relaxed);
-        const vr::core::ErrorCode status = signature_ok
+        const vr::core::ErrorCode status = (cause == RollbackCause::kConfigInvalid)
             ? vr::core::ErrorCode::kInvalidParam
             : vr::core::ErrorCode::kQueueCreateFailed;
         last_reload_status_code_.store(static_cast<std::int32_t>(status),
                                        std::memory_order_relaxed);
-        reload_rollback_reason_code_.store(signature_ok ? 3 : 4, std::memory_order_relaxed);
-        last_reload_audit_summary_ = audit.str() + ",status=rollback";
+
+        // 原因码是外部契约（metrics.reload_rollback_reason_code）：
+        //   3 = config_invalid          （配置本身非法，例如 worker_count = 0）
+        //   4 = signature_mismatch      （真的对不上，防御性保留）
+        //   7 = policy_fields_unsupported（改了 reload 不支持的策略字段）
+        // 5/6 已被"策略锁违反 / 高风险自动回滚"占用，不要复用。
+        std::int32_t reason_code = 4;
+        const char* rollback_reason = kReloadReasonSignatureMismatch;
+        if (cause == RollbackCause::kConfigInvalid) {
+            reason_code = 3;
+            rollback_reason = kReloadReasonConfigInvalid;
+        } else if (cause == RollbackCause::kPolicyFieldsUnsupported) {
+            reason_code = 7;
+            rollback_reason = kReloadReasonPolicyFieldsUnsupported;
+        }
+        reload_rollback_reason_code_.store(reason_code, std::memory_order_relaxed);
+
+        last_reload_audit_summary_ = audit.str() + ",status=rollback,reason=" + rollback_reason;
+        if (cause == RollbackCause::kPolicyFieldsUnsupported) {
+            // 附加可操作的说明：让看懂日志的人知道该往哪查，而不是去查文件是否损坏。
+            last_reload_audit_summary_ +=
+                ",note=reload_supports_non_policy_fields_only_restart_required";
+            LOG_WARN(std::string("Bridge config reload rejected: policy fields changed (")
+                     + rollback_reason +
+                     "). Hot reload only supports non-policy fields; restart to apply "
+                     "policy_table / sla_policy changes.");
+        }
         RefreshAggregatedMetrics(true);
         return status;
     }
@@ -1066,6 +1157,7 @@ vr::core::ErrorCode InterconnectBridge::ReloadConfigIfChanged(
     last_known_good_version_ = loaded_config_version_;
     last_known_good_source_ = loaded_config_source_;
     last_known_good_signature_ = next_signature;
+    has_committed_config_ = true;
     reload_success_count_.fetch_add(1U, std::memory_order_relaxed);
     last_reload_timestamp_ms_.store(NowUnixMs(), std::memory_order_relaxed);
     last_reload_status_code_.store(static_cast<std::int32_t>(vr::core::ErrorCode::kOk),
@@ -1110,12 +1202,12 @@ vr::core::ErrorCode InterconnectBridge::PublishWithBackpressure(ITransport* cons
         }
     }
 
-    if (policy.retry_budget.max_retries > 0 &&
+    if (policy.retry_budget.max_retries.value_or(0) > 0 &&
         policy.retry_budget.initial_backoff_ms > 0 &&
         policy.retry_budget.max_backoff_ms >= policy.retry_budget.initial_backoff_ms &&
         send_ec == vr::core::ErrorCode::kWouldBlock) {
         vr::core::RetryOptions options;
-        options.max_retries = policy.retry_budget.max_retries;
+        options.max_retries = policy.retry_budget.max_retries.value_or(0);
         options.initial_backoff_ms = policy.retry_budget.initial_backoff_ms;
         options.max_backoff_ms = policy.retry_budget.max_backoff_ms;
         send_ec = vr::core::RetryPolicy::RetryOnWouldBlock(send_once, options);
@@ -1361,31 +1453,6 @@ const BridgeSlaPolicy& InterconnectBridge::ResolvePolicy(
     return policy;
 }
 
-void InterconnectBridge::PopulateDefaultTemplateRules() {
-    if (!config_.policy_table.template_rules.empty()) {
-        return;
-    }
-
-    PolicyRule control_rule;
-    control_rule.priority = 10U;
-    control_rule.match_any_channel = false;
-    control_rule.channel = ChannelType::kControl;
-    control_rule.topic = "*";
-    control_rule.policy.max_end_to_end_latency_ms = 50U;
-    control_rule.policy.backpressure_policy = BackpressurePolicy::kDropOldest;
-
-    PolicyRule telemetry_rule;
-    telemetry_rule.priority = 5U;
-    telemetry_rule.match_any_channel = false;
-    telemetry_rule.channel = ChannelType::kTelemetry;
-    telemetry_rule.topic = "*";
-    telemetry_rule.policy.max_end_to_end_latency_ms = 150U;
-    telemetry_rule.policy.backpressure_policy = BackpressurePolicy::kReject;
-
-    config_.policy_table.template_rules.push_back(control_rule);
-    config_.policy_table.template_rules.push_back(telemetry_rule);
-}
-
 void InterconnectBridge::ApplyTransportTuning(const BridgeConfig& config) {
     flow_limit_vehicle_ = config.vehicle_to_robot_endpoint.flow_limit_inflight;
     flow_limit_robot_ = config.robot_to_vehicle_endpoint.flow_limit_inflight;
@@ -1629,7 +1696,7 @@ void InterconnectBridge::ProcessInbound(ITransport* const transport, MessageRout
 }
 
 // 是否需要刷新聚合指标
-bool InterconnectBridge::ShouldRefreshMetrics(const std::uint64_t now_ms) noexcept {
+bool InterconnectBridge::ShouldRefreshMetrics(const std::uint64_t now_ms) const noexcept {
     const std::uint64_t last = last_metrics_refresh_ms_.load(std::memory_order_relaxed);
     if (now_ms < last) {
         return true;
@@ -1640,7 +1707,7 @@ bool InterconnectBridge::ShouldRefreshMetrics(const std::uint64_t now_ms) noexce
 // 刷新聚合指标（时机控制关键点）
 // 1) force=true：用于关键路径（如配置提交/回滚、快照导出前）强制刷新，保证观测一致性；
 // 2) force=false：按节流周期刷新，避免高频路径下指标聚合造成额外开销。
-void InterconnectBridge::RefreshAggregatedMetrics(const bool force) noexcept {
+void InterconnectBridge::RefreshAggregatedMetrics(const bool force) const noexcept {
     const std::uint64_t now_ms = NowUnixMs();
     if (!force && !ShouldRefreshMetrics(now_ms)) {
         return;
@@ -1661,6 +1728,9 @@ void InterconnectBridge::RefreshAggregatedMetrics(const bool force) noexcept {
     bridge_metrics.invalid_envelope_count = invalid_envelope_count_.load(std::memory_order_relaxed);
     bridge_metrics.transport_error_count = transport_error_count_.load(std::memory_order_relaxed);
     bridge_metrics.backpressure_drop_count = backpressure_drop_count_.load(std::memory_order_relaxed);
+    bridge_metrics.idempotency_drop_count = idempotency_drop_count_.load(std::memory_order_relaxed);
+    bridge_metrics.diagnostic_snapshot_write_count =
+        diagnostic_snapshot_write_count_.load(std::memory_order_relaxed);
     bridge_metrics.policy_hit_count = policy_hit_count_.load(std::memory_order_relaxed);
     bridge_metrics.policy_override_count = policy_override_count_.load(std::memory_order_relaxed);
     bridge_metrics.policy_conflict_count = policy_conflict_count_.load(std::memory_order_relaxed);

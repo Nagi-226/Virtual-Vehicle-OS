@@ -22,6 +22,14 @@ struct BridgeMetrics {
     std::uint64_t invalid_envelope_count{0U};
     std::uint64_t transport_error_count{0U};
     std::uint64_t backpressure_drop_count{0U};
+    // 幂等判重丢弃次数。**曾经是一个只写不读的计数器**（声明 + 一处 fetch_add，
+    // 全库无读取方），导致"是不是被判重丢了"这件事在运维侧无法验证 ——
+    // 查不到就会去查别的地方。现在补进 BridgeMetrics / Prometheus / JSON / delta。
+    std::uint64_t idempotency_drop_count{0U};
+    // 诊断快照落盘次数。与 idempotency_drop_count 同批补导出：
+    // 它原本也是"只写不读"（3 处 fetch_add、0 处读取），导致
+    // "快照到底写没写 / 是不是写得太频繁"这两件事在运维侧无法验证。
+    std::uint64_t diagnostic_snapshot_write_count{0U};
 
     std::uint64_t policy_hit_count{0U};
     std::uint64_t policy_override_count{0U};

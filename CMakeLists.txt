@@ -68,6 +68,11 @@ if(UNIX AND NOT APPLE)
     target_link_libraries(vr_base_framework PUBLIC rt pthread)
 elseif(UNIX)
     target_link_libraries(vr_base_framework PUBLIC pthread)
+elseif(WIN32)
+    # tcp_transport.cpp 需要 Winsock。这里显式链接，而不是在源码里写
+    # MSVC 专有的 #pragma comment(lib, ...)：后者对 GCC/Clang(MinGW) 无效且
+    # 在 -Werror 下会因 -Wunknown-pragmas 直接编失败。
+    target_link_libraries(vr_base_framework PUBLIC ws2_32)
 endif()
 
 if(ENABLE_STM32F429_TARGET)
@@ -84,14 +89,29 @@ if(ENABLE_STM32F429_TARGET)
         -nostartfiles
     )
 
-    if(CMAKE_OBJCOPY)
-        add_custom_command(TARGET stm32f429_min_fw POST_BUILD
-            COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:stm32f429_min_fw> $<TARGET_FILE_DIR:stm32f429_min_fw>/stm32f429_min_fw.hex
-            COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:stm32f429_min_fw> $<TARGET_FILE_DIR:stm32f429_min_fw>/stm32f429_min_fw.bin
-            COMMENT "Generating STM32F429 HEX/BIN artifacts"
-        )
+        if(CMAKE_OBJCOPY)
+            add_custom_command(TARGET stm32f429_min_fw POST_BUILD
+                COMMAND ${CMAKE_OBJCOPY} -O ihex $<TARGET_FILE:stm32f429_min_fw> $<TARGET_FILE_DIR:stm32f429_min_fw>/stm32f429_min_fw.hex
+                COMMAND ${CMAKE_OBJCOPY} -O binary $<TARGET_FILE:stm32f429_min_fw> $<TARGET_FILE_DIR:stm32f429_min_fw>/stm32f429_min_fw.bin
+                COMMENT "Generating STM32F429 HEX/BIN artifacts"
+            )
+        endif()
+
+        # 显式下架说明（诊断 A14）：该目标当前**不可链接**，所以默认 OFF；
+        # 一旦打开就在这里失败，而不是让构建产出一个链接失败的半成品。
+        # 已核实的缺口（静态证据；本机无 arm-none-eabi-gcc，未做交叉链接验证）：
+        #   1) 源列表缺 platform/stm32f429/f429_bridge_diag_adapter.cpp，
+        #      但 main_min.cpp:29 调用了 F429BridgeDiagAdapter::EmitSramBringupEvent；
+        #   2) 该适配器调用 DiagnosticsManager::RecordSnapshotWithFields，
+        #      其实现 src/interconnect/diagnostics_manager.cpp 同样不在源列表里；
+        #   3) main_min.cpp 使用 std::string / std::unordered_map，需要 C++ 运行库，
+        #      而当前链接选项只有 -nostartfiles。
+        # 恢复条件：补齐上述 TU，并在装有 arm-none-eabi-gcc 的环境完成一次真实链接。
+        message(FATAL_ERROR
+            "stm32f429_min_fw 目标当前不可链接（缺 f429_bridge_diag_adapter.cpp 与 "
+            "diagnostics_manager.cpp，且 C++ 运行库配置未定型），已显式下架。"
+            "详见 README 的 STM32F429 章节。")
     endif()
-endif()
 
 if(NOT WIN32)
     add_executable(demo_service demo/main.cpp)
@@ -113,110 +133,136 @@ endif()
 if(ENABLE_TESTS)
     enable_testing()
 
+    # 注册测试的唯一入口。它做两件事：
+    #   1) 声明 ctest 测试（add_test）；
+    #   2) 把名字累加到 VVOS_DECLARED_TESTS，最终落到
+    #      ${CMAKE_BINARY_DIR}/vvos_declared_tests.txt。
+    # 质量门禁会用这份清单与 `ctest -N` 的注册结果做双向比对，
+    # 阻断"声明了却没注册 / 注册了却没声明 / 一个测试都没跑"的静默漂移。
+    # 新增测试请一律走这个宏，不要再直接写 add_test。
+    set(VVOS_DECLARED_TESTS "")
+    macro(vvos_register_test test_name test_command)
+        add_test(NAME ${test_name} COMMAND ${test_command})
+        set(VVOS_DECLARED_TESTS ${VVOS_DECLARED_TESTS} ${test_name})
+    endmacro()
+
     add_executable(thread_pool_test tests/thread_pool_test.cpp)
     target_link_libraries(thread_pool_test PRIVATE vr_base_framework)
-    add_test(NAME thread_pool_test COMMAND thread_pool_test)
+    vvos_register_test(thread_pool_test thread_pool_test)
     set_tests_properties(thread_pool_test PROPERTIES LABELS "core" TIMEOUT 10)
 
     add_executable(retry_policy_test tests/core/retry_policy_test.cpp)
     target_link_libraries(retry_policy_test PRIVATE vr_base_framework)
-    add_test(NAME retry_policy_test COMMAND retry_policy_test)
+    vvos_register_test(retry_policy_test retry_policy_test)
     set_tests_properties(retry_policy_test PROPERTIES LABELS "core" TIMEOUT 10)
 
     add_executable(logger_format_test tests/log/logger_format_test.cpp)
     target_link_libraries(logger_format_test PRIVATE vr_base_framework)
-    add_test(NAME logger_format_test COMMAND logger_format_test)
+    vvos_register_test(logger_format_test logger_format_test)
     set_tests_properties(logger_format_test PROPERTIES LABELS "log" TIMEOUT 10)
 
     add_executable(interconnect_codec_test tests/interconnect/interconnect_codec_test.cpp)
     target_link_libraries(interconnect_codec_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_codec_test COMMAND interconnect_codec_test)
+    vvos_register_test(interconnect_codec_test interconnect_codec_test)
     set_tests_properties(interconnect_codec_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_ttl_test tests/interconnect/interconnect_ttl_test.cpp)
     target_link_libraries(interconnect_ttl_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_ttl_test COMMAND interconnect_ttl_test)
+    vvos_register_test(interconnect_ttl_test interconnect_ttl_test)
     set_tests_properties(interconnect_ttl_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_router_exception_test tests/interconnect/interconnect_router_exception_test.cpp)
     target_link_libraries(interconnect_router_exception_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_router_exception_test COMMAND interconnect_router_exception_test)
+    vvos_register_test(interconnect_router_exception_test interconnect_router_exception_test)
     set_tests_properties(interconnect_router_exception_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_backpressure_test tests/interconnect/interconnect_backpressure_test.cpp)
     target_link_libraries(interconnect_backpressure_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_backpressure_test COMMAND interconnect_backpressure_test)
+    vvos_register_test(interconnect_backpressure_test interconnect_backpressure_test)
     set_tests_properties(interconnect_backpressure_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_metrics_delta_test tests/interconnect/interconnect_metrics_delta_test.cpp)
     target_link_libraries(interconnect_metrics_delta_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_metrics_delta_test COMMAND interconnect_metrics_delta_test)
+    vvos_register_test(interconnect_metrics_delta_test interconnect_metrics_delta_test)
     set_tests_properties(interconnect_metrics_delta_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_config_provider_test tests/interconnect/interconnect_config_provider_test.cpp)
     target_link_libraries(interconnect_config_provider_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_config_provider_test COMMAND interconnect_config_provider_test)
+    vvos_register_test(interconnect_config_provider_test interconnect_config_provider_test)
     set_tests_properties(interconnect_config_provider_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_config_reload_test tests/interconnect/interconnect_config_reload_test.cpp)
     target_link_libraries(interconnect_config_reload_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_config_reload_test COMMAND interconnect_config_reload_test)
+    vvos_register_test(interconnect_config_reload_test interconnect_config_reload_test)
     set_tests_properties(interconnect_config_reload_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_policy_matrix_test tests/interconnect/interconnect_policy_matrix_test.cpp)
     target_link_libraries(interconnect_policy_matrix_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_policy_matrix_test COMMAND interconnect_policy_matrix_test)
+    vvos_register_test(interconnect_policy_matrix_test interconnect_policy_matrix_test)
     set_tests_properties(interconnect_policy_matrix_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_transport_consistency_test tests/interconnect/interconnect_transport_consistency_test.cpp)
     target_link_libraries(interconnect_transport_consistency_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_transport_consistency_test COMMAND interconnect_transport_consistency_test)
+    vvos_register_test(interconnect_transport_consistency_test interconnect_transport_consistency_test)
     set_tests_properties(interconnect_transport_consistency_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(transport_orchestrator_test tests/interconnect/transport_orchestrator_test.cpp)
     target_link_libraries(transport_orchestrator_test PRIVATE vr_base_framework)
-    add_test(NAME transport_orchestrator_test COMMAND transport_orchestrator_test)
+    vvos_register_test(transport_orchestrator_test transport_orchestrator_test)
     set_tests_properties(transport_orchestrator_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_fault_injection_test tests/interconnect/interconnect_fault_injection_test.cpp)
     target_link_libraries(interconnect_fault_injection_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_fault_injection_test COMMAND interconnect_fault_injection_test)
+    vvos_register_test(interconnect_fault_injection_test interconnect_fault_injection_test)
     set_tests_properties(interconnect_fault_injection_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_tcp_loopback_test tests/interconnect/interconnect_tcp_loopback_test.cpp)
     target_link_libraries(interconnect_tcp_loopback_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_tcp_loopback_test COMMAND interconnect_tcp_loopback_test)
+    vvos_register_test(interconnect_tcp_loopback_test interconnect_tcp_loopback_test)
     set_tests_properties(interconnect_tcp_loopback_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(interconnect_protocol_adapter_test tests/interconnect/interconnect_protocol_adapter_test.cpp)
     target_link_libraries(interconnect_protocol_adapter_test PRIVATE vr_base_framework)
-    add_test(NAME interconnect_protocol_adapter_test COMMAND interconnect_protocol_adapter_test)
+    vvos_register_test(interconnect_protocol_adapter_test interconnect_protocol_adapter_test)
     set_tests_properties(interconnect_protocol_adapter_test PROPERTIES LABELS "interconnect" TIMEOUT 10)
 
     add_executable(rtos_adapter_stub_test tests/platform/rtos_adapter_stub_test.cpp)
     target_link_libraries(rtos_adapter_stub_test PRIVATE vr_base_framework)
-    add_test(NAME rtos_adapter_stub_test COMMAND rtos_adapter_stub_test)
+    vvos_register_test(rtos_adapter_stub_test rtos_adapter_stub_test)
     set_tests_properties(rtos_adapter_stub_test PROPERTIES LABELS "platform" TIMEOUT 10)
 
     add_executable(ros2_adapter_stub_test tests/platform/ros2_adapter_stub_test.cpp)
     target_link_libraries(ros2_adapter_stub_test PRIVATE vr_base_framework)
-    add_test(NAME ros2_adapter_stub_test COMMAND ros2_adapter_stub_test)
+    vvos_register_test(ros2_adapter_stub_test ros2_adapter_stub_test)
     set_tests_properties(ros2_adapter_stub_test PROPERTIES LABELS "platform" TIMEOUT 10)
 
-    add_executable(f429_bridge_diag_adapter_test tests/platform/f429_bridge_diag_adapter_test.cpp)
+    # f429_bridge_diag_adapter.cpp 本身是平台无关的纯 C++（std::string/unordered_map），
+    # 但从未被任何目标编译过：这里补进本测试目标，否则 EmitSramBringupEvent 会
+    # 在链接期未定义。include 路径用仓库根，因为源码头用的是
+    # "platform/stm32f429/..." 这种根相对写法（与 CMakeLists 只加 src/ 的约定不同）。
+    add_executable(f429_bridge_diag_adapter_test
+        tests/platform/f429_bridge_diag_adapter_test.cpp
+        platform/stm32f429/f429_bridge_diag_adapter.cpp
+    )
+    target_include_directories(f429_bridge_diag_adapter_test PRIVATE ${CMAKE_SOURCE_DIR})
     target_link_libraries(f429_bridge_diag_adapter_test PRIVATE vr_base_framework)
-    add_test(NAME f429_bridge_diag_adapter_test COMMAND f429_bridge_diag_adapter_test)
+    vvos_register_test(f429_bridge_diag_adapter_test f429_bridge_diag_adapter_test)
     set_tests_properties(f429_bridge_diag_adapter_test PROPERTIES LABELS "platform" TIMEOUT 10)
 
     if(NOT WIN32)
-        add_test(NAME rtos_adapter_sample_run COMMAND rtos_adapter_sample)
+        vvos_register_test(rtos_adapter_sample_run rtos_adapter_sample)
         set_tests_properties(rtos_adapter_sample_run PROPERTIES LABELS "platform" TIMEOUT 10)
 
-        add_test(NAME ros2_adapter_sample_run COMMAND ros2_adapter_sample)
+        vvos_register_test(ros2_adapter_sample_run ros2_adapter_sample)
         set_tests_properties(ros2_adapter_sample_run PROPERTIES LABELS "platform" TIMEOUT 10)
         add_executable(posix_message_queue_test tests/ipc/posix_message_queue_test.cpp)
         target_link_libraries(posix_message_queue_test PRIVATE vr_base_framework)
-        add_test(NAME posix_message_queue_test COMMAND posix_message_queue_test)
+        vvos_register_test(posix_message_queue_test posix_message_queue_test)
         set_tests_properties(posix_message_queue_test PROPERTIES LABELS "ipc" TIMEOUT 10)
     endif()
+
+    # 落盘声明清单：门禁据此校验"声明数 == 注册数"，且清单已按本平台的实际
+    # 条件分支求值（例如 NOT WIN32 里的 3 条在 Windows 上不会出现）。
+    string(REPLACE ";" "\n" VVOS_DECLARED_TESTS_TEXT "${VVOS_DECLARED_TESTS}")
+    file(WRITE "${CMAKE_BINARY_DIR}/vvos_declared_tests.txt" "${VVOS_DECLARED_TESTS_TEXT}\n")
 endif()

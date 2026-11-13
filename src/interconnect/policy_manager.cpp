@@ -16,10 +16,28 @@ void PolicyManager::NormalizePolicyDefaults(BridgeConfig* config) {
         config->policy_table.default_policy.transport_receive_timeout_ms == 50 &&
         config->policy_table.default_policy.transport_send_timeout_ms == 50 &&
         config->policy_table.default_policy.backpressure_policy == BackpressurePolicy::kReject) {
+        // 整块继承 sla_policy，但**显式配置过的重试预算必须原样保住**：
+        // "整表都用默认值"不能成为覆盖用户显式意图的理由。
+        const RetryBudget explicit_retry_budget =
+            config->policy_table.default_policy.retry_budget;
         config->policy_table.default_policy = config->sla_policy;
+        if (explicit_retry_budget.max_retries.has_value()) {
+            config->policy_table.default_policy.retry_budget = explicit_retry_budget;
+        }
     }
 
-    if (config->policy_table.default_policy.retry_budget.max_retries <= 0) {
+    // 重试预算的继承条件有两条，缺一不可：
+    //   ① 未配置（max_retries 为 nullopt）。这里刻意不再用 `<= 0`：
+    //      0 是合法配置（明确表示不重试），旧实现把它当"没配置"，
+    //      于是被 sla_policy 的预算覆盖，标称不重试的策略照样会重试一次。
+    //   ② 这条策略愿意缓冲/重试（backpressure != kReject）。kReject 的语义是
+    //      "现在就把失败告诉调用方"，给它补一个重试预算等于把它变成"重试后再拒"。
+    //      注意：只约束"继承"，不约束"显式配置"——显式给出的预算一律照用。
+    const bool retry_budget_configured =
+        config->policy_table.default_policy.retry_budget.max_retries.has_value();
+    const bool policy_wants_buffering =
+        config->policy_table.default_policy.backpressure_policy != BackpressurePolicy::kReject;
+    if (!retry_budget_configured && policy_wants_buffering) {
         config->policy_table.default_policy.retry_budget = config->sla_policy.retry_budget;
     }
     if (config->policy_table.default_policy.drop_policy == DropPolicy::kDropNone) {

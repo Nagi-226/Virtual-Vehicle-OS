@@ -25,6 +25,10 @@ enum class ErrorCode : std::int32_t {
     kInvalidParam = MakeErrorCode(ErrorDomain::kCommon, 0x0001),
     kTimeout = MakeErrorCode(ErrorDomain::kCommon, 0x0002),
     kWouldBlock = MakeErrorCode(ErrorDomain::kCommon, 0x0003),
+    // 报文 TTL 耗尽（已过期）。当前实现由接收侧 ProcessInbound() 的 IsExpired()
+    // 判定并丢弃，只累加 expired_drop_count 指标；发布侧 Publish() 尚未做前置校验，
+    // 因此这个码目前是"可表达但未从发布路径返回"的状态。
+    kExpired = MakeErrorCode(ErrorDomain::kCommon, 0x0004),
 
     kThreadStartFailed = MakeErrorCode(ErrorDomain::kCore, 0x0001),
     kThreadPrioritySetFailed = MakeErrorCode(ErrorDomain::kCore, 0x0002),

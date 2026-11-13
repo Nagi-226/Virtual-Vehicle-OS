@@ -54,6 +54,30 @@ std::string UnescapeField(const std::string& input) {
     return out;
 }
 
+// 数值字段是否"全为 ASCII 十进制数字且非空"。
+//
+// 为什么需要这一步（而不是直接交给 std::stoul）：
+//   std::stoul 只解析**前缀**，不检查是否消费完整个字段。于是
+//     "0x1F"  -> 读到 'x' 停止 -> 返回 0
+//     "42abc" -> 读到 'a' 停止 -> 返回 42
+//     "+5"    -> 接受正号    -> 返回 5
+//   三者都不会抛异常，解码"成功"却得到一个**静默错误的值**。
+// 后果不是崩溃，而是归因错位：sequence 被吞成 0 会让幂等 key（topic+sequence）
+// 退化、多条不同消息撞同一 key 而被当重复丢掉；timestamp/ttl 被吞成 0 会让消息
+// 必然过期、以 "expired" 的名义被丢弃 —— 排障的人会去查 TTL 策略而不是编码器。
+// 这里选择"全数字"而不是"pos == size"：后者挡不住 "+5" 与前导空格。
+bool IsDecimalDigits(const std::string& input) {
+    if (input.empty()) {
+        return false;
+    }
+    for (const char ch : input) {
+        if (ch < '0' || ch > '9') {
+            return false;
+        }
+    }
+    return true;
+}
+
 // 按分隔符切分并处理转义：保证 payload/topic 中包含 '|' 时仍可安全还原。
 // 这是 legacy/compact 文本协议正确性的关键基础能力。
 void SplitEscaped(const std::string& text, std::vector<std::string>* fields) {
@@ -186,6 +210,14 @@ vr::core::ErrorCode MessageCodec::Decode(const std::string& text, MessageEnvelop
     std::vector<std::string> fields;
     SplitEscaped(text, &fields);
     if (fields.size() != kExpectedFieldCount && fields.size() != kExpectedCompactFieldCount) {
+        return vr::core::ErrorCode::kInvalidParam;
+    }
+
+    // 四个数值字段（schema_version / sequence / timestamp_ms / ttl_ms）必须先做
+    // "全为十进制数字"的显式校验 —— 否则 std::stoul 的部分消费会让畸形输入静默通过。
+    // 见 IsDecimalDigits() 上方的说明。
+    if (!IsDecimalDigits(fields[0]) || !IsDecimalDigits(fields[3]) ||
+        !IsDecimalDigits(fields[4]) || !IsDecimalDigits(fields[5])) {
         return vr::core::ErrorCode::kInvalidParam;
     }
 

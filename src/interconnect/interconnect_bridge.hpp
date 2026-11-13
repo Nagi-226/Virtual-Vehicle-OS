@@ -14,6 +14,7 @@
 
 #include "core/error_code.hpp"
 #include "core/thread_pool.hpp"
+#include "interconnect/bridge_config.hpp"
 #include "interconnect/bridge_metrics.hpp"
 #include "interconnect/bridge_policy.hpp"
 #include "interconnect/config_provider.hpp"
@@ -22,50 +23,21 @@
 #include "interconnect/message_authenticator.hpp"
 #include "interconnect/message_envelope.hpp"
 #include "interconnect/message_router.hpp"
+#include "interconnect/policy_cache.hpp"
 #include "interconnect/policy_manager.hpp"
 #include "interconnect/protocol_manager.hpp"
 #include "interconnect/system_metrics_aggregator.hpp"
 #include "interconnect/transport.hpp"
 #include "interconnect/transport_orchestrator.hpp"
 
+// 本头文件只做 InterconnectBridge 的类定义，不再兼作类型仓库：
+//   MessageProtocolMode / BridgeConfig      -> interconnect/bridge_config.hpp
+//   PolicyCacheEntry / PolicyCacheKey 等    -> interconnect/policy_cache.hpp
+// 依赖方向（无环）：message_envelope -> transport -> bridge_policy
+//   -> bridge_config -> 各 manager 头 -> interconnect_bridge.hpp
+
 namespace vr {
 namespace interconnect {
-
-enum class MessageProtocolMode : std::uint8_t {
-    kLegacyPipe = 0,
-    kCompact = 1,
-    kProtobufReserved = 2,
-    kCborReserved = 3,
-};
-
-struct BridgeConfig {
-    TransportEndpointConfig vehicle_to_robot_endpoint;
-    TransportEndpointConfig robot_to_vehicle_endpoint;
-    std::vector<TransportEndpointConfig> additional_endpoints;
-    vr::core::ThreadConfig thread_pool;
-    BridgeSlaPolicy sla_policy;
-    BridgePolicyTable policy_table;
-    std::uint32_t receive_priority{0U};
-    std::uint32_t trace_sample_rate_percent{10U};
-    std::uint64_t trace_sample_interval_ms{2000U};
-    std::uint64_t sla_violation_sample_interval_ms{5000U};
-    std::uint64_t diagnostics_report_interval_ms{1000U};
-    bool enable_diagnostics_reporting{false};
-    bool enable_config_canary{false};
-    std::uint32_t config_canary_percent{100U};
-    std::string config_canary_topic_prefix;
-    std::int32_t config_canary_channel{-1};
-    std::string protocol_canary_topic_prefix;
-    std::uint32_t protocol_canary_percent{100U};
-    std::vector<std::string> idempotency_topics;
-    std::uint32_t idempotency_window_size{128U};
-    std::string diagnostics_snapshot_path{"build/diagnostics_snapshots.jsonl"};
-    std::uint32_t diagnostics_snapshot_limit{100U};
-    bool enable_config_risk_guard{false};
-    bool auto_rollback_on_high_risk{true};
-    std::uint32_t high_risk_block_threshold{3U};
-    MessageProtocolMode protocol_mode{MessageProtocolMode::kLegacyPipe};
-};
 
 class InterconnectBridge {
 public:
@@ -83,12 +55,30 @@ public:
     MessageRouter& VehicleRouter() noexcept;
     MessageRouter& RobotRouter() noexcept;
 
+    // ======================= 指标读取入口 · 新鲜度语义 =======================
+    // 五个入口的新鲜度**各不相同**，散在各自注释里读不全，所以集中列一张表。
+    // 刷新间隔来源：kMetricsRefreshIntervalMs = 100U（本文件下方成员区）。
+    //
+    // | 入口                                | 返回                          | 新鲜度                    | 备注 |
+    // |-------------------------------------|-------------------------------|---------------------------|------|
+    // | GetBridgeMetrics()                  | BridgeMetrics                 | ❌ 缓存，滞后 ≤100ms      | 不触发刷新 |
+    // | CaptureMetricsSnapshot()            | MetricsSnapshot（.bridge_metrics）| ✅ 强刷               | 要"刚发生必可见"用这个 |
+    // | ExportPrometheusMetrics()           | std::string                   | ✅ 强刷                   | 每次 = 完整聚合（9 张 map 深拷贝），别进高频循环 |
+    // | ExportJsonMetrics()                 | std::string                   | ✅ 强刷                   | 同上 |
+    // | ExportJsonMetricsLightweight()      | std::string（字段更少）        | ❌ 缓存，滞后 ≤100ms      | **「轻」= 输出字段更少（是全量 JSON 的子集，省掉 idempotency_drop / backpressure_drop / reload 等一批计数器），不指更新鲜** |
+    // | ExportMetricsDelta()                | MetricsDelta                  | ✅ 强刷                   | 本来就是（现成先例） |
+    //
+    // 判据/踩坑记录：发布或丢弃动作之后**立刻**读，只有带 ✅ 的三个入口能保证看到；
+    // 用 ❌ 的两个读会拿到 100ms 窗口内的旧值（曾经让两条测试误报失败，见 docs/backlog.md BL-02）。
+    // ======================================================================
     BridgeMetrics GetBridgeMetrics() const noexcept;
     vr::core::ThreadPoolMetrics GetThreadPoolMetrics() const noexcept;
     MetricsSnapshot CaptureMetricsSnapshot() noexcept;
     MetricsDelta ExportMetricsDelta() noexcept;
+    // ↓ 这两个**进入时强刷**，保证导出即最新；代价是每次一次完整聚合。
     std::string ExportPrometheusMetrics() const;
     std::string ExportJsonMetrics() const;
+    // ↓ 这个**故意不强刷**（轻 = 输出字段少，不是更新鲜），实现处有详细说明。
     std::string ExportJsonMetricsLightweight() const;
     std::string GetLoadedConfigSource() const;
     std::string GetPolicyLintReport() const;
@@ -114,10 +104,17 @@ private:
     void ProcessInbound(ITransport* transport, MessageRouter* router,
                         const std::string& loop_name) noexcept;
 
-    void RefreshAggregatedMetrics(bool force = false) noexcept;
-    bool ShouldRefreshMetrics(const std::uint64_t now_ms) noexcept;
+    // 刷新聚合指标。**声明为 const**：它确实"改状态"，但改的全是 mutable 成员
+    // （last_metrics_refresh_ms_ 与 metrics_aggregator_），这样 const 的导出接口
+    // （ExportPrometheusMetrics / ExportJsonMetrics）也能触发强刷 —— 用 mutable 而不是
+    // const_cast：const_cast 会把"在 const 方法里改状态"藏起来，是隐式行为的温床。
+    void RefreshAggregatedMetrics(bool force = false) const noexcept;
+    bool ShouldRefreshMetrics(const std::uint64_t now_ms) const noexcept;
     void RebuildPolicyIndex();
-    void PopulateDefaultTemplateRules();
+    // 把默认控制/遥测模板规则填进给定策略表（表里已有模板规则时不动）。
+    // 做成接受目标的静态函数而不是只操作 config_：reload 路径必须能在**落盘前**
+    // 对候选配置做同样的填充，否则算出的签名与"实际生效的表"不是同一状态。
+    static void PopulateDefaultTemplateRules(BridgePolicyTable* table);
     void ApplyTransportTuning(const BridgeConfig& config);
     std::uint32_t ResolvePriorityForPublish(const MessageEnvelope& envelope,
                                             const ITransport* transport) const noexcept;
@@ -196,19 +193,22 @@ private:
 
     mutable std::mutex metric_map_mutex_;
 
-    std::atomic<std::uint64_t> policy_hit_count_{0U};
-    std::atomic<std::uint64_t> policy_override_count_{0U};
-    std::atomic<std::uint64_t> policy_conflict_count_{0U};
-    std::atomic<std::uint64_t> policy_conflict_sampled_count_{0U};
-    std::atomic<std::uint64_t> policy_cache_hit_count_{0U};
-    std::atomic<std::uint64_t> policy_cache_miss_count_{0U};
-    std::atomic<std::uint64_t> trace_id_present_count_{0U};
-    std::atomic<std::uint64_t> trace_id_missing_count_{0U};
-    std::atomic<std::uint64_t> trace_id_sampled_count_{0U};
-    std::atomic<std::uint64_t> trace_index_hit_count_{0U};
-    std::atomic<std::uint64_t> trace_index_miss_count_{0U};
-    std::atomic<std::uint64_t> trace_linked_event_count_{0U};
-    std::atomic<std::uint64_t> sla_violation_sampled_count_{0U};
+    // 以下计数器均为**纯观测量**：const 的读路径（ResolvePolicy / DumpRuntimeState 等）
+    // 也会自增它们。它们不参与任何逻辑判定，因此声明为 mutable 以保持读路径的
+    // const 语义（"读不改逻辑状态，只改统计计数"），这比去掉 const 侵入更小。
+    mutable std::atomic<std::uint64_t> policy_hit_count_{0U};
+    mutable std::atomic<std::uint64_t> policy_override_count_{0U};
+    mutable std::atomic<std::uint64_t> policy_conflict_count_{0U};
+    mutable std::atomic<std::uint64_t> policy_conflict_sampled_count_{0U};
+    mutable std::atomic<std::uint64_t> policy_cache_hit_count_{0U};
+    mutable std::atomic<std::uint64_t> policy_cache_miss_count_{0U};
+    mutable std::atomic<std::uint64_t> trace_id_present_count_{0U};
+    mutable std::atomic<std::uint64_t> trace_id_missing_count_{0U};
+    mutable std::atomic<std::uint64_t> trace_id_sampled_count_{0U};
+    mutable std::atomic<std::uint64_t> trace_index_hit_count_{0U};
+    mutable std::atomic<std::uint64_t> trace_index_miss_count_{0U};
+    mutable std::atomic<std::uint64_t> trace_linked_event_count_{0U};
+    mutable std::atomic<std::uint64_t> sla_violation_sampled_count_{0U};
     std::atomic<std::uint64_t> reload_success_count_{0U};
     std::atomic<std::uint64_t> reload_fail_count_{0U};
     std::atomic<std::uint64_t> reload_rollback_count_{0U};
@@ -216,16 +216,27 @@ private:
     std::atomic<std::int32_t> last_reload_status_code_{0};
     std::atomic<std::int32_t> reload_rollback_reason_code_{0};
 
-    std::atomic<std::uint64_t> last_metrics_refresh_ms_{0U};
-    std::atomic<std::uint64_t> last_receive_error_log_ms_{0U};
-    std::atomic<std::uint64_t> last_decode_fail_log_ms_{0U};
-    std::atomic<std::uint64_t> last_invalid_envelope_log_ms_{0U};
-    std::atomic<std::uint64_t> last_expired_log_ms_{0U};
-    std::atomic<std::uint64_t> last_trace_id_sample_ms_{0U};
-    std::atomic<std::uint64_t> last_sla_violation_log_ms_{0U};
-    std::atomic<std::uint64_t> last_route_miss_log_ms_{0U};
-    std::atomic<std::uint64_t> last_handler_error_log_ms_{0U};
-    std::atomic<std::uint64_t> last_policy_conflict_log_ms_{0U};
+    // ↓ 这一组是**节流用的时间戳**，mutable 的理由只有一个：
+    //   const 的读路径/观测路径也要推进它们（刷新节流、日志节流、采样间隔），
+    //   属于"逻辑 const、物理需更新缓存"，所以标 mutable 而不是去掉 const。
+    //
+    // ⚠️ 这个 mutable 不是"免费属性"：它是为**上述具体用途**加的，不是通用许可。
+    //   尤其 `last_metrics_refresh_ms_` —— 目前 `ExportPrometheusMetrics()` /
+    //   `ExportJsonMetrics()`（都是 const）依赖它可由 `RefreshAggregatedMetrics(true)`
+    //   推进，才能做到"导出即最新"。**若有人把它改成非 mutable，这两个 const 导出会
+    //   编译不过**；届时请恢复 mutable 或改成别的正确做法，
+    //   **不要改用 `const_cast` 把"在 const 方法里改状态"藏起来**（见
+    //   `RefreshAggregatedMetrics` 声明处的说明）。
+    mutable std::atomic<std::uint64_t> last_metrics_refresh_ms_{0U};
+    mutable std::atomic<std::uint64_t> last_receive_error_log_ms_{0U};
+    mutable std::atomic<std::uint64_t> last_decode_fail_log_ms_{0U};
+    mutable std::atomic<std::uint64_t> last_invalid_envelope_log_ms_{0U};
+    mutable std::atomic<std::uint64_t> last_expired_log_ms_{0U};
+    mutable std::atomic<std::uint64_t> last_trace_id_sample_ms_{0U};
+    mutable std::atomic<std::uint64_t> last_sla_violation_log_ms_{0U};
+    mutable std::atomic<std::uint64_t> last_route_miss_log_ms_{0U};
+    mutable std::atomic<std::uint64_t> last_handler_error_log_ms_{0U};
+    mutable std::atomic<std::uint64_t> last_policy_conflict_log_ms_{0U};
 
     static constexpr std::uint64_t kMetricsRefreshIntervalMs = 100U;
     static constexpr std::uint64_t kLogThrottleIntervalMs = 1000U;
@@ -235,36 +246,7 @@ private:
     static constexpr std::uint32_t kTraceIdSampleRatePercentDefault = 10U;
     static constexpr std::uint64_t kPolicyCacheMaxEntries = 256U;
 
-    struct PolicyCacheEntry {
-        BridgeSlaPolicy policy;
-        bool override_applied{false};
-        bool conflict_detected{false};
-    };
-
-    struct PolicyCacheKey {
-        std::string topic;
-        ChannelType channel{ChannelType::kEvent};
-        DeliveryQoS qos{DeliveryQoS::kBestEffort};
-
-        bool operator==(const PolicyCacheKey& other) const {
-            return topic == other.topic && channel == other.channel && qos == other.qos;
-        }
-    };
-
-    struct PolicyCacheKeyHasher {
-        std::size_t operator()(const PolicyCacheKey& key) const noexcept {
-            const std::size_t h1 = std::hash<std::string>{}(key.topic);
-            const std::size_t h2 = std::hash<std::uint8_t>{}(static_cast<std::uint8_t>(key.channel));
-            const std::size_t h3 = std::hash<std::uint8_t>{}(static_cast<std::uint8_t>(key.qos));
-            return h1 ^ (h2 << 1U) ^ (h3 << 2U);
-        }
-    };
-
-    struct PolicyCacheItem {
-        PolicyCacheKey key;
-        PolicyCacheEntry entry;
-    };
-
+    // 策略解析缓存（类型见 interconnect/policy_cache.hpp）
     mutable std::mutex policy_cache_mutex_;
     mutable std::list<PolicyCacheItem> policy_cache_items_;
     mutable std::unordered_map<PolicyCacheKey, std::list<PolicyCacheItem>::iterator,
@@ -280,6 +262,10 @@ private:
     static constexpr std::size_t kTraceIndexMaxEntries = 1024U;
 
     std::uint64_t loaded_config_version_{0U};
+    // 是否已经有过一次成功提交的配置（Start 成功或 reload 成功提交）。
+    // 首次启动时不存在"上一份已知良好配置"，canary 灰度回退没有回退目标，
+    // 必须放行；否则 config_canary_percent < 100 的配置会让设备永远起不来。
+    bool has_committed_config_{false};
     std::string loaded_config_source_;
     BridgeConfig last_known_good_config_{};
     std::uint64_t last_known_good_version_{0U};
@@ -310,12 +296,22 @@ private:
     std::atomic<std::uint64_t> failover_hit_count_{0U};
     std::atomic<std::uint64_t> idempotency_drop_count_{0U};
     std::atomic<std::uint64_t> diagnostic_snapshot_write_count_{0U};
-    std::atomic<std::uint64_t> diag_dump_state_count_{0U};
-    std::atomic<std::uint64_t> diag_route_event_count_{0U};
-    std::atomic<std::uint64_t> diag_failover_event_count_{0U};
+    mutable std::atomic<std::uint64_t> diag_dump_state_count_{0U};
+    mutable std::atomic<std::uint64_t> diag_route_event_count_{0U};
+    mutable std::atomic<std::uint64_t> diag_failover_event_count_{0U};
     std::atomic<std::uint64_t> transport_primary_healthy_{1U};
     std::atomic<std::uint64_t> transport_secondary_healthy_{1U};
 
+    // mutable 的具体理由：多个 **const** 出口需要它"刷新缓存"才能给出一致观测 ——
+    //   GetBridgeMetrics()（const，读缓存）、CaptureMetricsSnapshot()（非 const，强刷）、
+    //   ExportPrometheusMetrics() / ExportJsonMetrics()（const，强刷）、
+    //   ExportMetricsDelta()（非 const，强刷）。
+    // 这些路径都会经由 `RefreshAggregatedMetrics()` 写入本成员；它是 const 方法可写的，
+    // 唯一原因就是这里的 mutable。
+    //
+    // ⚠️ 不要把它当成"因为别处依赖所以顺手带上的属性"：如果将来重构搬走/去掉这个
+    //   mutable，上面两个 const 导出会编译失败 —— 那时**不要**用 `const_cast` 绕过去
+    //   （会把"在 const 里改状态"藏起来，正是本轮一直在消灭的隐式行为）。
     mutable SystemMetricsAggregator metrics_aggregator_;
 };
 
