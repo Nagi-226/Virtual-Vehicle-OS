@@ -26,7 +26,12 @@ if(ENABLE_SANITIZER AND NOT MSVC)
     add_link_options($<$<CONFIG:Debug>:-fsanitize=address,undefined>)
 endif()
 
-include_directories(${CMAKE_SOURCE_DIR}/src)
+# 注意：必须用 CMAKE_CURRENT_SOURCE_DIR（本文件所在目录），不能用 CMAKE_SOURCE_DIR。
+# 后者指向**当前工程顶层**：当 VVOS 被父工程 add_subdirectory() 嵌入时，它指向父工程根，
+# 于是这里的 -I 变成 <父工程>/src —— VVOS 自己的头文件全部找不到（实测 13 个 TU 全部
+# "fatal error: xxx.hpp: No such file or directory"）。CMAKE_CURRENT_SOURCE_DIR 在
+# 两种情况下都等于 VVOS 根，语义正确。
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 add_library(vr_error_code STATIC src/core/error_code.cpp)
 
@@ -84,8 +89,10 @@ if(ENABLE_STM32F429_TARGET)
         platform/stm32f429/main_min.cpp
     )
     target_include_directories(stm32f429_min_fw PRIVATE platform/stm32f429)
+    # 链接脚本是本仓库内的文件，同样必须用 CMAKE_CURRENT_SOURCE_DIR（理由见文件头部
+    # include_directories 处的说明）：用 CMAKE_SOURCE_DIR 会指向父工程根。
     target_link_options(stm32f429_min_fw PRIVATE
-        -T${CMAKE_SOURCE_DIR}/platform/stm32f429/STM32F429ZGTX_FLASH.ld
+        -T${CMAKE_CURRENT_SOURCE_DIR}/platform/stm32f429/STM32F429ZGTX_FLASH.ld
         -nostartfiles
     )
 
@@ -244,7 +251,9 @@ if(ENABLE_TESTS)
         tests/platform/f429_bridge_diag_adapter_test.cpp
         platform/stm32f429/f429_bridge_diag_adapter.cpp
     )
-    target_include_directories(f429_bridge_diag_adapter_test PRIVATE ${CMAKE_SOURCE_DIR})
+    # 这里要加的是**本仓库根**（下面源码头用的是 "platform/stm32f429/..." 根相对写法），
+    # 所以用 CMAKE_CURRENT_SOURCE_DIR；用 CMAKE_SOURCE_DIR 在被父工程嵌入时会指向父工程根。
+    target_include_directories(f429_bridge_diag_adapter_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
     target_link_libraries(f429_bridge_diag_adapter_test PRIVATE vr_base_framework)
     vvos_register_test(f429_bridge_diag_adapter_test f429_bridge_diag_adapter_test)
     set_tests_properties(f429_bridge_diag_adapter_test PROPERTIES LABELS "platform" TIMEOUT 10)
