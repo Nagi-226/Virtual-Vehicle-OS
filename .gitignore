@@ -44,12 +44,18 @@ compile_commands.json
 Thumbs.db
 desktop.ini
 
-# ---- 内部工作文档（保留本地，不进公开仓库）----
-# 架构评估、集成规格、backlog、工具链笔记等属于开发过程产物，
-# 对外只保留 README.md 与已有的 docs/platform_integration_v08.md。
-docs/architecture-assessment-*.md
-docs/three-way-integration-*.md
-docs/u02-u03-implementation-spec-*.md
-docs/backlog.md
-docs/toolchain-notes.md
-docs/*.mermaid
+# ---- 文档：白名单制（默认不入库，显式放行）----
+# 为什么用白名单而不是黑名单：
+#   本项目发生过「凭据被顺手写进配置并入库」（sdkconfig → .bin）。
+#   黑名单的默认是「泄漏」（新文件自动入库），白名单的默认是「安全」（新文件自动留本地）。
+# 入库标准 —— 这份文档「过期十年后还有没有用」：
+#   ✅ 长期有效（协作规矩 / 环境坑 / 对外说明）→ 显式放行
+#   ❌ 一次性（评估报告 / 实施规格 / backlog / 测量日志）→ 默认不入库
+docs/*
+!docs/platform_integration_v08.md
+!docs/toolchain-notes.md
+!docs/version-history.md
+!docs/readme-restructure-plan.md
+!docs/smoke/
+!docs/**/*.log
+!docs/**/*.jsonl
