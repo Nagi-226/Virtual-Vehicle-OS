@@ -216,4 +216,4 @@ thread_local char g_thread_context[kThreadContextCapacity] = {0};  // 平凡析�
 | gdb | **未安装** |
 | MSVC | VS2022 BuildTools 14.44 在 `C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools`，**缺 Windows SDK**，且 `vcvars64.bat` 会调用被沙箱拦截的 `reg.exe` |
 | Application Verifier | `C:\Windows\system32\appverif.exe` 存在（未使用，page heap 需管理员） |
-| ESP-IDF | v5.2.7 在 `D:/Espressif/frameworks/esp-idf-v5.2.7/`，**需先加载 export 脚本**才有 `idf.py` / `xtensa-esp32s3-elf-gcc` |
+| ESP-IDF | v5.2.7 装在 **IDF 安装根**（示例：`<IDF 根>/frameworks/esp-idf-v5.2.7/`），**需先加载 export 脚本**才有 `idf.py` / `xtensa-esp32s3-elf-gcc` |
