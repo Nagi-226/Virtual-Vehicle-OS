@@ -65,6 +65,20 @@ list(APPEND VR_BASE_SOURCES
 
 add_library(vr_base_framework ${VR_BASE_SOURCES})
 
+# 把 src/ 作为**导出**的头文件目录给消费者。
+#
+# 为什么必须单独写这一条：上面 :34 的 include_directories() 是**目录级**作用域，只影响
+# 本目录及其子目录里创建的目标，**不会传播给父工程**。所以父工程即使
+# `target_link_libraries(app PRIVATE vr_base_framework)`，也拿不到 -I，
+# `#include "interconnect/message_codec.hpp"` 直接 fatal error（实测：
+# `main.cpp:10: fatal error: interconnect/message_codec.hpp: No such file or directory`）。
+#
+# PUBLIC 而不是 INTERFACE：本库自身编译也要这些头（公有 include 会自动参与本 target 的编译），
+# 语义就是"用这个 target 的人也需要这些头"，不是"额外多给"。
+target_include_directories(vr_base_framework
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src
+)
+
 target_link_libraries(vr_base_framework
     PUBLIC commonsvc_log vr_error_code
 )
@@ -143,7 +157,10 @@ if(ENABLE_TESTS)
     # 注册测试的唯一入口。它做两件事：
     #   1) 声明 ctest 测试（add_test）；
     #   2) 把名字累加到 VVOS_DECLARED_TESTS，最终落到
-    #      ${CMAKE_BINARY_DIR}/vvos_declared_tests.txt。
+    #      ${CMAKE_CURRENT_BINARY_DIR}/vvos_declared_tests.txt。
+    #      （用 CURRENT_BINARY_DIR 而不是 BINARY_DIR：后者是**整个工程**的构建根，
+    #        被父工程 add_subdirectory() 嵌入时会写到父工程构建根去，属目录泄漏。
+    #        独立构建时两者相同，行为不变。）
     # 质量门禁会用这份清单与 `ctest -N` 的注册结果做双向比对，
     # 阻断"声明了却没注册 / 注册了却没声明 / 一个测试都没跑"的静默漂移。
     # 新增测试请一律走这个宏，不要再直接写 add_test。
@@ -272,6 +289,8 @@ if(ENABLE_TESTS)
 
     # 落盘声明清单：门禁据此校验"声明数 == 注册数"，且清单已按本平台的实际
     # 条件分支求值（例如 NOT WIN32 里的 3 条在 Windows 上不会出现）。
+    # 用 CMAKE_CURRENT_BINARY_DIR：被父工程嵌入时清单落在 VVOS 自己的构建子目录，
+    # 不污染父工程构建根；独立构建时与 CMAKE_BINARY_DIR 相同。
     string(REPLACE ";" "\n" VVOS_DECLARED_TESTS_TEXT "${VVOS_DECLARED_TESTS}")
-    file(WRITE "${CMAKE_BINARY_DIR}/vvos_declared_tests.txt" "${VVOS_DECLARED_TESTS_TEXT}\n")
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/vvos_declared_tests.txt" "${VVOS_DECLARED_TESTS_TEXT}\n")
 endif()
