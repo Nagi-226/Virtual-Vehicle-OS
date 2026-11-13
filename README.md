@@ -110,15 +110,19 @@ platform/stm32f429（默认下架） · tests/ · tools/（发布门禁） · do
 
 ## 文档地图
 
-| 想了解 | 看 |
-|---|---|
-| **改了 wire 格式要同步哪里**（必读） | [项目集群总索引](https://github.com/Nagi-226/RoboMind-S3/blob/master/docs/PROJECTS.md) §4 |
-| 已知缺陷与待决策项 | [`docs/backlog.md`](./docs/backlog.md) |
-| 架构体检（严重度清单 A1–A16） | [`docs/architecture-assessment-2026-11-13.md`](./docs/architecture-assessment-2026-11-13.md) |
-| 三者打通评估（VVOS × RoboMind × PPM） | [`docs/three-way-integration-2026-11-13.md`](./docs/three-way-integration-2026-11-13.md) |
-| wire 格式的字节级规格 | [`docs/u02-u03-implementation-spec-2026-11-13.md`](./docs/u02-u03-implementation-spec-2026-11-13.md) |
-| 版本历史、验收清单、审计报告 | [`docs/version-history.md`](./docs/version-history.md) |
-| README 重排规划（历史记录） | [`docs/readme-restructure-plan.md`](./docs/readme-restructure-plan.md) |
+| 想了解 | 看 | 在仓库里？ |
+|---|---|---|
+| **改了 wire 格式要同步哪里**（必读） | [项目集群总索引](https://github.com/Nagi-226/RoboMind-S3/blob/master/docs/PROJECTS.md) §4 | ✅ |
+| 版本历史、验收清单、审计报告 | [`docs/version-history.md`](./docs/version-history.md) | ✅ |
+| README 重排规划（历史记录） | [`docs/readme-restructure-plan.md`](./docs/readme-restructure-plan.md) | ✅ |
+| 已知缺陷与待决策项 | 文字路径 `docs/backlog.md` | ⚠️ **本地未入库** |
+| 架构体检（严重度清单 A1–A16） | 文字路径 `docs/architecture-assessment-2026-11-13.md` | ⚠️ **本地未入库** |
+| 三者打通评估（VVOS × RoboMind × PPM） | 文字路径 `docs/three-way-integration-2026-11-13.md` | ⚠️ **本地未入库** |
+| wire 格式的字节级规格 | 文字路径 `docs/u02-u03-implementation-spec-2026-11-13.md` | ⚠️ **本地未入库** |
+
+> ⚠️ **为什么后四行是文字路径而不是链接**：它们在 `.gitignore` 里（见 `.gitignore:52` 等），**没有入 git**。
+> 对未入库的文件，相对路径和 GitHub 绝对 URL **都**会 404——**问题不在链接形式，在目标文件在不在仓库里**。
+> 所以这里只给路径与入库状态；本地可打开，GitHub 上打不开。
 
 ---
 
