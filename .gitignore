@@ -1,0 +1,55 @@
+# ---- 构建产物目录 ----
+build/
+build-*/
+build_*/
+
+# ---- CMake / CTest 生成物 ----
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+CTestTestfile.cmake
+Testing/
+compile_commands.json
+
+# ---- 编译中间物 ----
+*.o
+*.obj
+*.a
+*.lib
+*.exe
+*.out
+*.pdb
+*.ilk
+*.exp
+*.d
+*.su
+
+# ---- IDE / 编辑器 ----
+.vscode/
+.idea/
+*.user
+*.suo
+*.sln
+*.vcxproj
+*.vcxproj.*
+
+# ---- 运行时产物 ----
+*.log
+*.jsonl
+!docs/**/*.log
+!docs/**/*.jsonl
+
+# ---- 系统 ----
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- 内部工作文档（保留本地，不进公开仓库）----
+# 架构评估、集成规格、backlog、工具链笔记等属于开发过程产物，
+# 对外只保留 README.md 与已有的 docs/platform_integration_v08.md。
+docs/architecture-assessment-*.md
+docs/three-way-integration-*.md
+docs/u02-u03-implementation-spec-*.md
+docs/backlog.md
+docs/toolchain-notes.md
+docs/*.mermaid
