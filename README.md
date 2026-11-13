@@ -138,6 +138,23 @@ C. 规划章节（v0.8）
 - Bridge 侧支持加载失败回滚到 last_known_good_config，记录 reload 状态码。
 - 已补齐回滚一致性校验规则（hash/签名），异常变更可触发回滚。
 - 已补齐配置灰度开关（enable_config_canary/config_canary_percent）。
+- **热更新支持的字段范围（重要，原为隐藏行为）**：`ReloadConfigIfChanged` 只支持修改
+  **非策略字段**（如 `receive_priority`、采样率、诊断上报间隔、canary 开关等）；
+  一旦候选配置改动了 **策略字段**（`policy_table` / `sla_policy`），reload 会拒绝并回滚，
+  诊断字段为 `reload_rollback_reason_code = 7`、审计摘要
+  `reason=policy_fields_unsupported`，并在日志中提示"需重启生效"。
+  这类改动**必须重启进程**，不能靠热更新落地。
+  注意区分：`reload_rollback_reason_code = 4`（`signature_mismatch`）才是真正的签名不符
+  （例如配置文件被外部改动/损坏），两者排查路径不同。
+- **已知限制（Known Limitations）· 配置灰度覆盖范围（P1 功能空白）**：
+  config-canary 灰度门禁当前**仅作用于 Start()**，**不覆盖 `ReloadConfigIfChanged()`**。
+  也就是说：通过**热更新**下发的新配置**不受灰度保护，会直接全量生效**（策略字段除外，
+  会被拒绝回滚，见上一条）。
+  这与 canary 的设计意图相悖——灰度本意是"新配置先给小流量试"，而运维改配置走的恰恰是
+  reload，**灰度实际只保护了冷启动这条最不常发生的路径**。
+  ⚠️ 不要把"已启用 enable_config_canary"理解为"所有配置变更都受灰度保护"。
+  待决策的两个语义选项与各自后果见 `docs/backlog.md` 的 **BL-01**。
+  代码位置标记：`InterconnectBridge::ReloadConfigIfChanged()` 函数体开头有显式注释。
 - 策略校验工具（lint + 打印冲突规则）已完成。
 - fault injection 更完整场景（乱序/重复/handler异常）已覆盖。
 - TcpTransport 端到端集成测试（双端本地 loopback）已补齐。
@@ -748,7 +765,144 @@ v1.0 准入门槛（由 v0.9 输出）
 - 运营门槛：故障定位路径闭环（日志/指标/快照/审计）。
 - 交付门槛：平台接入文档、样例、门禁脚本可复用并可审计。
 
-七、项目价值总结
+八、ESP32-S3 架构适配规划（v1.0 新增平台）
+
+导航摘要：ESP32-S3 作为 v1.0 重点新增平台，与 STM32F429 形成"硬实时网关 + 无线互通节点"的双芯车载架构。本节省略通用开发实践，聚焦硬件定位、架构协同与落地路径。
+
+8.1 为什么新增 ESP32-S3（而非取代 STM32）
+
+两片芯片定位互补，不可相互替代：
+
+| 维度 | STM32F429 | ESP32-S3 |
+|------|-----------|----------|
+| 车内角色 | CAN/FMC 硬实时传感器网关 | WiFi/BLE 无线互通中间件节点 |
+| 核心优势 | FMC 外扩 SRAM、CAN 总线、硬实时 | 双核 240MHz、WiFi/BLE、原生 FreeRTOS |
+| 运行方式 | 裸机固件（不链接 vr_base_framework） | ESP-IDF FreeRTOS，可运行完整 vr_base_framework |
+| 无线能力 | 无 | WiFi 2.4GHz + BLE 5.0 + ESP-NOW |
+| SRAM | 256KB 内部 + 8MB FMC 外扩 | 512KB 内部 + 最大 16MB PSRAM |
+| 构建工具链 | arm-none-eabi-gcc | xtensa-esp32s3-elf-gcc（ESP-IDF） |
+
+共存架构：
+
+┌─────────────────────────────────────────────────┐
+│              车载域（Vehicle Domain）              │
+│  ┌──────────┐    ┌──────────────────────────┐   │
+│  │ STM32F429 │    │      ESP32-S3             │   │
+│  │ CAN/硬实时 │    │  WiFi/BLE 无线桥接         │   │
+│  │ 传感器网关  │    │  运行 vr_base_framework    │   │
+│  └────┬─────┘    └────────────┬─────────────┘   │
+│       │ SPI/UART               │  WiFi/BLE       │
+│       └──────────┬─────────────┘                 │
+│                  │                               │
+└──────────────────┼───────────────────────────────┘
+                   │
+┌──────────────────┼───────────────────────────────┐
+│              机器人域（Robot Domain）               │
+│          ┌──────┴──────────────┐                 │
+│          │   ESP32-S3 / ROS2   │                 │
+│          │   无线接收 + 路由分发  │                 │
+│          └─────────────────────┘                 │
+└─────────────────────────────────────────────────┘
+
+8.2 ESP32-S3 适配的核心价值
+
+1) 首次让无线互通落地
+- 当前所有 Transport 均为有线（TCP/POSIX MQ），ESP32-S3 首次引入 WiFi UDP 和 ESP-NOW 广播两种无线 Transport。
+- ESP-NOW 无需配对、延迟 < 10ms，特别适合车载遥测场景。
+
+2) OSAL 抽象层从"纸面架构"走向真实代码
+- ESP-IDF 原生 FreeRTOS 倒逼 OSAL 从 stdlib 薄封装升级为真正的平台抽象层。
+- 一旦完成，任何 FreeRTOS 平台（包括 STM32+FreeRTOS）均可复用。
+
+3) 首次在嵌入式平台上运行完整互通框架
+- STM32F429 的 bare-metal target 无法链接 vr_base_framework（无 std::thread、无 C++ stdlib）。
+- **当前状态（2026-11 修正）：`stm32f429_min_fw` 目标已显式下架**。它不仅无法链接
+  `vr_base_framework`，连自身 5 个源文件都不完整：`main_min.cpp:29` 调用了
+  `F429BridgeDiagAdapter::EmitSramBringupEvent`（定义在
+  `platform/stm32f429/f429_bridge_diag_adapter.cpp`，从未被任何目标编译），
+  而该适配器又依赖 `DiagnosticsManager::RecordSnapshotWithFields`
+  （定义在 `src/interconnect/diagnostics_manager.cpp`，同样不在固件源列表里）；
+  此外 `main_min.cpp` 使用 `std::string` / `std::unordered_map`，需要 C++ 运行库，
+  而链接选项只有 `-nostartfiles`。因此 `ENABLE_STM32F429_TARGET` 默认 OFF，
+  显式打开会在 CMake 配置期直接 `FATAL_ERROR` 报出上述原因，而不是产出一个链接失败的半成品。
+  恢复条件：补齐这两个 TU 并配置 C++ 运行库，然后在装有 `arm-none-eabi-gcc` 的环境完成一次真实链接。
+- ESP32-S3 凭 512KB+PSRAM 和 ESP-IDF pthread 兼容层，是首个能跑完整框架的 MCU。
+
+8.3 适配里程碑与落地路径
+
+P0（必须完成：最小可用通路）
+1) E01：CMake 工具链与构建目标
+- 新增 cmake/toolchains/esp32s3.cmake（xtensa-esp32s3-elf-gcc + ESP-IDF 集成）。
+- 新增 CMakeLists.txt option: ENABLE_ESP32S3_TARGET。
+- 验收：cmake configure 通过，产出 ESP32-S3 ELF/BIN。
+- 工作量：S（约 1~2 人日）
+
+2) E02：OSAL FreeRTOS 真抽象
+- osal_mutex → xSemaphoreCreateMutex 变体。
+- osal_event → xEventGroup 变体。
+- osal_time → xTaskGetTickCount / vTaskDelay 变体。
+- 新增 osal_thread（xTaskCreate 封装）。
+- 新增 osal_queue（FreeRTOS Queue 封装）。
+- 验收：现有 OSAL 接口保持不变，底层切换到 FreeRTOS API。
+- 工作量：M（约 4~5 人日）
+
+3) E03：FreeRTOS ThreadPool 替换
+- 用 xTaskCreate 替换 std::thread，保持 ThreadPool 公开接口不变。
+- 保留拒绝策略语义（kRejectNewTask / kCallerRuns）。
+- 验收：thread_pool_test 在 ESP32-S3 上通过。
+- 工作量：M（约 3~5 人日）
+
+4) E04：ESP32 WiFi Transport（首个无线 ITransport）
+- 实现 ITransport 接口，底层使用 LwIP UDP sockets（ESP-IDF 内建）。
+- 支持 WiFi STA 模式连接、超时重传、优先级队列。
+- 验收：interconnect_tcp_loopback_test 等效测试在 ESP32-S3 上通过。
+- 工作量：M（约 3~4 人日）
+
+P1（应完成：高价值增量）
+5) E05：ESP-NOW 低延迟广播 Transport
+- 实现 ITransport 接口，底层使用 ESP-NOW（无需连接、< 10ms 延迟）。
+- 支持广播 + 单播模式，payload 限制 250 字节（ESP-NOW 硬件限制）。
+- 验收：弱电场下丢包率 < 5%，延迟 P99 < 15ms。
+- 工作量：M（约 3~4 人日）
+
+6) E06：Logger UART + ESP_LOG 后端
+- 替换 std::cout/std::ofstream 为 UART TX + ESP-IDF esp_log 双通道。
+- 支持日志等级过滤与紧凑格式（适配嵌入式串口带宽）。
+- 验收：启动日志通过 UART 输出，与 STM32F429 UART 日志格式对齐。
+- 工作量：S（约 1~2 人日）
+
+P2（可选：生产级加固）
+7) E07：BLE 近场自动连接 Transport
+- BLE GATT Server/Client 模式，支持 RSSI 距离感知自动连接。
+- 适用场景：车载与机器人短距离自动配对。
+- 工作量：L（约 5~8 人日）
+
+8) E08：STM32 ↔ ESP32-S3 SPI 高速互联 Transport
+- 自定义 SPI 帧协议（带 CRC + 序列号），作为双芯之间的有线 Transport。
+- 验收：SPI 吞吐 ≥ 500KB/s，误码率 < 10^-6。
+- 工作量：M/L（约 4~7 人日）
+
+8.4 适配风险与护栏
+
+- 二进制体积护栏：ESP32-S3 内置 Flash 最大 16MB，vr_base_framework + ESP-IDF 需控制在 4MB 以内，预留 OTA 分区。
+- 内存护栏：PSRAM 使能后 heap 可达 8MB+，但内部 SRAM 仅 512KB，栈/关键路径数据需控制在内部 SRAM。
+- 功耗护栏：WiFi 持续开启电流 ~100mA，电池供电场景需增加 DTIM 睡眠策略。
+- 兼容性红线：OSAL 接口不得因 FreeRTOS 适配而修改公开 API。ITransport 接口不变。
+- 回退策略：ESP32-S3 无线链路断开时，自动回退到 SPI 有线 Transport（经 STM32F429 转发）。
+
+8.5 ESP32-S3 推荐里程碑
+
+- M1（v1.0-alpha）：E01 + E02 + E03 + E04（构建 + OSAL + WiFi Transport 最小可用通路）
+- M2（v1.0-beta）：E05 + E06（ESP-NOW + 日志落地）
+- M3（v1.0-rc）：E07/E08 按优先级选取（生产加固）
+
+8.6 与 v0.9 现有规划的联动
+
+- E02/E03 直接服务 v0.9 的 R01（架构解耦）目标：OSAL + ThreadPool 真抽象化是解耦的基础设施前提。
+- E04/E05 直接服务 v0.9 的 R07（多路 transport 高级调度）目标：WiFi + ESP-NOW 两种无线 Transport 为 TransportOrchestrator 提供了真正的"多路异构"场景。
+- STM32F429 的 v0.9/R01 → R08 继续推进，ESP32-S3 适配作为并行轨道，不阻塞 STM32 主线。
+
+九、项目价值总结
 
 本项目已形成“车载-机器人互通”中间层的核心骨架，具备以下特征：
 - 可插拔：传输层和配置可替换
@@ -757,3 +911,4 @@ v1.0 准入门槛（由 v0.9 输出）
 
 结论：
 当前框架已经具备工程化可用的互通能力，适合作为车载与机器人之间中间件的标准基座；下一步在配置热更新、策略化与跨平台适配上继续扩展即可形成完整产品能力。
+	v1.0 将新增 ESP32-S3 无线互通节点，与 STM32F429 硬实时网关形成双芯车载架构，首次实现"硬实时有线 + 无线多模"的完整互通闭环。
