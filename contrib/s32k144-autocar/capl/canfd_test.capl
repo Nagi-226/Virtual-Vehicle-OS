@@ -1,0 +1,216 @@
+/**
+ * @file canfd_test.capl
+ * @brief CANoe CAPL Test Script for S32K144 CAN-FD Communication
+ * @version v0.2
+ * @target CANoe 16+ with CAN-FD license
+ *
+ * Test cases:
+ * 1. CAN0 FD message TX/RV verification (500kbps/2Mbps)
+ * 2. CAN1/CAN2 classic CAN TX/RX verification (500kbps)
+ * 3. DLC boundary test (DLC 0-15 for FD)
+ * 4. Bus-off injection and recovery
+ * 5. Periodic message timing verification
+ *
+ * Usage: Load this script in CANoe CAN-FD node configuration.
+ *        Assign to CAN channel 1 (CAN0), 2 (CAN1), 3 (CAN2).
+ */
+
+/* ========== Variables ========== */
+variables {
+    msTimer txPeriodicTimer;
+    msTimer rxWatchdogTimer;
+    int  g_rxCount_Can0 = 0;
+    int  g_rxCount_Can1 = 0;
+    int  g_txCount = 0;
+    int  g_testPassCount = 0;
+    int  g_testFailCount = 0;
+    int  g_lastRxDlc = 0;
+    long g_testStartTime;
+}
+
+/* ========== Test Setup ========== */
+on start {
+    write("=== Simulink_AutoCar CAN-FD Test Suite v0.2 ===");
+    write("CAN0: CAN-FD 500kbps/2Mbps (Channel 1)");
+    write("CAN1: Classic 500kbps (Channel 2)");
+    write("CAN2: Classic 500kbps (Channel 3)");
+    write("");
+
+    g_testStartTime = timeNow();
+
+    /* Start periodic TX timer (10ms cycle for MotorStatus) */
+    setTimer(txPeriodicTimer, 10);
+    /* Start RX watchdog (100ms timeout) */
+    setTimer(rxWatchdogTimer, 100);
+
+    /* Test 1: Send initial FD frame */
+    testCanFdTx();
+}
+
+/* ========== Timer Handlers ========== */
+on timer txPeriodicTimer {
+    /* Periodic MotorStatus message (10ms cycle, CAN-FD) */
+    message 0x100 MotorStatusTx;  /* CAN ID 0x100 */
+
+    MotorStatusTx.dlc = 8;        /* Classic 8 bytes */
+    MotorStatusTx.byte(0) = g_txCount & 0xFF;  /* Sequence counter */
+    MotorStatusTx.byte(1) = 0x01;  /* Status: Running */
+    MotorStatusTx.byte(2) = 0x80;  /* Speed MSB */
+    MotorStatusTx.byte(3) = 0x00;  /* Speed LSB */
+    MotorStatusTx.byte(4) = 0x40;  /* Torque MSB */
+    MotorStatusTx.byte(5) = 0x00;  /* Torque LSB */
+    MotorStatusTx.byte(6) = 0x00;  /* Temperature */
+    MotorStatusTx.byte(7) = 0x00;  /* Reserved */
+
+    output(MotorStatusTx);
+    g_txCount++;
+
+    setTimer(txPeriodicTimer, 10);
+}
+
+on timer rxWatchdogTimer {
+    /* Check if we've received any frames in the last 100ms */
+    if (g_rxCount_Can0 == 0) {
+        write("WARNING: No CAN0 frames received in 100ms window");
+    }
+    g_rxCount_Can0 = 0;
+    setTimer(rxWatchdogTimer, 100);
+}
+
+/* ========== RX Message Handlers ========== */
+
+/* CAN0 FD RX: SensorData (0x200) */
+on message 0x200 {
+    g_rxCount_Can1++;
+
+    /* Verify DLC */
+    if (this.dlc != 16) {
+        write("FAIL: SensorData DLC mismatch. Expected 16, got %d", this.dlc);
+        g_testFailCount++;
+    } else {
+        g_testPassCount++;
+    }
+
+    /* Log received data */
+    write("RX SensorData: ID=0x%03X DLC=%d Byte0=0x%02X",
+          this.id, this.dlc, this.byte(0));
+}
+
+/* CAN0 FD RX: MotorStatus (0x100) echo from DUT */
+on message 0x100 {
+    g_lastRxDlc = this.dlc;
+    write("RX MotorStatus Echo: ID=0x%03X DLC=%d", this.id, this.dlc);
+}
+
+/* CAN1 Classic RX: BmsStatus (0x300) */
+on message 0x300 {
+    write("RX BmsStatus: ID=0x%03X DLC=%d SOC=%d%%",
+          this.id, this.dlc, this.byte(0));
+}
+
+/* CAN2 Classic RX: VehicleControl (0x400) */
+on message 0x400 {
+    write("RX VehicleControl: ID=0x%03X DLC=%d", this.id, this.dlc);
+}
+
+/* ========== Test Functions ========== */
+
+/**
+ * Test 1: CAN-FD TX/RV verification
+ * Send FD frame with DLC 9 (12 bytes) and verify DUT echoes back
+ */
+void testCanFdTx(void) {
+    message 0x200 SensorDataTx;  /* CAN ID 0x200 - FD sensor data */
+
+    /* @canfd = 1 enables CAN-FD format */
+    SensorDataTx.canfd = 1;
+    SensorDataTx.dlc = 9;  /* DLC 9 = 12 bytes in CAN-FD */
+    SensorDataTx.byte(0) = 0xAA;  /* Test pattern */
+    SensorDataTx.byte(1) = 0x55;
+    SensorDataTx.byte(2) = 0xFF;
+    SensorDataTx.byte(3) = 0x00;
+    /* ... remaining bytes default to 0 */
+
+    output(SensorDataTx);
+    write("TEST: Sent CAN-FD frame ID=0x200 DLC=9 (12 bytes)");
+}
+
+/**
+ * Test 2: DLC boundary test for CAN-FD
+ * Send frames with DLC 0 through 15
+ */
+void testDlcBoundary(void) {
+    int dlc;
+    for (dlc = 0; dlc <= 15; dlc++) {
+        message 0x200 SensorDataTx;
+        SensorDataTx.canfd = 1;
+        SensorDataTx.dlc = dlc;
+        SensorDataTx.byte(0) = dlc;  /* DLC as test marker */
+        output(SensorDataTx);
+        write("TEST: DLC boundary test - DLC=%d (length=%d bytes)",
+              dlc, lengthToDlc(dlc));
+    }
+}
+
+/**
+ * Test 3: Bus-off injection
+ * Force bus-off by sending dominant bits, verify DUT recovery
+ */
+void testBusOffInjection(void) {
+    write("TEST: Bus-off injection - sending error frames");
+    /* In real test, use CANoe bus disturbance feature or
+     * set CAN channel to error active to trigger bus-off on DUT */
+    /* canSetBusError(1, 8); */  /* 8 consecutive errors -> bus-off */
+}
+
+/**
+ * Test 4: Periodic message timing verification
+ * Monitor MotorStatus message timing jitter
+ */
+void testTimingJitter(void) {
+    write("TEST: Periodic message timing - monitoring 10ms cycle");
+    /* Timing measurement done in on message handler above */
+}
+
+/* ========== Key Event Handlers ========== */
+on key 't' {
+    /* Manual test trigger */
+    write("--- Running DLC boundary test ---");
+    testDlcBoundary();
+}
+
+on key 'b' {
+    /* Bus-off test trigger */
+    write("--- Running bus-off injection test ---");
+    testBusOffInjection();
+}
+
+on key 's' {
+    /* Print statistics */
+    write("=== Test Statistics ===");
+    write("TX count: %d", g_txCount);
+    write("RX count (CAN0): %d", g_rxCount_Can1);
+    write("PASS: %d  FAIL: %d", g_testPassCount, g_testFailCount);
+    write("Last RX DLC: %d", g_lastRxDlc);
+    write("Uptime: %d ms", (timeNow() - g_testStartTime) / 100000);
+}
+
+on key 'q' {
+    write("Test suite stopped.");
+    cancelTimer(txPeriodicTimer);
+    cancelTimer(rxWatchdogTimer);
+}
+
+/* ========== Helper: CAN-FD DLC to Length ========== */
+int lengthToDlc(int dlc) {
+    /* Standard CAN-FD DLC mapping */
+    if (dlc <= 8) return dlc;
+    if (dlc == 9) return 12;
+    if (dlc == 10) return 16;
+    if (dlc == 11) return 20;
+    if (dlc == 12) return 24;
+    if (dlc == 13) return 32;
+    if (dlc == 14) return 48;
+    if (dlc == 15) return 64;
+    return -1;
+}

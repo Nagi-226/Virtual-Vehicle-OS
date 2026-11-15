@@ -1,0 +1,130 @@
+VERSION ""
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_DEF_
+    CAT_
+    FILTER
+    BA_DEF_DEF_
+    EV_DATA_
+    ENVVAR_DATA_
+    SGTYPE_
+    SGTYPE_VAL_
+    BA_DEF_SGTYPE_
+    BA_SGTYPE_
+    SIG_TYPE_REF_
+    VAL_TABLE_
+    SIG_GROUP_
+    SIG_VALTYPE_
+    SIGTYPE_VALTYPE_
+    BO_TX_BU_
+    BA_DEF_REL_
+    BA_REL_
+    BA_DEF_DEF_REL_
+    BU_SG_REL_
+    BU_EV_REL_
+    BU_BO_REL_
+    SG_MUL_VAL_
+
+BS_:
+
+BU_: ECU RADAR_FRONT RADAR_REAR USS_FL USS_FR USS_RL USS_RR TIME_MASTER
+
+BO_ 100 RadarTargetList: 64 RADAR_FRONT
+ SG_ NumTargets : 0|8@1+ (1,0) [0|16] "" ECU
+ SG_ SensorId : 8|8@1+ (1,0) [0|255] "" ECU
+ SG_ T0_TargetId : 16|6@1+ (1,0) [0|63] "" ECU
+ SG_ T0_Status : 22|2@1+ (1,0) [0|3] "" ECU
+ SG_ T0_Range_cm : 24|16@1+ (1,0) [0|65535] "cm" ECU
+ SG_ T0_Confidence : 56|4@1+ (1,0) [0|15] "" ECU
+ SG_ T1_TargetId : 48|6@1+ (1,0) [0|63] "" ECU
+ SG_ T1_Status : 54|2@1+ (1,0) [0|3] "" ECU
+ SG_ T1_Range_cm : 56|16@1+ (1,0) [0|65535] "cm" ECU
+ SG_ T1_Confidence : 88|4@1+ (1,0) [0|15] "" ECU
+
+BO_ 101 RadarTargetExt: 64 RADAR_FRONT
+ SG_ NumTargets : 0|8@1+ (1,0) [0|8] "" ECU
+ SG_ T0_TargetId : 16|8@1+ (1,0) [0|255] "" ECU
+ SG_ T0_RangeRate_cms : 24|16@1- (1,0) [-32768|32767] "cm/s" ECU
+ SG_ T0_Angle_deg10 : 40|16@1- (1,0) [-1800|1800] "0.1deg" ECU
+ SG_ T0_RCS_dBm : 56|8@1+ (1,-128) [-128|127] "dBm" ECU
+
+BO_ 102 RadarStatus: 8 RADAR_FRONT
+ SG_ SensorStatus : 0|8@1+ (1,0) [0|255] "" ECU
+ SG_ Temperature_C : 8|8@1+ (1,-40) [-40|215] "degC" ECU
+ SG_ NumDetections : 16|8@1+ (1,0) [0|255] "" ECU
+ SG_ CycleTime_ms : 24|16@1+ (1,0) [0|65535] "ms" ECU
+ SG_ FaultCode : 40|8@1+ (1,0) [0|255] "" ECU
+
+BO_ 200 UltrasonicData: 8 USS_FL
+ SG_ FL_Distance_cm : 0|12@1+ (1,0) [0|4000] "cm" ECU
+ SG_ FL_Valid : 12|1@1+ (1,0) [0|1] "" ECU
+ SG_ FL_Timeout : 13|1@1+ (1,0) [0|1] "" ECU
+ SG_ FR_Distance_cm : 16|12@1+ (1,0) [0|4000] "cm" ECU
+ SG_ FR_Valid : 28|1@1+ (1,0) [0|1] "" ECU
+ SG_ FR_Timeout : 29|1@1+ (1,0) [0|1] "" ECU
+ SG_ RL_Distance_cm : 32|12@1+ (1,0) [0|4000] "cm" ECU
+ SG_ RL_Valid : 44|1@1+ (1,0) [0|1] "" ECU
+ SG_ RL_Timeout : 45|1@1+ (1,0) [0|1] "" ECU
+ SG_ RR_Distance_cm : 48|12@1+ (1,0) [0|4000] "cm" ECU
+ SG_ RR_Valid : 60|1@1+ (1,0) [0|1] "" ECU
+ SG_ RR_Timeout : 61|1@1+ (1,0) [0|1] "" ECU
+
+BO_ 300 TimeBase: 8 TIME_MASTER
+ SG_ MasterTime_ms : 0|32@1+ (1,0) [0|4294967295] "ms" ECU
+ SG_ SyncSequence : 32|16@1+ (1,0) [0|65535] "" ECU
+ SG_ SyncQuality : 48|8@1+ (1,0) [0|100] "%" ECU
+
+BO_ 301 ObstacleList: 64 ECU
+ SG_ NumObstacles : 0|8@1+ (1,0) [0|24] "" TIME_MASTER
+ SG_ O0_XPos_cm : 16|16@1- (1,0) [-32768|32767] "cm" TIME_MASTER
+ SG_ O0_YPos_cm : 32|16@1- (1,0) [-32768|32767] "cm" TIME_MASTER
+ SG_ O0_Confidence : 48|8@1+ (1,0) [0|100] "%" TIME_MASTER
+ SG_ O0_RiskLevel : 56|4@1+ (1,0) [0|3] "" TIME_MASTER
+ SG_ O0_Source : 60|2@1+ (1,0) [0|3] "" TIME_MASTER
+
+BO_ 302 SensorFault: 8 ECU
+ SG_ RadarTimeout : 0|1@1+ (1,0) [0|1] "" TIME_MASTER
+ SG_ RadarCrcError : 1|1@1+ (1,0) [0|1] "" TIME_MASTER
+ SG_ UsTimeout : 2|1@1+ (1,0) [0|1] "" TIME_MASTER
+ SG_ UsOutOfRange : 3|1@1+ (1,0) [0|1] "" TIME_MASTER
+ SG_ TimeSyncLost : 4|1@1+ (1,0) [0|1] "" TIME_MASTER
+ SG_ RadarFrameCount : 16|16@1+ (1,0) [0|65535] "" TIME_MASTER
+ SG_ UsSampleCount : 32|16@1+ (1,0) [0|65535] "" TIME_MASTER
+ SG_ FaultCount : 48|16@1+ (1,0) [0|65535] "" TIME_MASTER
+
+VAL_ 100 T0_Status 0 "Valid" 1 "Coasted" 2 "Deleted" 3 "New" ;
+VAL_ 100 T1_Status 0 "Valid" 1 "Coasted" 2 "Deleted" 3 "New" ;
+VAL_ 301 O0_RiskLevel 0 "None" 1 "Low" 2 "Medium" 3 "High" ;
+VAL_ 301 O0_Source 1 "Radar" 2 "Ultrasonic" 3 "Fused" ;
+
+BA_DEF_ BO_ "GenMsgSendType" ENUM "cyclic","spontan","cyclicIfActive","spontanWithRepeat","cyclicAndSpontan","cyclicAndSpontanWithRepeat";
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 65535;
+BA_DEF_ BO_ "CANFD_BRS" ENUM "no","yes";
+BA_DEF_ SG_ "GenSigStartValue" FLOAT -3.4E38 3.4E38;
+
+BA_DEF_DEF_ "GenMsgSendType" "cyclic";
+BA_DEF_DEF_ "GenMsgCycleTime" 0;
+BA_DEF_DEF_ "CANFD_BRS" "no";
+BA_DEF_DEF_ "GenSigStartValue" 0;
+
+BA_ "GenMsgSendType" BO_ 100 "cyclic";
+BA_ "GenMsgCycleTime" BO_ 100 50;
+BA_ "CANFD_BRS" BO_ 100 "yes";
+BA_ "GenMsgSendType" BO_ 101 "cyclic";
+BA_ "GenMsgCycleTime" BO_ 101 50;
+BA_ "CANFD_BRS" BO_ 101 "yes";
+BA_ "GenMsgSendType" BO_ 102 "cyclic";
+BA_ "GenMsgCycleTime" BO_ 102 100;
+BA_ "GenMsgSendType" BO_ 200 "cyclic";
+BA_ "GenMsgCycleTime" BO_ 200 100;
+BA_ "GenMsgSendType" BO_ 300 "cyclic";
+BA_ "GenMsgCycleTime" BO_ 300 100;
+BA_ "GenMsgSendType" BO_ 301 "cyclic";
+BA_ "GenMsgCycleTime" BO_ 301 100;
+BA_ "CANFD_BRS" BO_ 301 "yes";
+BA_ "GenMsgSendType" BO_ 302 "spontan";

@@ -1,0 +1,102 @@
+VERSION ""
+
+NS_ :
+
+BS_:
+
+BU_: ECU_Motor ECU_CAN ECU_Sensor ECU_Ota BMS
+
+BO_ 100 MotorStatus: 8 ECU_Motor
+ SG_ MotorRPM : 0|16@1+ (1,0) (0,65535) "rpm" ECU_CAN,ECU_Sensor
+ SG_ MotorTemp : 16|8@1+ (1,-40) (-40,215) "degC" ECU_CAN,ECU_Sensor
+ SG_ PhaseCurrentA : 24|16@1- (0.01,-327.68) (-327.68,327.67) "A" ECU_CAN
+ SG_ PhaseCurrentB : 40|16@1- (0.01,-327.68) (-327.68,327.67) "A" ECU_CAN
+ SG_ FaultCode : 56|8@1+ (1,0) (0,255) "" ECU_CAN,ECU_Sensor
+
+BO_ 200 SensorData: 64 ECU_Sensor
+ SG_ RadarSpeed_mps : 0|16@1+ (0.01,0) (0,655.35) "m/s" ECU_Motor,ECU_CAN
+ SG_ RadarDistance_mm : 16|16@1+ (1,0) (0,65535) "mm" ECU_Motor,ECU_CAN
+ SG_ UltraFront_mm : 32|16@1+ (1,0) (0,65535) "mm" ECU_Motor
+ SG_ UltraRear_mm : 48|16@1+ (1,0) (0,65535) "mm" ECU_Motor
+ SG_ ImuAccelX : 64|16@1- (0.01,-327.68) (-327.68,327.67) "m/s2" ECU_Motor,ECU_CAN
+ SG_ ImuAccelY : 80|16@1- (0.01,-327.68) (-327.68,327.67) "m/s2" ECU_Motor,ECU_CAN
+ SG_ ImuGyroZ : 96|16@1- (0.01,-327.68) (-327.68,327.67) "deg/s" ECU_Motor,ECU_CAN
+ SG_ SteerAngle : 112|16@1- (0.1,-3276.8) (-3276.8,3276.7) "deg" ECU_Motor,ECU_CAN
+
+BO_ 300 OtaCommand: 8 ECU_Ota
+ SG_ CmdType : 0|8@1+ (1,0) (0,255) "" ECU_Motor,ECU_CAN
+ SG_ TargetSlot : 8|8@1+ (1,0) (0,1) "" ECU_Motor,ECU_CAN
+ SG_ FwSize : 16|32@1+ (1,0) (0,4294967295) "bytes" ECU_Motor
+ SG_ Crc32 : 48|32@1+ (1,0) (0,4294967295) "" ECU_Motor
+
+BO_ 400 VehicleControl: 8 ECU_CAN
+ SG_ TargetTorque : 0|16@1+ (0.1,-3276.8) (-3276.8,3276.7) "Nm" ECU_Motor
+ SG_ TargetSpeed : 16|16@1+ (1,0) (0,65535) "rpm" ECU_Motor
+ SG_ RegenLevel : 32|8@1+ (1,0) (0,100) "%" ECU_Motor
+ SG_ DriveMode : 40|4@1+ (1,0) (0,15) "" ECU_Motor
+ SG_ Enable : 44|1@1+ (1,0) (0,1) "" ECU_Motor
+
+BO_ 500 BmsStatus: 8 BMS
+ SG_ SocPercent : 0|8@1+ (0.5,0) (0,100) "%" ECU_Motor,ECU_CAN
+ SG_ PackVoltage : 8|16@1+ (0.01,0) (0,655.35) "V" ECU_Motor,ECU_CAN
+ SG_ PackCurrent : 24|16@1- (0.01,-327.68) (-327.68,327.67) "A" ECU_Motor,ECU_CAN
+ SG_ CellTempMax : 40|8@1+ (1,-40) (-40,215) "degC" ECU_CAN
+ SG_ CellTempMin : 48|8@1+ (1,-40) (-40,215) "degC" ECU_CAN
+ SG_ BmsFault : 56|8@1+ (1,0) (0,255) "" ECU_CAN
+
+BO_ 600 DiagRequest: 8 ECU_CAN
+ SG_ ServiceId : 0|8@1+ (1,0) (0,255) "" ECU_Motor
+ SG_ SubFunction : 8|8@1+ (1,0) (0,255) "" ECU_Motor
+ SG_ DataPayload : 16|48@1+ (1,0) (0,0) "" ECU_Motor
+
+BO_ 601 DiagResponse: 8 ECU_Motor
+ SG_ ServiceId : 0|8@1+ (1,0) (0,255) "" ECU_CAN
+ SG_ ResponseCode : 8|8@1+ (1,0) (0,255) "" ECU_CAN
+ SG_ DataPayload : 16|48@1+ (1,0) (0,0) "" ECU_CAN
+
+BO_ 700 FocDebugData: 64 ECU_Motor
+ SG_ VdRef : 0|16@1- (0.001,-32.768) (-32.768,32.767) "V" ECU_CAN
+ SG_ VqRef : 16|16@1- (0.001,-32.768) (-32.768,32.767) "V" ECU_CAN
+ SG_ IdActual : 32|16@1- (0.01,-327.68) (-327.68,327.67) "A" ECU_CAN
+ SG_ IqActual : 48|16@1- (0.01,-327.68) (-327.68,327.67) "A" ECU_CAN
+ SG_ ThetaElec : 64|16@1+ (0.01,0) (0,655.35) "deg" ECU_CAN
+ SG_ DcBusVoltage : 80|16@1+ (0.01,0) (0,655.35) "V" ECU_CAN
+ SG_ PwmDutyA : 96|16@1+ (0.01,0) (0,100) "%" ECU_CAN
+ SG_ PwmDutyB : 112|16@1+ (0.01,0) (0,100) "%" ECU_CAN
+ SG_ PwmDutyC : 128|16@1+ (0.01,0) (0,100) "%" ECU_CAN
+ SG_ SpeedRPM : 144|16@1+ (1,0) (0,65535) "rpm" ECU_CAN
+ SG_ FocStatus : 160|8@1+ (1,0) (0,255) "" ECU_CAN
+
+BA_DEF_ BO_ "GenMsgCycleTime" INT 0 65535;
+BA_DEF_DEF_ "GenMsgCycleTime" 0;
+
+BA_DEF_ BO_ "CANFD_BRS" ENUM "no","yes";
+BA_DEF_DEF_ "CANFD_BRS" "no";
+
+BA_DEF_ BO_ "GenMsgSendType" ENUM "cyclic","spontan","cyclicIfActive","spontanWithRepeat";
+BA_DEF_DEF_ "GenMsgSendType" "cyclic";
+
+BA_ "GenMsgCycleTime" BO_ 100 10;
+BA_ "GenMsgCycleTime" BO_ 200 20;
+BA_ "GenMsgCycleTime" BO_ 500 100;
+BA_ "GenMsgCycleTime" BO_ 700 50;
+
+BA_ "CANFD_BRS" BO_ 200 "yes";
+BA_ "CANFD_BRS" BO_ 700 "yes";
+
+BA_ "GenMsgSendType" BO_ 100 "cyclic";
+BA_ "GenMsgSendType" BO_ 200 "cyclic";
+BA_ "GenMsgSendType" BO_ 300 "spontan";
+BA_ "GenMsgSendType" BO_ 400 "cyclic";
+BA_ "GenMsgSendType" BO_ 500 "cyclic";
+BA_ "GenMsgSendType" BO_ 600 "spontan";
+BA_ "GenMsgSendType" BO_ 601 "spontanWithRepeat";
+BA_ "GenMsgSendType" BO_ 700 "cyclic";
+
+VAL_ 300 CmdType 0 "QueryVersion" 1 "StartUpgrade" 2 "AbortUpgrade" 3 "ActivateSlot" 4 "Rollback" ;
+VAL_ 300 TargetSlot 0 "SlotA" 1 "SlotB" ;
+VAL_ 400 DriveMode 0 "Park" 1 "Reverse" 2 "Neutral" 3 "Drive" 4 "Sport" 5 "Eco" ;
+VAL_ 400 Enable 0 "Disabled" 1 "Enabled" ;
+VAL_ 500 BmsFault 0 "NoFault" 1 "OverVoltage" 2 "UnderVoltage" 4 "OverCurrent" 8 "OverTemp" 16 "CommError" ;
+VAL_ 700 FocStatus 0 "Idle" 1 "Aligning" 2 "Running" 3 "Fault" 4 "OverCurrent" ;
+VAL_ 601 ResponseCode 0 "Positive" 1 "SubFunctionNotSupported" 2 "IncorrectMessageLength" 3 "ConditionsNotCorrect" ;

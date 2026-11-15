@@ -1,0 +1,153 @@
+/**
+ * @file sensor_error_injection.can
+ * @brief CANoe CAPL Script - Sensor Error Injection for ADAS Robustness Testing
+ * @version v0.3
+ * @target S32K144 ADAS sensor link test
+ *
+ * Injects various errors into sensor data paths to verify:
+ * - S32K144 fault detection and reporting
+ * - Sensor timeout handling
+ * - Data validation (out-of-range, CRC errors)
+ * - Time sync loss recovery
+ * - Bus-off recovery under error conditions
+ *
+ * Interactive commands:
+ *   '1'     : Inject radar DLC error (wrong DLC)
+ *   '2'     : Inject radar invalid target count
+ *   '3'     : Inject radar out-of-range distance
+ *   '4'     : Inject ultrasonic out-of-range
+ *   '5'     : Stop time sync (simulates master failure)
+ *   '6'     : Resume time sync
+ *   '7'     : Inject CAN stuff error
+ *   '8'     : Inject high busload (stress test)
+ *   '9'     : Stop all injection
+ *   's'     : Print injection statistics
+ */
+
+variables {
+  /* Error injection state */
+  int radarDlcErrorActive     = 0;
+  int radarInvalidCountActive = 0;
+  int radarOutOfRangeActive   = 0;
+  int usOutOfRangeActive      = 0;
+  int timeSyncStopped         = 0;
+  int highBusloadActive       = 0;
+
+  /* Statistics */
+  int injectionsTotal = 0;
+  int radarErrorsSent = 0;
+  int usErrorsSent    = 0;
+  int timeSyncMissed  = 0;
+
+  /* High busload */
+  msTimer busloadTimer;
+  const long spamCanId = 0x7FF;   /* Invalid CAN ID for busload */
+}
+
+/* ========== Key Commands ========== */
+on key '1' {
+  radarDlcErrorActive = 1;
+  injectionsTotal++;
+  write("INJECT: Radar DLC error (DLC=2 instead of 15)");
+}
+
+on key '2' {
+  radarInvalidCountActive = 1;
+  injectionsTotal++;
+  write("INJECT: Radar invalid target count (255 targets)");
+}
+
+on key '3' {
+  radarOutOfRangeActive = 1;
+  injectionsTotal++;
+  write("INJECT: Radar out-of-range distance (50000 cm)");
+}
+
+on key '4' {
+  usOutOfRangeActive = 1;
+  injectionsTotal++;
+  write("INJECT: Ultrasonic out-of-range distance (999 cm)");
+}
+
+on key '5' {
+  timeSyncStopped = 1;
+  injectionsTotal++;
+  write("INJECT: Time sync stopped (master failure)");
+}
+
+on key '6' {
+  timeSyncStopped = 0;
+  write("INJECT: Time sync resumed");
+}
+
+on key '7' {
+  /* Force a stuff error by corrupting a bit */
+  write("INJECT: CAN stuff error — use CANoe hardware error injection");
+  write("  Configure CANoe: Analysis | Bus Simulation | Error Injection");
+  injectionsTotal++;
+}
+
+on key '8' {
+  if (!highBusloadActive) {
+    highBusloadActive = 1;
+    setTimer(busloadTimer, 1);  /* 1ms interval = high busload */
+    injectionsTotal++;
+    write("INJECT: High busload spam started");
+  } else {
+    highBusloadActive = 0;
+    cancelTimer(busloadTimer);
+    write("INJECT: High busload spam stopped");
+  }
+}
+
+on key '9' {
+  radarDlcErrorActive = 0;
+  radarInvalidCountActive = 0;
+  radarOutOfRangeActive = 0;
+  usOutOfRangeActive = 0;
+  timeSyncStopped = 0;
+  highBusloadActive = 0;
+  cancelTimer(busloadTimer);
+  write("All error injections cleared");
+}
+
+on key 's' {
+  write("=== Error Injection Statistics ===");
+  write("Total injections: %d", injectionsTotal);
+  write("Radar errors sent: %d", radarErrorsSent);
+  write("Ultrasonic errors sent: %d", usErrorsSent);
+  write("Time sync missed: %d", timeSyncMissed);
+  write("Active injections:");
+  if (radarDlcErrorActive)     write("  Radar DLC error");
+  if (radarInvalidCountActive) write("  Radar invalid target count");
+  if (radarOutOfRangeActive)   write("  Radar out-of-range");
+  if (usOutOfRangeActive)      write("  Ultrasonic out-of-range");
+  if (timeSyncStopped)         write("  Time sync stopped");
+  if (highBusloadActive)       write("  High busload");
+}
+
+/* ========== High Busload Spam ========== */
+on timer busloadTimer {
+  message spamCanId msg;
+  int i;
+
+  msg.can = 1;
+  msg.dlc = 8;
+  for (i = 0; i < 8; i++) {
+    msg.byte(i) = 0xAA;
+  }
+  output(msg);
+
+  if (highBusloadActive) {
+    setTimer(busloadTimer, 1);
+  }
+}
+
+/* ========== Helper: Modify radar message before send ========== */
+/* This function is called from radar_simulator.can via signal handler.
+ * For standalone use, hook into the radar simulator's output. */
+
+/* Export error state flags for other scripts to query */
+export radarDlcErrorActive, radarInvalidCountActive, radarOutOfRangeActive;
+export usOutOfRangeActive, timeSyncStopped;
+export radarErrorsSent, usErrorsSent, timeSyncMissed;

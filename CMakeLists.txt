@@ -151,6 +151,40 @@ if(NOT WIN32)
     target_link_libraries(ros2_adapter_sample PRIVATE vr_base_framework)
 endif()
 
+# ============================================================================
+# contrib：Simulink_AutoCar 归档资产（说明见 contrib/s32k144-autocar/README.md）
+#
+#   - uds/  参与编译 → 独立静态库 vr_contrib_uds（下方）
+#   - dbc/  capl/  是数据与仿真脚本，**不参与编译**，CMake 完全不引用它们
+#
+# 为什么单独建目标、而不是并进 vr_base_framework：
+#   这批资产来自另一条产品线（S32K144 电机控制/ADAS），不应进入 VVOS 的运行时依赖图。
+#   单独目标既能做编译验证，又允许随时整目录删除而不影响主库。
+#
+# 关于 C 语言：不需要在这里 enable_language(C) —— 文件头 project() 已声明
+#   LANGUAGES C CXX，.c 会按 C 编译。若将来有人把 project() 改成只有 CXX，
+#   再把 enable_language(C) 加在这里（不要改 project() 那一行）。
+# ============================================================================
+add_library(vr_contrib_uds STATIC
+    contrib/s32k144-autocar/uds/uds_transport.c
+)
+target_include_directories(vr_contrib_uds
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/contrib/s32k144-autocar/uds
+)
+
+# 构建期实测：上游这份 MISRA 代码有 3 个 service handler 未使用 `uds` 形参
+# （UDS_HandleEcuReset / UDS_HandleReadDataById / UDS_HandleTesterPresent ——
+#  为了与 handler 表保持统一签名）。全局开了 -Wextra -Werror，于是变成 3 个硬错误：
+#     uds_transport.c:252/276/405: error: unused parameter 'uds' [-Werror=unused-parameter]
+#
+# 处置：**不改上游源码**（vendored 资产要保持逐字节等同上游，否则"原样留存"就没意义了），
+# 只对本目标单独放宽这一条警告；其余警告仍按全局 -Werror 处理。
+if(MSVC)
+    target_compile_options(vr_contrib_uds PRIVATE /wd4100)  # C4100: unreferenced formal parameter
+else()
+    target_compile_options(vr_contrib_uds PRIVATE -Wno-unused-parameter)
+endif()
+
 if(ENABLE_TESTS)
     enable_testing()
 
@@ -286,6 +320,13 @@ if(ENABLE_TESTS)
         vvos_register_test(posix_message_queue_test posix_message_queue_test)
         set_tests_properties(posix_message_queue_test PROPERTIES LABELS "ipc" TIMEOUT 10)
     endif()
+
+    # contrib 冒烟验证（不是覆盖率工程）：0x3E TesterPresent → 正响应 0x7E。
+    # 目的是证明 uds_transport.c "能链接进可执行文件并真的处理一帧请求"，而不只是编过。
+    add_executable(uds_smoke_test contrib/s32k144-autocar/test/uds_smoke_test.cpp)
+    target_link_libraries(uds_smoke_test PRIVATE vr_contrib_uds)
+    vvos_register_test(uds_smoke_test uds_smoke_test)
+    set_tests_properties(uds_smoke_test PROPERTIES LABELS "contrib" TIMEOUT 10)
 
     # 落盘声明清单：门禁据此校验"声明数 == 注册数"，且清单已按本平台的实际
     # 条件分支求值（例如 NOT WIN32 里的 3 条在 Windows 上不会出现）。

@@ -1,0 +1,194 @@
+/**
+ * @file ultrasonic_simulator.can
+ * @brief CANoe CAPL Script - Ultrasonic Sensor Simulator for ADAS Testing
+ * @version v0.3
+ * @target S32K144 ADAS sensor link test
+ *
+ * Simulates ultrasonic sensor data sent via CAN (classic) to S32K144.
+ * Ultrasonic sensors report distance measurements via CAN1 (Classic CAN 500kbps).
+ *
+ * Also provides error injection for ultrasonic sensor testing:
+ * - Timeout injection (sensor stops reporting)
+ * - Out-of-range values
+ * - Noise injection
+ *
+ * Interactive commands:
+ *   'd'     : Normal distance mode (all sensors 100cm)
+ *   'c'     : Close obstacle (all sensors 20cm)
+ *   'n'     : No obstacle (all sensors 400cm)
+ *   'o'     : Out-of-range injection
+ *   'x'     : Timeout injection (stop sending)
+ *   'v'     : Add noise to measurements
+ *   's'     : Print statistics
+ *   'q'     : Quit simulation
+ */
+
+/* Import error injection flags from sensor_error_injection.can */
+import usOutOfRangeActive;
+
+variables {
+  /* Ultrasonic CAN configuration */
+  const long usCanId = 0x180;        /* UltrasonicData CAN ID */
+  const int  usPeriod_ms = 100;       /* Ultrasonic reporting period */
+  const int  numSensors = 4;          /* FL, FR, RL, RR */
+
+  /* Sensor state */
+  int sensorDistance[4] = { 100, 100, 100, 100 };  /* cm */
+  int sensorValid[4]   = { 1, 1, 1, 1 };
+  int sensorTimeout[4] = { 0, 0, 0, 0 };
+  int noiseEnabled     = 0;
+  int sendingEnabled   = 1;
+  int frameCount       = 0;
+  int errorCount       = 0;
+  msTimer usTimer;
+}
+
+/* ========== Initialization ========== */
+on start {
+  write("=== Ultrasonic Simulator Started ===");
+  write("CAN1: 500kbps Classic CAN");
+  write("Ultrasonic CAN ID: 0x%X, Period: %d ms", usCanId, usPeriod_ms);
+  write("Commands: d=default, c=close, n=no_obstacle, o=outrange, x=timeout, v=noise, s=stats, q=quit");
+
+  setTimer(usTimer, usPeriod_ms);
+}
+
+/* ========== Periodic Ultrasonic Data Transmission ========== */
+on timer usTimer {
+  if (sendingEnabled) {
+    message usCanId msg;
+    int i;
+
+    msg.can = 2;  /* CAN channel 2 (Classic CAN) */
+    msg.dlc = 8;
+
+    /* Pack 4 ultrasonic sensors into 8 bytes:
+     * Byte 0-1: Sensor 0 (FL): distance[15:4] | valid[3] | timeout[2] | reserved[1:0]
+     * Byte 2-3: Sensor 1 (FR)
+     * Byte 4-5: Sensor 2 (RL)
+     * Byte 6-7: Sensor 3 (RR) */
+    for (i = 0; i < numSensors; i++) {
+      int dist = sensorDistance[i];
+      int flags = 0;
+
+      if (noiseEnabled) {
+        dist = dist + _abs(random(-10, 10));
+        if (dist < 0) dist = 0;
+        if (dist > 1000) dist = 1000;
+      }
+
+      /* Apply out-of-range injection if active */
+      if (usOutOfRangeActive) {
+        dist = 999;  /* Beyond 600cm valid range */
+        flags = 0x01;  /* Mark as "valid" to test S32K144 validation */
+      }
+
+      if (sensorTimeout[i]) {
+        dist = 0;
+        flags = 0x04;  /* Timeout flag */
+      } else if (!sensorValid[i]) {
+        dist = 0;
+        flags = 0x08;  /* Invalid flag */
+      } else {
+        flags = 0x01;  /* Valid flag */
+      }
+
+      msg.byte(i * 2)     = (dist >> 4) & 0xFF;
+      msg.byte(i * 2 + 1) = ((dist & 0x0F) << 4) | (flags & 0x0F);
+    }
+
+    output(msg);
+    frameCount++;
+  }
+
+  setTimer(usTimer, usPeriod_ms);
+}
+
+/* ========== Key Commands ========== */
+on key 'd' {
+  /* Default distances */
+  int i;
+  for (i = 0; i < numSensors; i++) {
+    sensorDistance[i] = 100;
+    sensorValid[i] = 1;
+    sensorTimeout[i] = 0;
+  }
+  sendingEnabled = 1;
+  write("Default: all sensors at 100cm");
+}
+
+on key 'c' {
+  /* Close obstacle */
+  int i;
+  for (i = 0; i < numSensors; i++) {
+    sensorDistance[i] = 20;
+    sensorValid[i] = 1;
+    sensorTimeout[i] = 0;
+  }
+  sendingEnabled = 1;
+  write("Close obstacle: all sensors at 20cm");
+}
+
+on key 'n' {
+  /* No obstacle */
+  int i;
+  for (i = 0; i < numSensors; i++) {
+    sensorDistance[i] = 400;
+    sensorValid[i] = 1;
+    sensorTimeout[i] = 0;
+  }
+  sendingEnabled = 1;
+  write("No obstacle: all sensors at 400cm");
+}
+
+on key 'o' {
+  /* Out-of-range injection */
+  int i;
+  for (i = 0; i < numSensors; i++) {
+    sensorDistance[i] = 700;  /* Beyond 600cm valid range */
+    sensorValid[i] = 1;
+    sensorTimeout[i] = 0;
+  }
+  sendingEnabled = 1;
+  write("Out-of-range: 700cm (valid range 15-600cm)");
+}
+
+on key 'x' {
+  /* Timeout injection */
+  sendingEnabled = 0;
+  write("Timeout injection: stopped sending ultrasonic data");
+}
+
+on key 'v' {
+  /* Toggle noise */
+  noiseEnabled = !noiseEnabled;
+  if (noiseEnabled) {
+    write("Noise injection: ENABLED (+/-10cm jitter)");
+  } else {
+    write("Noise injection: DISABLED");
+  }
+}
+
+on key 's' {
+  int i;
+  write("=== Ultrasonic Simulator Statistics ===");
+  write("Frames sent: %d", frameCount);
+  write("Errors: %d", errorCount);
+  write("Sending: %s", sendingEnabled ? "ON" : "OFF");
+  write("Noise: %s", noiseEnabled ? "ON" : "OFF");
+  for (i = 0; i < numSensors; i++) {
+    write("  Sensor %d: %d cm, valid=%d, timeout=%d",
+          i, sensorDistance[i], sensorValid[i], sensorTimeout[i]);
+  }
+}
+
+on key 'q' {
+  cancelTimer(usTimer);
+  write("Ultrasonic simulator stopped");
+}
+
+/* ========== Error Frame Handler ========== */
+on errorFrame {
+  errorCount++;
+  write("ERROR: Bus error detected (count: %d)", errorCount);
+}

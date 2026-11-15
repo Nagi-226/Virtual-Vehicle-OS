@@ -1,0 +1,259 @@
+/**
+ * @file radar_simulator.can
+ * @brief CANoe CAPL Script - Radar Target List Simulator for ADAS Testing
+ * @version v0.3
+ * @target S32K144 ADAS sensor link test
+ *
+ * Simulates a millimeter-wave radar sensor sending CAN-FD target lists
+ * to the S32K144 MCU via CAN0 (CAN-FD, 500kbps/2Mbps).
+ *
+ * CAN ID: 0x18FFA027 (RadarTargetList)
+ * Period: 50ms
+ * Payload: 64 bytes (CAN-FD)
+ *
+ * Interactive commands:
+ *   '1'-'8' : Set number of targets (1-8)
+ *   'r'     : Randomize target positions
+ *   'a'     : Move all targets closer (approach)
+ *   'b'     : Move all targets away (retreat)
+ *   'f'     : Simulate front crash scenario
+ *   'e'     : Simulate empty road
+ *   't'     : Send time sync message
+ *   's'     : Print statistics
+ *   'q'     : Quit simulation
+ */
+
+variables {
+  /* Radar configuration */
+  const long radarCanId        = 0x18FFA027;   /* RadarTargetList CAN ID */
+  const long timeSyncCanId     = 0x18FFA000;   /* TimeBase CAN ID */
+  const int  radarPeriod_ms    = 50;           /* Target list period */
+  const int  timeSyncPeriod_ms = 100;          /* Time sync period */
+  const int  maxTargets        = 16;
+
+  /* Target state */
+  struct RadarTarget {
+    int targetId;
+    int range_cm;         /* 0-25000 cm */
+    int rangeRate_cms;    /* -5000..5000 cm/s */
+    int angle_deg10;      /* -1800..1800 (0.1 deg) */
+    int status;           /* 0=valid, 1=coasted, 2=deleted, 3=new */
+    int confidence;       /* 0-100 */
+  } targets[16];
+
+  int numTargets = 4;
+  int frameCount = 0;
+  int errorCount = 0;
+  msTimer radarTimer;
+  msTimer timeSyncTimer;
+}
+
+/* ========== Initialization ========== */
+on start {
+  int i;
+  setWriteDbgLevel(1);
+  write("=== Radar Simulator Started ===");
+  write("CAN0: 500kbps/2Mbps CAN-FD");
+  write("Radar CAN ID: 0x%X, Period: %d ms", radarCanId, radarPeriod_ms);
+  write("Commands: 1-8=targets, r=random, a=approach, b=retreat, f=crash, e=empty, t=timesync, s=stats, q=quit");
+
+  /* Initialize default targets */
+  for (i = 0; i < maxTargets; i++) {
+    targets[i].targetId = i;
+    targets[i].range_cm = 2000 + i * 500;   /* 20m, 25m, 30m, ... */
+    targets[i].rangeRate_cms = -50;          /* Approaching at 0.5 m/s */
+    targets[i].angle_deg10 = (i - 8) * 50;  /* Spread across FOV */
+    targets[i].status = 0;                   /* Valid */
+    targets[i].confidence = 80 + i * 2;
+  }
+
+  setTimer(radarTimer, radarPeriod_ms);
+  setTimer(timeSyncTimer, timeSyncPeriod_ms);
+}
+
+/* ========== Periodic Radar Target List Transmission ========== */
+/* ========== Error Injection Hook ========== *
+ * This section integrates with sensor_error_injection.can.
+ * When error injection is active (exported variables from error script),
+ * the radar output is modified before transmission.
+ *
+ * Integration: Load both scripts in CANoe simulation setup.
+ * The error injection script exports flag variables that this
+ * script reads to modify its output accordingly.
+ */
+
+/* Import error injection flags from sensor_error_injection.can */
+import radarDlcErrorActive, radarInvalidCountActive, radarOutOfRangeActive;
+
+on timer radarTimer {
+  message radarCanId msg;
+  int i;
+  int payloadLen;
+
+  msg.can = 1;  /* CAN channel 1 */
+  msg.dlc = 15;  /* CAN-FD DLC 15 = 64 bytes */
+  msg.flags = 0; /* Clear flags */
+
+  /* Apply DLC error injection if active */
+  if (radarDlcErrorActive) {
+    msg.dlc = 2;  /* Wrong DLC — simulates short payload */
+  }
+
+  /* Header: numTargets + sensorId */
+  if (radarInvalidCountActive) {
+    msg.byte(0) = 255;  /* Invalid: 255 targets */
+  } else {
+    msg.byte(0) = numTargets;
+  }
+  msg.byte(1) = 0x01;  /* Sensor ID = front radar */
+
+  /* Pack compact targets (4 bytes each) */
+  for (i = 0; i < numTargets && i < maxTargets; i++) {
+    int offset = 2 + i * 4;
+
+    /* Byte 0: targetId[5:0] | status[7:6] */
+    msg.byte(offset) = (targets[i].targetId & 0x3F) | ((targets[i].status & 0x03) << 6);
+
+    /* Byte 1-2: range_cm big-endian */
+    if (radarOutOfRangeActive) {
+      /* Out-of-range injection: send unrealistic distance */
+      msg.byte(offset + 1) = 0xC3;  /* 50000 cm >> 8 */
+      msg.byte(offset + 2) = 0x50;  /* 50000 cm & 0xFF */
+    } else {
+      msg.byte(offset + 1) = (targets[i].range_cm >> 8) & 0xFF;
+      msg.byte(offset + 2) = targets[i].range_cm & 0xFF;
+    }
+
+    /* Byte 3: confidence[7:4] | reserved[3:0] */
+    msg.byte(offset + 3) = ((targets[i].confidence * 15 / 100) & 0x0F) << 4;
+  }
+
+  /* Clear remaining bytes */
+  for (i = 2 + numTargets * 4; i < 64; i++) {
+    msg.byte(i) = 0;
+  }
+
+  output(msg);
+  frameCount++;
+
+  /* Update target motion */
+  for (i = 0; i < numTargets && i < maxTargets; i++) {
+    targets[i].range_cm += targets[i].rangeRate_cms / 20;  /* per 50ms tick */
+    if (targets[i].range_cm < 50) targets[i].range_cm = 50;
+    if (targets[i].range_cm > 25000) targets[i].range_cm = 25000;
+  }
+
+  setTimer(radarTimer, radarPeriod_ms);
+}
+
+/* ========== Periodic Time Sync ========== */
+on timer timeSyncTimer {
+  message timeSyncCanId msg;
+  int timeMs;
+
+  msg.can = 1;
+  msg.dlc = 8;
+  msg.flags = 0;
+
+  timeMs = timeNow() / 10000;  /* Convert 10us ticks to ms */
+
+  /* Byte 0-3: masterTime_ms (little-endian) */
+  msg.byte(0) = timeMs & 0xFF;
+  msg.byte(1) = (timeMs >> 8) & 0xFF;
+  msg.byte(2) = (timeMs >> 16) & 0xFF;
+  msg.byte(3) = (timeMs >> 24) & 0xFF;
+
+  /* Byte 4-5: sync sequence number */
+  msg.byte(4) = frameCount & 0xFF;
+  msg.byte(5) = (frameCount >> 8) & 0xFF;
+
+  /* Byte 6-7: reserved */
+  msg.byte(6) = 0;
+  msg.byte(7) = 0;
+
+  output(msg);
+  setTimer(timeSyncTimer, timeSyncPeriod_ms);
+}
+
+/* ========== Key Commands ========== */
+on key '1' { numTargets = 1; write("Targets: %d", numTargets); }
+on key '2' { numTargets = 2; write("Targets: %d", numTargets); }
+on key '3' { numTargets = 3; write("Targets: %d", numTargets); }
+on key '4' { numTargets = 4; write("Targets: %d", numTargets); }
+on key '5' { numTargets = 5; write("Targets: %d", numTargets); }
+on key '6' { numTargets = 6; write("Targets: %d", numTargets); }
+on key '7' { numTargets = 7; write("Targets: %d", numTargets); }
+on key '8' { numTargets = 8; write("Targets: %d", numTargets); }
+
+on key 'r' {
+  /* Randomize targets */
+  int i;
+  for (i = 0; i < maxTargets; i++) {
+    targets[i].range_cm = _abs(random(500, 20000));
+    targets[i].rangeRate_cms = random(-300, 300);
+    targets[i].angle_deg10 = random(-900, 900);
+    targets[i].status = 0;
+    targets[i].confidence = random(40, 100);
+  }
+  write("Targets randomized");
+}
+
+on key 'a' {
+  /* Approach scenario: all targets move closer */
+  int i;
+  for (i = 0; i < maxTargets; i++) {
+    targets[i].rangeRate_cms = -200;  /* -2 m/s approaching */
+  }
+  write("Approach scenario: all targets at -2 m/s");
+}
+
+on key 'b' {
+  /* Retreat scenario: all targets move away */
+  int i;
+  for (i = 0; i < maxTargets; i++) {
+    targets[i].rangeRate_cms = 200;  /* +2 m/s retreating */
+  }
+  write("Retreat scenario: all targets at +2 m/s");
+}
+
+on key 'f' {
+  /* Front crash scenario: one target at close range approaching fast */
+  numTargets = 1;
+  targets[0].range_cm = 500;          /* 5m */
+  targets[0].rangeRate_cms = -1000;   /* -10 m/s approaching */
+  targets[0].angle_deg10 = 0;         /* Dead center */
+  targets[0].status = 0;
+  targets[0].confidence = 95;
+  write("CRASH SCENARIO: target at 5m, -10 m/s, center");
+}
+
+on key 'e' {
+  /* Empty road */
+  numTargets = 0;
+  write("Empty road scenario");
+}
+
+on key 't' {
+  /* Manual time sync */
+  setTimer(timeSyncTimer, 0);
+  write("Time sync sent");
+}
+
+on key 's' {
+  write("=== Radar Simulator Statistics ===");
+  write("Frames sent: %d", frameCount);
+  write("Errors: %d", errorCount);
+  write("Current targets: %d", numTargets);
+}
+
+on key 'q' {
+  cancelTimer(radarTimer);
+  cancelTimer(timeSyncTimer);
+  write("Radar simulator stopped");
+}
+
+/* ========== Error Frame Handler ========== */
+on errorFrame {
+  errorCount++;
+  write("ERROR: Bus error detected (count: %d)", errorCount);
+}
