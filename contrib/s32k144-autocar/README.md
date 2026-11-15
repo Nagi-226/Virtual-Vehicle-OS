@@ -60,7 +60,7 @@
 **前提**：需要 **Vector CANoe + 对应 license**。没有 CANoe 时这些脚本无法执行，
 只能作为写法参考。
 
-### 2.3 `uds/` —— UDS 诊断传输层（**这是唯一参与编译的资产**）
+### 2.3 `uds/` —— UDS 诊断传输层（**唯一参与编译的上游资产**）
 
 `uds_transport.c` / `uds_transport.h`（419 / 185 行）
 
@@ -73,15 +73,42 @@
 - API 只有四个：`UDS_Init` / `UDS_ProcessRequest` / `UDS_CheckTimeout` / `UDS_DeInit`，
   与硬件解耦（收发帧由调用方负责）。
 
-### ⚠️ 已知语义偏差（引用前必读）
+### ⚠️ 上游偏差 + 已提供兼容层（引用前必读）
 
-`UDS_HandleTesterPresent()` 把 **`subFunc == 0x00` 当作"抑制响应"**，`0x01..0x7F` 才回正响应
-（`uds_transport.c` 内注释原文：*"Sub-function 0x00 = no response required"*）。
+**上游偏差**：`UDS_HandleTesterPresent()` 把 **`subFunc == 0x00` 当作"抑制响应"**，
+`0x01..0x7F` 才回正响应（`uds_transport.c` 内注释原文：*"Sub-function 0x00 = no response required"*）。
 
-这与 ISO 14229-1 不一致：标准里 **bit7（`0x80`）** 才是 suppressPosRspMsgIndicationBit，
-`3E 00` 应当**回** `7E 00`。**本目录保留原实现未改**（属上游资产，改动会失去"原样留存"的意义）；
-接入方若需要标准行为，请在调用侧把 `3E 80` 映射成 `subFunc = 0x00`，或自行修正后另行标注。
-本目录的冒烟测试用的是 `subFunc = 0x01`，正是为了绕开这处偏差。
+这与 ISO 14229-1 相反：标准里 **bit7（`0x80`）** 才是 suppressPosRspMsgIndicationBit，
+`3E 00` 应当**回** `7E 00`。后果很具体：**任何按标准发 `3E 00` 的诊断工具（CANoe 诊断面板、
+第三方诊断仪）都拿不到响应，现象与"ECU 已死"无法区分。**
+
+**上游 `uds/` 目录保持原样未改**（vendored 资产要与源仓逐字节相同）。
+为了让这份资产**直接可用**，本目录另加了 `compat/` 兼容层（**VVOS 新增，不属于上游**）。
+
+#### 两个入口怎么选
+
+| 入口 | 抑制位语义 | 什么时候用 |
+|---|---|---|
+| `UDS_ProcessRequest()`（上游，`uds/`） | **`subFunc == 0x00` 抑制**（非标准） | 需要与上游行为**完全一致**时（如复现上游缺陷、与原工程对拍） |
+| `UDS_ProcessRequestCompat()`（本目录 `compat/`） | **bit7 = `0x80` 抑制**（符合 ISO 14229-1） | **推荐**：所有新接入方都用这个 |
+
+`UDS_ProcessRequestCompat()` 只做入参映射，**不改上游一个字节**：
+
+```
+raw bit7 = 0（如 0x00）→ 内部改成上游 0x01（会回正响应）→ 把回显的 data[0] 改回 raw & 0x7F
+raw bit7 = 1（如 0x80）→ 内部改成上游 0x00（抑制）      → 本层返回 false（不发送）
+非 0x3E 服务          → 原样透传给上游
+```
+
+> 注意第二行：上游在"抑制"时返回 `true` 但 `length = 0`，照搬会让调用方发出一帧**零长度响应**
+> （协议违规）。兼容层把它翻译成 `false`（不发送），这是兼容层对上游返回值的唯一改写，
+> 已在 `compat/uds_compat.h` 里写明理由。
+
+#### 验证
+
+`tests/contrib/uds_smoke_test.cpp`（**不在 vendor 目录内**）覆盖四条：
+上游 `3E 01` → `7E 01`；兼容层 `3E 00` → `7E 00`（标准行为）；兼容层 `3E 80` → 不发送；
+非 0x3E 服务两个入口结果一致（证明兼容层只介入 TesterPresent）。
 
 ---
 
@@ -109,12 +136,17 @@ contrib/s32k144-autocar/
 │   ├── radar_simulator.can
 │   ├── sensor_error_injection.can
 │   └── ultrasonic_simulator.can
-├── uds/                           唯一参与编译的资产
+├── uds/                           ← 上游资产，参与编译
 │   ├── uds_transport.c
 │   └── uds_transport.h
-└── test/
-    └── uds_smoke_test.cpp         编译后可用的最小冒烟验证（0x3E → 0x7E）
+└── compat/                        ← VVOS 新增（**不属于上游**）
+    ├── uds_compat.c               ISO 14229-1 语义兼容层
+    └── uds_compat.h
 ```
+
+**`dbc/`、`capl/`、`uds/` 三个目录是纯上游字节**（与源仓 `bedb358` 对应目录 `diff -r` 零差异），
+这就是为什么本目录里没有测试代码：验证程序放在 `tests/contrib/uds_smoke_test.cpp`。
+把新写的代码放进 vendor 目录会破坏"逐字节留存"这条可验证性质。
 
 ## 5. 为什么没有并入 S32K144 的 HAL / Bootloader / 跟踪算法
 

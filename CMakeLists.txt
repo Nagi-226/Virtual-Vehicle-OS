@@ -185,6 +185,17 @@ else()
     target_compile_options(vr_contrib_uds PRIVATE -Wno-unused-parameter)
 endif()
 
+# ISO 14229-1 语义兼容层（**VVOS 新增代码，不属于上游资产**，单独目标以示边界）：
+# 上游 TesterPresent 把 subFunc==0x00 当抑制位，与标准的 bit7 相反；
+# 本层只映射入参，不改上游一个字节。详见 contrib/s32k144-autocar/compat/uds_compat.h。
+add_library(vr_contrib_uds_compat STATIC
+    contrib/s32k144-autocar/compat/uds_compat.c
+)
+target_include_directories(vr_contrib_uds_compat
+    PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/contrib/s32k144-autocar/compat
+)
+target_link_libraries(vr_contrib_uds_compat PUBLIC vr_contrib_uds)
+
 if(ENABLE_TESTS)
     enable_testing()
 
@@ -321,10 +332,11 @@ if(ENABLE_TESTS)
         set_tests_properties(posix_message_queue_test PROPERTIES LABELS "ipc" TIMEOUT 10)
     endif()
 
-    # contrib 冒烟验证（不是覆盖率工程）：0x3E TesterPresent → 正响应 0x7E。
-    # 目的是证明 uds_transport.c "能链接进可执行文件并真的处理一帧请求"，而不只是编过。
-    add_executable(uds_smoke_test contrib/s32k144-autocar/test/uds_smoke_test.cpp)
-    target_link_libraries(uds_smoke_test PRIVATE vr_contrib_uds)
+    # contrib 冒烟验证（不是覆盖率工程）：覆盖上游原样行为 与 ISO 兼容层两种语义。
+    # 测试放在 tests/contrib/ 而不是 contrib/ 下：vendor 目录只留上游字节，
+    # 这样"逐字节留存"可以用 diff -r 一条命令验证。
+    add_executable(uds_smoke_test tests/contrib/uds_smoke_test.cpp)
+    target_link_libraries(uds_smoke_test PRIVATE vr_contrib_uds_compat)
     vvos_register_test(uds_smoke_test uds_smoke_test)
     set_tests_properties(uds_smoke_test PROPERTIES LABELS "contrib" TIMEOUT 10)
 
